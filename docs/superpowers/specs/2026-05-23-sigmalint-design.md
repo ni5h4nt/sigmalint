@@ -354,7 +354,7 @@ sigmalint/
 
 ## 16. CI and release
 
-- **`ci.yml`** — matrix on Python 3.10–3.13: `ruff check`, `ruff format --check`, `mypy --strict`, `pytest --cov=sigmalint --cov-fail-under=90`, `import-linter`. Codecov upload on main. Required for merge.
+- **`ci.yml`** — matrix on Python 3.10–3.13: `ruff check`, `ruff format --check`, `mypy` (v0.1 baseline config; tightens to `--strict` in v0.2), `pytest --cov=sigmalint --cov-fail-under=90`, `import-linter`. Codecov upload on main. Required for merge.
 - **`release.yml`** — triggers on `v*` tags: builds wheel + sdist, publishes to PyPI via OIDC trusted publishing.
 - **`self-lint.yml`** — nightly cron: clones SigmaHQ, runs `sigmalint lint` over the corpus, opens an issue if mean score drops >2 points week-over-week.
 - **`action.yml`** — composite action; inputs `path`, `format` (default `github`), `fail-on`, `min-score`. Steps: setup-python → `pip install sigmalint==<action-tag>` (action major/minor pins to the released package version) → `sigmalint lint ...`. Published to GitHub Marketplace at v0.1.0.

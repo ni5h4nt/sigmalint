@@ -24,6 +24,7 @@
 - Create: `src/sigmalint/py.typed` (empty)
 - Create: `tests/__init__.py` (empty)
 - Create: `tests/conftest.py` (skeleton)
+- Create: `tests/test_smoke.py` (one trivial assertion so pytest collects at least one test)
 - Create: `.github/workflows/ci.yml`
 - Create: `pytest.ini` (or `[tool.pytest.ini_options]` in pyproject)
 - Create: `.importlinter.cfg`
@@ -103,8 +104,20 @@ ignore = ["D203","D213"]
 
 [tool.mypy]
 python_version = "3.10"
-strict = true
 files = ["src/sigmalint"]
+# v0.1 baseline — strict enough to catch real bugs, lenient enough to ship.
+# Tightened to `strict = true` in v0.2 once the codebase is fully annotated.
+warn_unused_configs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_return_any = true
+no_implicit_optional = true
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+# Explicitly NOT enabled for v0.1: disallow_untyped_defs, disallow_any_generics,
+# disallow_subclassing_any. See docs/maintainers.md "type-strictness roadmap".
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -115,7 +128,9 @@ source = ["src/sigmalint"]
 branch = true
 
 [tool.coverage.report]
-fail_under = 90
+# The fail-under threshold is supplied on the CI command line so it can be
+# ratcheted up as the codebase grows (Phase 1 starts at 0; Phase 8 raises to
+# 60; Phase 22 raises to 90). Setting it here would block the first CI run.
 show_missing = true
 ```
 
@@ -253,12 +268,30 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: ruff check .
       - run: ruff format --check .
-      - run: mypy --strict src/sigmalint
+      - run: mypy src/sigmalint    # configuration lives in pyproject.toml
       - run: lint-imports
-      - run: pytest --cov=sigmalint --cov-report=xml
+      # Coverage gate ratchets up across phases: 0 → 60 (Phase 8) → 90 (Phase 22).
+      # Phase 1 starts at 0 so the matrix can be green from day one.
+      - run: pytest --cov=sigmalint --cov-report=xml --cov-fail-under=0
       - if: matrix.python-version == '3.12'
         uses: codecov/codecov-action@v4
         with: {file: ./coverage.xml}
+```
+
+**Step 8b: Write `tests/test_smoke.py`.**
+
+```python
+"""Smoke test so pytest has at least one test to collect.
+
+pytest exits with code 5 if no tests are collected — that would fail Phase 1
+CI before the rest of the codebase exists. This file is replaced/extended in
+later phases but the version check stays.
+"""
+from sigmalint import __version__
+
+
+def test_version_string():
+    assert __version__ == "0.1.0"
 ```
 
 **Step 9: Verify scaffold builds.**
@@ -270,14 +303,14 @@ ruff check .
 pytest -q
 ```
 
-Expected: install OK, version prints `0.1.0`, ruff clean, pytest reports `no tests ran`.
+Expected: install OK, version prints `0.1.0`, ruff clean, pytest reports `1 passed`.
 
 **Step 10: Commit.**
 
 ```bash
 git add pyproject.toml LICENSE README.md .editorconfig .pre-commit-config.yaml \
         src/sigmalint/__init__.py src/sigmalint/py.typed \
-        tests/__init__.py tests/conftest.py \
+        tests/__init__.py tests/conftest.py tests/test_smoke.py \
         .github/workflows/ci.yml .importlinter.cfg
 git commit -m "chore: scaffold project structure, tooling, CI matrix
 
@@ -999,7 +1032,8 @@ def referenced_selectors(ast: object) -> set[str]:
     return set()
 
 
-def _is_wildcard(pat: str) -> bool:
+def is_wildcard_pattern(pat: str) -> bool:
+    """Return True if `pat` contains a Sigma selector-pattern wildcard (`*` or `?`)."""
     return "*" in pat or "?" in pat
 
 
@@ -1018,7 +1052,7 @@ def expand_patterns(referenced: Iterable[str], available: Iterable[str]) -> set[
     available_set = set(available)
     out: set[str] = set()
     for ref in referenced:
-        if _is_wildcard(ref):
+        if is_wildcard_pattern(ref):
             rx = _wildcard_to_regex(ref)
             out |= {s for s in available_set if rx.match(s)}
         elif ref in available_set:
@@ -1462,10 +1496,18 @@ pytest tests/unit/core/test_scoring.py -v
 
 Expected: 4 passed.
 
-**Step 4: Commit.**
+**Step 4: Ratchet coverage gate to 60%.** Edit `.github/workflows/ci.yml`:
+
+```yaml
+      - run: pytest --cov=sigmalint --cov-report=xml --cov-fail-under=60
+```
+
+Phase 8 is the right moment because the core layer now has full unit tests; the run will easily clear 60%. Phase 22 raises it again to 90%.
+
+**Step 5: Commit.**
 
 ```bash
-git add src/sigmalint/core/scoring.py tests/unit/core/test_scoring.py
+git add src/sigmalint/core/scoring.py tests/unit/core/test_scoring.py .github/workflows/ci.yml
 git commit -m "feat(core): add validity-gated quality scoring with renormalized dimension weights
 
 Phase 8/22 of sigmalint v0.1"
@@ -2150,7 +2192,9 @@ run only on successfully-parsed files.
 from __future__ import annotations
 from typing import Iterable
 
-from sigmalint.core.condition import ConditionParseError, expand_patterns, parse, referenced_selectors
+from sigmalint.core.condition import (
+    ConditionParseError, expand_patterns, is_wildcard_pattern, parse, referenced_selectors,
+)
 from sigmalint.core.registry import register
 from sigmalint.core.rule import Rule
 from sigmalint.core.types import Dimension, Finding, ParsedRule, Severity
@@ -2216,9 +2260,8 @@ class Schema004ConditionParseable(Rule):
             return
         available = {k for k in det.keys() if k != "condition"}
         referenced = referenced_selectors(ast)
-        # Wildcards may be `*` or `?` and may appear at any position.
-        from sigmalint.core.condition import _is_wildcard  # type: ignore[attr-defined]
-        wildcards = {r for r in referenced if _is_wildcard(r)}
+        # Wildcards (`*` or `?`) may appear at any position.
+        wildcards = {r for r in referenced if is_wildcard_pattern(r)}
         non_wild = referenced - wildcards
         unknown = (non_wild - available) | {
             w for w in wildcards if not expand_patterns({w}, available)
@@ -2766,9 +2809,16 @@ import yaml
 
 @dataclass(frozen=True, slots=True)
 class SigmaFilter:
+    """A Sigma Filter file (top-level `filter:` mapping) and its targets.
+
+    Sigma Filters reference rules by either UUID `id` or by the rule's `name`
+    field. The `name` field is Sigma's cross-reference identifier, distinct
+    from the human-readable `title`. We match against both `name` and `title`
+    for pragmatic coverage of corpora that don't yet populate `name`.
+    """
     path: str
-    targets_ids: tuple[str, ...]    # rule ids referenced
-    targets_names: tuple[str, ...]  # rule titles/names referenced
+    targets_ids: tuple[str, ...]    # UUID ids referenced
+    targets_names: tuple[str, ...]  # `name` (or `title` fallback) values referenced
     condition: str                  # the filter's appended condition
 
 
@@ -2813,9 +2863,16 @@ def discover_filters(patterns: list[str], cwd: Path) -> list[SigmaFilter]:
 
 
 def filters_for_rule(filters: list[SigmaFilter], rule_id: str | None,
-                     title: str | None) -> list[SigmaFilter]:
+                     name: str | None, title: str | None) -> list[SigmaFilter]:
+    """Return filters that reference this rule by id, name, or title.
+
+    Per SigmaHQ filter docs: filters reference rules by id or name. We also
+    accept title as a fallback for rules that have no name field, since many
+    real-world rules omit it.
+    """
     return [f for f in filters
             if (rule_id and rule_id in f.targets_ids)
+            or (name and name in f.targets_names)
             or (title and title in f.targets_names)]
 ```
 
@@ -2927,8 +2984,10 @@ class Fp003NoFilterOnNoisy(Rule):
             return
         if has_negated_selector(ast, _is_filter_selector):
             return
-        # External Sigma Filters
-        ext = filters_for_rule(ctx.filters or [], parsed.data.get("id"),
+        # External Sigma Filters: match by id, name, or title.
+        ext = filters_for_rule(ctx.filters or [],
+                               parsed.data.get("id"),
+                               parsed.data.get("name"),
                                parsed.data.get("title"))
         for f in ext:
             try:
@@ -3373,7 +3432,85 @@ def version(value: bool = typer.Option(None, "--version", is_eager=True)):
         raise typer.Exit()
 ```
 
-**Step 2: Write `src/sigmalint/cli/update_data.py`.** Downloads ATT&CK STIX + Sigma schema into `data_dir`; optionally clones SigmaHQ.
+**Step 2: Write `src/sigmalint/cli/update_data.py`.**
+
+Per spec §11, `update-data` refreshes **all** reference datasets into the user cache (`data_dir`) and never touches the installed package. Concrete responsibilities:
+
+```python
+"""Refresh reference data into ~/.cache/sigmalint/<version>/."""
+from __future__ import annotations
+import shutil
+import subprocess
+from pathlib import Path
+
+import requests
+import typer
+
+from sigmalint.core.errors import DataLoadError
+from sigmalint.data.attack import VENDORED_ATTACK_VERSION
+
+ATTACK_TAG = "v16.1"
+SIGMA_SCHEMA_TAG = "v2.1.0"
+
+DATASETS = [
+    # (relative cache filename, fetch URL, sidecar version file or None)
+    ("enterprise-attack.json",
+     f"https://raw.githubusercontent.com/mitre/cti/ATT%26CK-{ATTACK_TAG}/enterprise-attack/enterprise-attack.json",
+     ("attack-version.txt", ATTACK_TAG)),
+    ("sigma-schema.json",
+     f"https://raw.githubusercontent.com/SigmaHQ/sigma-specification/{SIGMA_SCHEMA_TAG}/json-schema/sigma-detection-rule-schema.json",
+     ("sigma-schema-version.txt", SIGMA_SCHEMA_TAG)),
+    # Sigma modifiers + field taxonomy + ATT&CK-logsource map ship as
+    # opinionated YAML fixtures maintained in this repo. `update-data` mirrors
+    # the package-vendored copies into the cache so users on stale wheels can
+    # pick up project-side refreshes without reinstalling.
+    ("sigma-modifiers.yml", None, None),
+    ("fields.yml", None, None),
+    ("attack-logsource-map.yml", None, None),
+]
+
+
+def refresh(corpus: bool = False, dry_run: bool = False) -> None:
+    from sigmalint.core.config import Config
+    cfg = Config()
+    cache = Path(cfg.data_dir).expanduser()
+    cache.mkdir(parents=True, exist_ok=True)
+
+    for filename, url, sidecar in DATASETS:
+        dest = cache / filename
+        if url:
+            typer.echo(f"  fetch {url} -> {dest}")
+            if not dry_run:
+                r = requests.get(url, timeout=30)
+                r.raise_for_status()
+                dest.write_bytes(r.content)
+        else:
+            # Mirror the vendored fixture (kept in src/sigmalint/data/vendored).
+            from importlib.resources import files
+            src = Path(str(files("sigmalint.data.vendored") / filename))
+            typer.echo(f"  mirror {src} -> {dest}")
+            if not dry_run:
+                shutil.copyfile(src, dest)
+        if sidecar and not dry_run:
+            (cache / sidecar[0]).write_text(sidecar[1] + "\n", encoding="utf-8")
+
+    if corpus:
+        repo = cache / "corpus"
+        if repo.exists():
+            typer.echo(f"  pull {repo}")
+            if not dry_run:
+                subprocess.check_call(["git", "-C", str(repo), "pull", "--ff-only"])
+        else:
+            typer.echo(f"  clone SigmaHQ/sigma -> {repo}")
+            if not dry_run:
+                subprocess.check_call(
+                    ["git", "clone", "--depth", "1",
+                     "https://github.com/SigmaHQ/sigma.git", str(repo)])
+
+    typer.echo("done.")
+```
+
+The five core dataset entries cover everything spec §11 lists: ATT&CK STIX, Sigma JSON schema, Sigma modifiers appendix, taxonomy field list, ATT&CK→logsource map. Sidecar version files (`attack-version.txt`, `sigma-schema-version.txt`) are written next to the data so loaders report a reproducible version in the report's `data_versions`.
 
 **Step 3: Write `tests/integration/test_cli.py`** using `typer.testing.CliRunner` to smoke-test `lint`, `list-rules`, `profiles`, `explain` (missing rule = exit 2), and `--version`.
 
@@ -3480,12 +3617,20 @@ runs:
 
 **Step 3: Write `.github/workflows/self-lint.yml`** — nightly cron, clones SigmaHQ, runs `sigmalint lint` over the corpus, posts mean-score to a GitHub Issue (or comment) if drop > 2 points week-over-week.
 
+**Step 3b: Ratchet coverage gate to 90%.** Edit `.github/workflows/ci.yml`:
+
+```yaml
+      - run: pytest --cov=sigmalint --cov-report=xml --cov-fail-under=90
+```
+
+By Phase 22 every rule has fixture coverage, every formatter is golden-tested, and the runner has unit + integration coverage. The 90% gate should hold.
+
 **Step 4: Run full local validation.**
 
 ```bash
 pip install -e ".[dev]"
 ruff check . && ruff format --check .
-mypy --strict src/sigmalint
+mypy src/sigmalint
 lint-imports
 pytest --cov=sigmalint --cov-fail-under=90
 sigmalint lint tests/fixtures   # self-lint
