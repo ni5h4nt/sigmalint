@@ -10,7 +10,7 @@
 
 ## 1. Purpose
 
-A command-line linter for Sigma detection rules. Given a Sigma YAML file (or directory of files), `sigmalint` emits ESLint-shaped findings plus a derived quality score across six dimensions: schema validity, MITRE ATT&CK alignment, field-name correctness against the Sigma taxonomy, false-positive risk, redundancy with the public SigmaHQ corpus, and metadata completeness.
+A command-line linter for Sigma detection rules. Given a Sigma YAML file (or directory of files), `sigmalint` emits ESLint-shaped findings, gates each rule on Sigma-2.1.0 validity (a hard pass/fail), and — for valid rules — derives a quality score across six quality dimensions: MITRE ATT&CK alignment, field-name correctness against the Sigma taxonomy, false-positive risk, metadata completeness, redundancy with the public SigmaHQ corpus, and Sigma interoperability style.
 
 This repository is the reference implementation cited by the author's SoK paper on detection-rule quality assessment.
 
@@ -36,8 +36,8 @@ This repository is the reference implementation cited by the author's SoK paper 
 | # | Decision | Rationale |
 |---|---|---|
 | 1 | New repo `sigmalint` | Clean MIT history; portfolio-grade; no scaffold baggage. |
-| 2 | Vendored MITRE ATT&CK STIX bundle, refreshable via `sigmalint update-data` | Deterministic scoring, offline-capable, CI-friendly. |
-| 3 | Vendored Sigma JSON schema; on-demand SigmaHQ corpus clone for redundancy | Fast deterministic core; heavy data is opt-in. |
+| 2 | Bundled pinned MITRE ATT&CK STIX baseline; cache-refreshable overrides via `sigmalint update-data` (writes only to user cache, never the installed package) | Deterministic default, offline-capable, CI-friendly; supports newer-than-baseline data without mutating the wheel. |
+| 3 | Bundled pinned Sigma JSON schema baseline; cache-refreshable override; on-demand SigmaHQ corpus clone for redundancy (user cache only) | Fast deterministic core; heavy and mutable data lives in `data_dir`, not the package. |
 | 4 | Findings-first output; score is derived | Actionable, matches detection-engineer mental model, CI-friendly. |
 | 5 | Plugin-style rule registry (decorator-based) | Per-rule enable/disable, stable IDs, future extensibility for ~50 LOC overhead. |
 | 6 | Python 3.10+ | Pattern matching, modern type hints, broad install reach. |
@@ -136,11 +136,11 @@ Two-layer model. **Schema rules** (`SCHEMA###`) are strict Sigma-2.1.0 validity 
 | `ATK003` | attack | info | `logsource.category/product` is plausible for cited techniques per a versioned lookup table. Documented as a weak signal. |
 | `ATK004` | attack | info | Sub-technique vs. parent specificity — flag rules tagged with parents where a specific sub-technique would be more appropriate (heuristic on `detection.condition` content). |
 | `TAX001` | taxonomy | warning | All `detection` field names are known in the configured taxonomy for the declared `logsource`. Configured taxonomy defaults to `sigma` (settable via the rule's `taxonomy:` attribute or `.sigmalintrc.yml`). Unknown fields produce a warning, not an error, because Sigma permits log-source-specific fields. |
-| `TAX002` | taxonomy | warning | Field-name modifiers (`\|contains`, `\|endswith`, `\|startswith`, `\|re`, `\|base64`, `\|base64offset`, `\|all`, `\|cased`, `\|cidr`, `\|expand`, `\|fieldref`, `\|gt`, `\|gte`, `\|lt`, `\|lte`, `\|windash`) are spelled correctly per Sigma 2.1.0. |
+| `TAX002` | taxonomy | warning | Field-name modifiers are spelled correctly. The accepted modifier set is sourced from the **Sigma 2.1.0 Modifiers Appendix** and shipped as a fixture (`src/sigmalint/data/vendored/sigma-modifiers.yml`) so the list is generated/fixture-backed rather than hand-maintained. Refreshable via `sigmalint update-data` like other reference data. |
 | `TAX003` | taxonomy | info | Preferred canonical field used over known aliases (e.g., `Image` over `ImagePath`). |
 | `FP001` | fp_risk | warning | Single-selection rule on a common field/value with no negated/filter selector referenced in `detection.condition`. |
 | `FP002` | fp_risk | info | Prefer modifiers (`\|contains`, `\|startswith`, `\|endswith`) over raw leading/trailing wildcards when semantically equivalent. |
-| `FP003` | fp_risk | warning | Noisy log source (e.g., `process_creation`) with no negated filter selector in `detection.condition`. Recognizes `filter`, `filter_*`, grouped filter constructs, and Sigma Filters (separate filter files). Does NOT treat the `falsepositives:` metadata field as a filter. |
+| `FP003` | fp_risk | warning | Noisy log source (e.g., `process_creation`) with no negated filter selector in `detection.condition`. Recognizes in-file filters (`filter`, `filter_*`, grouped filter constructs) AND Sigma Filters — separate YAML files of `kind: filter` that reference a rule by `id` and append exclusion conditions during conversion. Sigma-Filter discovery is config-driven: `.sigmalintrc.yml` accepts a `filters_paths: [<glob>, ...]` list (default `["filters/**/*.yml"]`); each linted rule joins its referencing filters' conditions for the FP003 evaluation. Does NOT treat the `falsepositives:` metadata field as a filter. |
 | `FP004` | fp_risk | info | Hardcoded environment-specific literals (drive letters with usernames, specific hostnames, MAC/IP fragments). |
 | `RED001` | redundancy | info | Semantically-canonicalized detection fingerprint matches an existing SigmaHQ rule (Jaccard ≥ 0.85). Canonicalization: selector names dropped, AND/OR structure preserved, modifiers normalized, condition wildcards expanded. v0.1 is best-effort; documented as a near-duplicate hint, not a definitive match. |
 | `RED002` | redundancy | info | Title or `id` collides with a public SigmaHQ rule. |
@@ -208,6 +208,8 @@ weights:
   rules:                             # per-rule default_weight multiplier
     FP003: 2.0
 taxonomy: sigma                      # sigma | <custom-name>
+filters_paths:                       # globs for Sigma Filter files (kind: filter)
+  - filters/**/*.yml
 data_dir: ~/.cache/sigmalint         # corpus + STIX cache location (writable)
 fail_on: error                       # error | warning | never
 min_score: null                      # numeric or null
@@ -382,8 +384,8 @@ Deferred past v0.1: GOVERNANCE.md, signed releases (sigstore/cosign), public roa
 
 | Week | Deliverables |
 |---|---|
-| 1 | Repo scaffolding (LICENSE, pyproject, src layout, pre-commit, CI skeleton). `core/` (rule, registry, runner, scoring, config, profiles, errors). `core/condition` parser with property-based tests. `data/sigma_schema` + `data/attack`. Validity gate (SCHEMA001–004) + ATT&CK dimension (ATK001–004) + metadata dimension (META001a/b–005). JSON + text reporters. `sigmalint lint` + `list-rules` + `profiles`. Golden tests. (13 rules) |
-| 2 | Taxonomy + fp_risk + redundancy + style dimensions (13 rules). `data/taxonomy` + `data/corpus`. `update-data` command with vendored-vs-cache fall-through. SARIF + `github` reporters. `explain` command. Coverage to 90%. Profile coverage tests. |
+| 1 | Repo scaffolding (LICENSE, pyproject, src layout, pre-commit, CI skeleton). `core/` (rule, registry, runner, scoring, config, profiles, errors). `core/condition` parser with property-based tests. `data/sigma_schema` + `data/attack`. Validity gate SCHEMA001–004 (4) + ATT&CK ATK001–004 (4) + metadata META001a/b, 002, 003, 004, 005 (6) = **14 rules**. JSON + text reporters. `sigmalint lint` + `list-rules` + `profiles`. Golden tests. |
+| 2 | Taxonomy TAX001–003 (3) + fp_risk FP001–004 (4) + redundancy RED001–002 (2) + style STY001–003 (3) = **12 rules**. `data/taxonomy` + `data/corpus`. Sigma-Filters discovery (`filters_paths`). `update-data` command with vendored-vs-cache fall-through. SARIF + `github` reporters. `explain` command. Coverage to 90%. Profile coverage tests. |
 | 3 | All docs (per-rule .md files, scoring, configuration, profiles, architecture, maintainers). GH composite action + Marketplace listing. release.yml + PyPI trusted publishing. self-lint.yml. Full OSS readiness checklist. README polish + badges. v0.1.0 tag and release. |
 
 ## 19. Out-of-scope items (recorded so they are not forgotten)
