@@ -6,7 +6,7 @@
 
 **Architecture:** Strictly layered Python package (`core → data → rules → cli/reporting`) with `core/` having zero internal-module dependencies. Plugin-style rule registry with stable IDs. Validity-first scoring: failed schema gates produce `status: "invalid"` and no quality score. Bundled pinned reference data with cache-refreshable overrides (`update-data` writes only to `data_dir`).
 
-**Tech Stack:** Python 3.10+, hatchling build backend, Typer (CLI), rich (text output), ruamel.yaml (YAML with line/col), pyparsing (Sigma condition grammar), jsonschema, requests, pytest + hypothesis + pytest-cov, ruff, mypy --strict, import-linter, pre-commit.
+**Tech Stack:** Python 3.10+, hatchling build backend, Typer (CLI), rich (text output), ruamel.yaml (YAML with line/col), pyparsing (Sigma condition grammar), jsonschema, requests, pytest + hypothesis + pytest-cov, ruff, mypy (v0.1 strictness baseline; tightens to `--strict` in v0.2), import-linter, pre-commit.
 
 **Spec:** `docs/superpowers/specs/2026-05-23-sigmalint-design.md` (commit `7ebbb58`).
 
@@ -95,7 +95,7 @@ target-version = "py310"
 [tool.ruff.lint]
 select = ["E","F","W","I","B","UP","SIM","RUF","D"]
 ignore = ["D203","D213"]
-# Note: type annotations are enforced by mypy --strict on src/sigmalint;
+# Note: type annotations are enforced by mypy (v0.1 baseline) on src/sigmalint;
 # ruff's ANN rules are intentionally disabled to avoid annotating fixtures
 # and tests where they add noise without value.
 
@@ -175,7 +175,9 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: [types-PyYAML, types-requests]
-        args: [--strict, src/sigmalint]
+        # v0.1 baseline lives in pyproject.toml [tool.mypy]; pre-commit
+        # only needs the target path. Tightens to --strict in v0.2.
+        args: [src/sigmalint]
 ```
 
 **Step 5: Write `src/sigmalint/__init__.py`.**
