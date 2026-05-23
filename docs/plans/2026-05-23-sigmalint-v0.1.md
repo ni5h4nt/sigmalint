@@ -790,6 +790,13 @@ _DEFAULT_DIMENSION_WEIGHTS = {
 }
 
 
+# Sigma spec versions sigmalint can validate against. v0.1 ships exactly one;
+# the key is reserved and accepted in config so v0.2's multi-version support
+# does not require a config-schema bump.
+SUPPORTED_SIGMA_VERSIONS = ("2.1.0",)
+DEFAULT_SIGMA_VERSION = "2.1.0"
+
+
 @dataclass(frozen=True, slots=True)
 class Config:
     profile: str = DEFAULT_PROFILE
@@ -799,6 +806,7 @@ class Config:
     dimension_weights: dict[str, float] = field(default_factory=lambda: dict(_DEFAULT_DIMENSION_WEIGHTS))
     rule_weights: dict[str, float] = field(default_factory=dict)
     taxonomy: str = "sigma"
+    target_sigma_version: str = DEFAULT_SIGMA_VERSION
     filters_paths: tuple[str, ...] = ("filters/**/*.yml",)
     data_dir: str = "~/.cache/sigmalint"
     fail_on: str = "error"
@@ -825,6 +833,13 @@ def _from_dict(d: dict[str, Any]) -> Config:
     fail_on = d.get("fail_on", "error")
     if fail_on not in {"error", "warning", "never"}:
         raise ConfigError(f"fail_on must be error|warning|never, got {fail_on!r}")
+    tsv = d.get("target_sigma_version", DEFAULT_SIGMA_VERSION)
+    if tsv not in SUPPORTED_SIGMA_VERSIONS:
+        raise ConfigError(
+            f"target_sigma_version={tsv!r} not supported by this sigmalint "
+            f"release. Supported: {list(SUPPORTED_SIGMA_VERSIONS)}. "
+            f"Multi-version support arrives in v0.2."
+        )
     severities = {k: Severity(v) for k, v in (d.get("severities") or {}).items()}
     weights = d.get("weights") or {}
     dim_weights = dict(_DEFAULT_DIMENSION_WEIGHTS)
@@ -838,6 +853,7 @@ def _from_dict(d: dict[str, Any]) -> Config:
         dimension_weights=dim_weights,
         rule_weights=rule_weights,
         taxonomy=d.get("taxonomy", "sigma"),
+        target_sigma_version=tsv,
         filters_paths=tuple(d.get("filters_paths") or ("filters/**/*.yml",)),
         data_dir=d.get("data_dir", "~/.cache/sigmalint"),
         fail_on=fail_on,
@@ -890,11 +906,35 @@ def test_filters_paths_round_trip(tmp_path: Path):
     p.write_text("filters_paths: ['x/*.yml','y/*.yml']\n")
     c = load_config(p)
     assert c.filters_paths == ("x/*.yml", "y/*.yml")
+
+
+def test_target_sigma_version_default(tmp_path: Path):
+    c = load_config(tmp_path / "missing.yml")
+    assert c.target_sigma_version == "2.1.0"
+
+
+def test_target_sigma_version_accepted(tmp_path: Path):
+    p = tmp_path / ".sigmalintrc.yml"
+    p.write_text("target_sigma_version: 2.1.0\n")
+    c = load_config(p)
+    assert c.target_sigma_version == "2.1.0"
+
+
+def test_target_sigma_version_unsupported_raises(tmp_path: Path):
+    # v0.1 reserves the key but only ships 2.1.0. v0.2+ widens this.
+    p = tmp_path / ".sigmalintrc.yml"
+    p.write_text("target_sigma_version: 2.2.0\n")
+    with pytest.raises(ConfigError):
+        load_config(p)
 ```
 
-**Step 3: Write `.sigmalintrc.example.yml` mirroring spec §10.**
+**Step 3: Write `.sigmalintrc.example.yml` mirroring spec §10**, with an added commented line documenting the reserved `target_sigma_version` key:
 
-(Copy verbatim from spec §10's YAML block.)
+```yaml
+# target_sigma_version: 2.1.0   # v0.1 supports only 2.1.0; key reserved for v0.2+
+```
+
+(Copy the rest verbatim from spec §10's YAML block.)
 
 **Step 4: Run tests.**
 
@@ -1569,7 +1609,13 @@ def _resolve(data_dir: Path) -> Path:
 
 
 class SigmaSchema:
-    def __init__(self, data_dir: Path):
+    def __init__(self, data_dir: Path, version: str | None = None):
+        # v0.1 ships a single Sigma version; the `version` parameter is
+        # accepted now so v0.2's multi-version loader does not change the
+        # signature. When set, it is recorded in `data_version` to preserve
+        # report reproducibility; resolution against versioned vendored
+        # bundles arrives in v0.2.
+        self._requested_version = version
         path = _resolve(data_dir)
         try:
             self._schema = json.loads(path.read_text(encoding="utf-8"))
@@ -1579,8 +1625,12 @@ class SigmaSchema:
 
     @property
     def data_version(self) -> str:
-        # Prefer schema's $id/version if present, else VENDORED_VERSION.
-        return self._schema.get("version") or VENDORED_VERSION
+        # If a version was requested, that's the canonical answer (used in
+        # multi-version mode). Else prefer the schema's own $id/version, else
+        # fall back to the vendored baseline.
+        return (self._requested_version
+                or self._schema.get("version")
+                or VENDORED_VERSION)
 
     def validate(self, data: dict) -> list[str]:
         """Return a list of human-readable error messages (empty if valid)."""
@@ -1682,7 +1732,10 @@ def _resolve(data_dir: Path) -> Path:
 
 
 class AttackTaxonomy:
-    def __init__(self, data_dir: Path):
+    def __init__(self, data_dir: Path, version: str | None = None):
+        # `version` is reserved for v0.2's multi-version support; v0.1 ignores
+        # it for resolution but plumbs it through the API.
+        self._requested_version = version
         path = _resolve(data_dir)
         try:
             doc = json.loads(path.read_text(encoding="utf-8"))
@@ -1917,7 +1970,9 @@ def _load_yaml(p: Path) -> dict:
 
 
 class SigmaTaxonomy:
-    def __init__(self, data_dir: Path):
+    def __init__(self, data_dir: Path, version: str | None = None):
+        # `version` is reserved for v0.2's multi-version support.
+        self._requested_version = version
         data = _load_yaml(_resolve(data_dir, "fields.yml"))
         self._fields: dict[str, dict[str, set[str]]] = {
             tax: {ls: set(fs) for ls, fs in (entries or {}).items()}
@@ -1943,7 +1998,8 @@ class SigmaTaxonomy:
 
 
 class SigmaModifiers:
-    def __init__(self, data_dir: Path):
+    def __init__(self, data_dir: Path, version: str | None = None):
+        self._requested_version = version  # reserved for v0.2 multi-version
         data = _load_yaml(_resolve(data_dir, "sigma-modifiers.yml"))
         self._known = set(data.get("modifiers") or [])
 
@@ -1952,7 +2008,8 @@ class SigmaModifiers:
 
 
 class AttackLogsourceMap:
-    def __init__(self, data_dir: Path):
+    def __init__(self, data_dir: Path, version: str | None = None):
+        self._requested_version = version  # reserved for v0.2 multi-version
         data = _load_yaml(_resolve(data_dir, "attack-logsource-map.yml"))
         self._t = data.get("techniques") or {}
         self._version = data.get("version", "v0.1")
@@ -3332,11 +3389,12 @@ def lint(
             cfg = dataclasses.replace(cfg, min_score=min_score)
 
         data_dir = Path(cfg.data_dir).expanduser()
+        v = cfg.target_sigma_version  # reserved-key in v0.1; honored by v0.2 loaders
         ctx = RunContext(
             attack=AttackTaxonomy(data_dir),
-            sigma_schema=SigmaSchema(data_dir),
-            taxonomy=SigmaTaxonomy(data_dir),
-            modifiers=SigmaModifiers(data_dir),
+            sigma_schema=SigmaSchema(data_dir, version=v),
+            taxonomy=SigmaTaxonomy(data_dir, version=v),
+            modifiers=SigmaModifiers(data_dir, version=v),
             attack_logsource=AttackLogsourceMap(data_dir),
             corpus=RuleCorpus(data_dir),
             config=cfg,

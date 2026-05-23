@@ -208,7 +208,8 @@ weights:
   rules:                             # per-rule default_weight multiplier
     FP003: 2.0
 taxonomy: sigma                      # sigma | <custom-name>
-filters_paths:                       # globs for Sigma Filter files (kind: filter)
+target_sigma_version: 2.1.0          # reserved; v0.1 accepts only 2.1.0, v0.2+ widens
+filters_paths:                       # globs for Sigma Filter files (top-level filter: block)
   - filters/**/*.yml
 data_dir: ~/.cache/sigmalint         # corpus + STIX cache location (writable)
 fail_on: error                       # error | warning | never
