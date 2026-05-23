@@ -105,8 +105,8 @@ ignore = ["D203","D213"]
 [tool.mypy]
 python_version = "3.10"
 files = ["src/sigmalint"]
-# v0.1 baseline — strict enough to catch real bugs, lenient enough to ship.
-# Tightened to `strict = true` in v0.2 once the codebase is fully annotated.
+# v0.1 baseline — catches real bugs without forcing exhaustive annotation.
+# Tightened to `strict = true` in v0.2 once every snippet is fully typed.
 warn_unused_configs = true
 warn_unused_ignores = true
 warn_redundant_casts = true
@@ -114,10 +114,18 @@ warn_unreachable = true
 warn_return_any = true
 no_implicit_optional = true
 check_untyped_defs = true
-disallow_incomplete_defs = true
-disallow_untyped_decorators = true
-# Explicitly NOT enabled for v0.1: disallow_untyped_defs, disallow_any_generics,
-# disallow_subclassing_any. See docs/maintainers.md "type-strictness roadmap".
+# Explicitly NOT enabled in v0.1 (each blocks shipping today; tracked in
+# docs/maintainers.md "type-strictness roadmap"):
+#   - disallow_untyped_defs       — Rule.check() bodies and AST visitors
+#                                    have many local helpers that ship untyped.
+#   - disallow_incomplete_defs    — Rule.check(self, parsed: ParsedRule, ctx)
+#                                    deliberately leaves ctx as a Protocol-shaped
+#                                    duck type that isn't worth annotating per
+#                                    subclass; partial annotations are expected.
+#   - disallow_untyped_decorators — Typer's decorators in cli/ are untyped
+#                                    upstream; enabling this would force
+#                                    @cast(...) wrappers on every CLI command.
+#   - disallow_any_generics, disallow_subclassing_any — minor; bundled with strict.
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
