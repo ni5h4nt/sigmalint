@@ -225,7 +225,7 @@ In-line suppression: `# sigmalint: disable=FP003` as a YAML comment on the offen
 | `sigmalint list-rules` | Print all built-in rules with ID, dimension, severity (under the active profile), one-line summary. |
 | `sigmalint explain <rule_id>` | Print full documentation for a rule (sourced from `docs/rules/<id>.md`). |
 | `sigmalint profiles` | List built-in profiles and the effective rule severities under each. |
-| `sigmalint update-data` | Refresh ATT&CK STIX and Sigma schema into the user cache (`data_dir`); with `--corpus` also clones SigmaHQ. **Never** mutates files inside the installed package. |
+| `sigmalint update-data` | Refresh all reference datasets (ATT&CK STIX, Sigma JSON schema, Sigma modifiers appendix, taxonomy field list, ATT&CK→logsource map) into the user cache (`data_dir`); with `--corpus` also clones SigmaHQ. **Never** mutates files inside the installed package. |
 | `sigmalint --version` | Print version. |
 
 Exit codes: `0` clean, `1` findings above threshold or score below threshold, `2` user error, `3` data load error, `>3` internal bug (uncaught exception).
@@ -324,7 +324,7 @@ sigmalint/
 │   ├── __init__.py
 │   ├── core/
 │   ├── data/
-│   │   └── vendored/          # enterprise-attack.json, sigma-schema.json, fields.yml, attack-logsource-map.yml
+│   │   └── vendored/          # enterprise-attack.json, sigma-schema.json, sigma-modifiers.yml, fields.yml, attack-logsource-map.yml
 │   ├── rules/                 # schema.py, attack.py, taxonomy.py, fp_risk.py, redundancy.py, metadata.py, style.py
 │   ├── reporting/
 │   └── cli/
