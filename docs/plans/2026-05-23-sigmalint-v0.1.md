@@ -92,11 +92,14 @@ line-length = 100
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E","F","W","I","B","UP","SIM","RUF","ANN","D"]
-ignore = ["D203","D213","ANN101","ANN102"]
+select = ["E","F","W","I","B","UP","SIM","RUF","D"]
+ignore = ["D203","D213"]
+# Note: type annotations are enforced by mypy --strict on src/sigmalint;
+# ruff's ANN rules are intentionally disabled to avoid annotating fixtures
+# and tests where they add noise without value.
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["D","ANN"]
+"tests/**/*.py" = ["D"]
 
 [tool.mypy]
 python_version = "3.10"
@@ -190,6 +193,8 @@ def fixtures_dir() -> Path:
 root_packages =
     sigmalint
 
+# Base layering: each layer below may import any layer above its own,
+# but not the other way around.
 [importlinter:contract:layers]
 name = sigmalint layered architecture
 type = layers
@@ -201,6 +206,29 @@ layers =
     sigmalint.core
 containers =
     sigmalint
+
+# Reporting works on the canonical JSON shape only — it must not depend on
+# rules/, data/, or anything domain-specific.
+[importlinter:contract:reporting-core-only]
+name = reporting imports core only
+type = forbidden
+source_modules =
+    sigmalint.reporting
+forbidden_modules =
+    sigmalint.rules
+    sigmalint.data
+
+# Only the cli composes rules into the runner. No other layer may pull rules
+# in, which would defeat the lazy-registration model.
+[importlinter:contract:rules-only-from-cli]
+name = rules importable only from cli
+type = forbidden
+source_modules =
+    sigmalint.core
+    sigmalint.data
+    sigmalint.reporting
+forbidden_modules =
+    sigmalint.rules
 ```
 
 **Step 8: Write `.github/workflows/ci.yml`.**
@@ -333,7 +361,14 @@ class ParsedRule:
     path: str
     raw_text: str
     data: dict[str, Any]
+    # Map from "/" -separated key path (e.g. "detection/selection/Image") to
+    # 1-based (line, col). Populated by the runner from ruamel.yaml's
+    # CommentedMap before the doc is flattened to a plain dict.
+    positions: dict[str, tuple[int, int]] = field(default_factory=dict)
     yaml_error: str | None = None
+
+    def position_for(self, *path: str, default: tuple[int, int] = (1, 1)) -> tuple[int, int]:
+        return self.positions.get("/".join(path), default)
 
 
 @dataclass(frozen=True, slots=True)
@@ -863,6 +898,7 @@ Grammar (Sigma 2.1.0):
 The runner also accepts a list of strings under `condition`, OR-joined.
 """
 from __future__ import annotations
+import re
 from dataclasses import dataclass
 from typing import Iterable
 
@@ -899,8 +935,12 @@ class Or:
 
 
 # Grammar
+#
+# Selector identifiers may include `*` and `?` wildcards anywhere (Sigma allows
+# patterns like `*selection`, `sel*tion`, `filter_?`). We also accept an
+# underscore-prefixed identifier for filter-exclusion convention.
 def _build_grammar() -> pp.ParserElement:
-    ident = pp.Regex(r"[A-Za-z_][A-Za-z0-9_]*\*?")
+    ident = pp.Regex(r"[A-Za-z_*?][A-Za-z0-9_*?]*")
     n_keyword = pp.one_of("1 all")
     quant = pp.Group(n_keyword + pp.Keyword("of") + (ident | pp.Keyword("them")))
     expr = pp.Forward()
@@ -944,7 +984,7 @@ def parse(condition: str | list[str]) -> object:
 
 
 def referenced_selectors(ast: object) -> set[str]:
-    """Return the set of selector names referenced (wildcards expanded later)."""
+    """Return the set of selector name patterns referenced (wildcards expanded later)."""
     if isinstance(ast, Ident):
         return {ast.name}
     if isinstance(ast, Quantifier):
@@ -959,30 +999,50 @@ def referenced_selectors(ast: object) -> set[str]:
     return set()
 
 
+def _is_wildcard(pat: str) -> bool:
+    return "*" in pat or "?" in pat
+
+
+def _wildcard_to_regex(pat: str) -> re.Pattern[str]:
+    # Escape the pattern then translate Sigma globs into regex.
+    escaped = re.escape(pat).replace(r"\*", ".*").replace(r"\?", ".")
+    return re.compile(f"^{escaped}$")
+
+
 def expand_patterns(referenced: Iterable[str], available: Iterable[str]) -> set[str]:
-    """Expand wildcard selectors (e.g. 'filter*') against the available selector set."""
+    """Expand wildcard selector patterns against the available selector set.
+
+    Supports `*` (any) and `?` (single char) at any position, matching Sigma's
+    selector-pattern semantics — not just trailing wildcards.
+    """
     available_set = set(available)
     out: set[str] = set()
     for ref in referenced:
-        if ref.endswith("*"):
-            prefix = ref[:-1]
-            out |= {s for s in available_set if s.startswith(prefix)}
+        if _is_wildcard(ref):
+            rx = _wildcard_to_regex(ref)
+            out |= {s for s in available_set if rx.match(s)}
         elif ref in available_set:
             out.add(ref)
     return out
 
 
-def has_negated_selector(ast: object, predicate) -> bool:
-    """True if the AST contains `not <selector>` where predicate(selector_name) is True."""
+def has_negated_selector(ast: object, predicate, *, _negated: bool = False) -> bool:
+    """True if any selector matching predicate(name) appears under a `not` in the AST.
+
+    Negation is propagated through recursion so grouped forms like
+    `not (filter1 or filter2)` correctly report the inner selectors as negated.
+    Sigma's condition grammar does not include explicit double negation; if the
+    `not` keyword nests, each Not toggles the carried flag.
+    """
     if isinstance(ast, Not):
-        inner = ast.expr
-        if isinstance(inner, Ident):
-            return predicate(inner.name)
-        if isinstance(inner, Quantifier):
-            return predicate(inner.pattern)
-        return has_negated_selector(inner, predicate)
+        return has_negated_selector(ast.expr, predicate, _negated=not _negated)
     if isinstance(ast, (And, Or)):
-        return any(has_negated_selector(item, predicate) for item in ast.items)
+        return any(has_negated_selector(item, predicate, _negated=_negated)
+                   for item in ast.items)
+    if isinstance(ast, Ident):
+        return _negated and predicate(ast.name)
+    if isinstance(ast, Quantifier):
+        return _negated and predicate(ast.pattern)
     return False
 ```
 
@@ -1039,6 +1099,17 @@ def test_has_negated_selector_false():
     assert not has_negated_selector(ast, lambda n: n.startswith("filter"))
 
 
+def test_has_negated_selector_grouped():
+    # `not (filter1 or filter2)` — negation must propagate through Or.
+    ast = parse("selection and not (filter1 or filter2)")
+    assert has_negated_selector(ast, lambda n: n.startswith("filter"))
+
+
+def test_has_negated_selector_grouped_quantifier():
+    ast = parse("selection and not 1 of filter*")
+    assert has_negated_selector(ast, lambda n: n.startswith("filter"))
+
+
 @given(st.from_regex(r"^[a-z][a-z0-9_]{0,8}$", fullmatch=True))
 def test_single_ident_round_trip(name):
     ast = parse(name)
@@ -1090,6 +1161,28 @@ from sigmalint.core.types import Dimension, Finding, LintResult, ParsedRule, Sev
 _yaml = YAML(typ="rt")  # round-trip preserves line/col
 
 
+def _extract_positions(node, prefix: str = "") -> dict[str, tuple[int, int]]:
+    """Walk a ruamel.yaml CommentedMap, returning {key_path: (line, col)}.
+
+    Lines/columns from ruamel.yaml are 0-based; we convert to 1-based.
+    """
+    out: dict[str, tuple[int, int]] = {}
+    if not hasattr(node, "items"):
+        return out
+    lc = getattr(node, "lc", None)
+    for key, value in node.items():
+        path = f"{prefix}/{key}" if prefix else str(key)
+        if lc is not None:
+            try:
+                line, col = lc.key(key)
+                out[path] = (line + 1, col + 1)
+            except (KeyError, TypeError):
+                pass
+        if hasattr(value, "items"):
+            out.update(_extract_positions(value, path))
+    return out
+
+
 @dataclass(slots=True)
 class RunContext:
     attack: object | None = None
@@ -1106,11 +1199,20 @@ _SUPPRESS = re.compile(r"#\s*sigmalint:\s*disable\s*=\s*([A-Z0-9_,\s]+)")
 def _parse_file(path: Path) -> ParsedRule:
     text = path.read_text(encoding="utf-8", errors="replace")
     try:
-        data = _yaml.load(text) or {}
-        if not isinstance(data, dict):
+        node = _yaml.load(text) or {}
+        if not hasattr(node, "items"):
             return ParsedRule(path=str(path), raw_text=text, data={},
                               yaml_error="root must be a mapping")
-        return ParsedRule(path=str(path), raw_text=text, data=dict(data))
+        positions = _extract_positions(node)
+        # Flatten ruamel.yaml's CommentedMap into a plain dict for rule code.
+        def _plain(x):  # local helper
+            if hasattr(x, "items"):
+                return {k: _plain(v) for k, v in x.items()}
+            if isinstance(x, list):
+                return [_plain(i) for i in x]
+            return x
+        return ParsedRule(path=str(path), raw_text=text,
+                          data=_plain(node), positions=positions)
     except YAMLError as e:
         return ParsedRule(path=str(path), raw_text=text, data={}, yaml_error=str(e))
 
@@ -1486,14 +1588,15 @@ Phase 9/22 of sigmalint v0.1"
 - Create: `src/sigmalint/data/vendored/enterprise-attack.json` (pinned MITRE STIX bundle)
 - Create: `tests/unit/data/test_attack.py`
 
-**Step 1: Fetch pinned STIX.**
+**Step 1: Fetch pinned STIX and record version.**
 
 ```bash
+TAG="v16.1"   # ATT&CK release tag; update with care, STIX spec_version is NOT this.
 curl -fsSLo src/sigmalint/data/vendored/enterprise-attack.json \
-  https://raw.githubusercontent.com/mitre/cti/ATT%26CK-v16.1/enterprise-attack/enterprise-attack.json
+  "https://raw.githubusercontent.com/mitre/cti/ATT%26CK-${TAG}/enterprise-attack/enterprise-attack.json"
+printf '%s\n' "$TAG" > src/sigmalint/data/vendored/attack-version.txt
+# Keep VENDORED_ATTACK_VERSION in src/sigmalint/data/attack.py in sync with $TAG.
 ```
-
-(Pin to ATT&CK v16.1 release tag. If a newer tag exists at build time, prefer the latest stable tag and record it.)
 
 **Step 2: Write `src/sigmalint/data/attack.py`.**
 
@@ -1509,6 +1612,12 @@ from sigmalint.core.errors import DataLoadError
 
 _TECHNIQUE_RE = re.compile(r"^T\d{4}(?:\.\d{3})?$")
 ATTACK_TAG_RE = re.compile(r"^attack\.t(\d{4})(?:\.(\d{3}))?$")
+
+# Pinned baseline matching the vendored STIX bundle. `update-data` writes a
+# sidecar `attack-version.txt` into the user cache; loader prefers that, else
+# falls back to this constant. STIX's `spec_version` is the spec rev, not the
+# ATT&CK release, so we record the release tag explicitly for reproducibility.
+VENDORED_ATTACK_VERSION = "v16.1"
 
 
 def _vendored_path() -> Path:
@@ -1539,7 +1648,13 @@ class AttackTaxonomy:
             if _TECHNIQUE_RE.match(tid):
                 self._techniques[tid] = obj
         self._path = path
-        self._version = doc.get("spec_version") or "unknown"
+        # Prefer an explicit sidecar (written by `update-data`); fall back to
+        # the vendored constant. STIX spec_version isn't the ATT&CK release.
+        sidecar = path.parent / "attack-version.txt"
+        if sidecar.exists():
+            self._version = sidecar.read_text(encoding="utf-8").strip()
+        else:
+            self._version = VENDORED_ATTACK_VERSION
 
     @property
     def data_version(self) -> str:
@@ -1593,7 +1708,8 @@ def test_tag_parser():
 
 ```bash
 pytest tests/unit/data/test_attack.py -v
-git add src/sigmalint/data/attack.py src/sigmalint/data/vendored/enterprise-attack.json tests/unit/data/test_attack.py
+git add src/sigmalint/data/attack.py src/sigmalint/data/vendored/enterprise-attack.json \
+        src/sigmalint/data/vendored/attack-version.txt tests/unit/data/test_attack.py
 git commit -m "feat(data): bundle ATT&CK Enterprise STIX with technique lookup
 
 Phase 10/22 of sigmalint v0.1"
@@ -2100,11 +2216,13 @@ class Schema004ConditionParseable(Rule):
             return
         available = {k for k in det.keys() if k != "condition"}
         referenced = referenced_selectors(ast)
-        # Expand wildcards
-        wildcards = {r for r in referenced if r.endswith("*")}
+        # Wildcards may be `*` or `?` and may appear at any position.
+        from sigmalint.core.condition import _is_wildcard  # type: ignore[attr-defined]
+        wildcards = {r for r in referenced if _is_wildcard(r)}
         non_wild = referenced - wildcards
-        expanded = expand_patterns(wildcards, available)
-        unknown = (non_wild - available) | {w for w in wildcards if not expand_patterns({w}, available)}
+        unknown = (non_wild - available) | {
+            w for w in wildcards if not expand_patterns({w}, available)
+        }
         for u in sorted(unknown):
             yield Finding(self.id, self.dimension, self.default_severity,
                           f"detection.condition references unknown selector: {u}",
@@ -2348,7 +2466,13 @@ Phase 14/22 of sigmalint v0.1"
 **Step 1: Write `src/sigmalint/rules/metadata.py`.**
 
 ```python
-"""META001a/b–META005 — metadata completeness rules."""
+"""META001a/b–META005 — metadata completeness rules.
+
+Pattern note: rules pass key paths (e.g. "id", "logsource/category") to
+`_finding(..., *path)` so Findings carry line/col extracted from
+ParsedRule.positions. Findings without a meaningful path may omit it; the
+formatter defaults to file-level (line=None).
+"""
 from __future__ import annotations
 import re
 from typing import Iterable
@@ -2362,8 +2486,11 @@ from sigmalint.core.types import Dimension, Finding, ParsedRule, Severity
 VALID_STATUS = {"stable", "test", "experimental", "deprecated", "unsupported"}
 
 
-def _finding(rule, msg, parsed, hint):
-    return Finding(rule.id, rule.dimension, rule.default_severity, msg, parsed.path, fix_hint=hint)
+def _finding(rule, msg, parsed, hint, *path: str):
+    """Helper: build a Finding with line/col looked up from parsed.positions."""
+    line, col = parsed.position_for(*path) if path else (None, None)
+    return Finding(rule.id, rule.dimension, rule.default_severity, msg, parsed.path,
+                   line=line, col=col, fix_hint=hint)
 
 
 @register
@@ -2394,11 +2521,12 @@ class Meta001bIdValidUuid4(Rule):
             u = UUID(str(rid))
         except (ValueError, TypeError):
             yield _finding(self, f"id {rid!r} is not a valid UUID", parsed,
-                           "Use a UUIDv4: `python -c 'import uuid;print(uuid.uuid4())'`.")
+                           "Use a UUIDv4: `python -c 'import uuid;print(uuid.uuid4())'`.",
+                           "id")
             return
         if u.version != 4:
             yield _finding(self, f"id {rid!r} is UUIDv{u.version}, expected UUIDv4", parsed,
-                           "Regenerate with UUIDv4.")
+                           "Regenerate with UUIDv4.", "id")
 
 
 @register
@@ -2608,11 +2736,30 @@ Phase 16/22 of sigmalint v0.1"
 **Step 1: Write `src/sigmalint/core/filters.py`.**
 
 ```python
-"""Sigma Filter file discovery and condition-merging for FP003."""
+"""Sigma Filter file discovery and condition-merging for FP003.
+
+Sigma Filter file shape (per SigmaHQ docs):
+
+    title: <name>
+    id: <uuid>
+    logsource: { ... }
+    filter:
+      rules:
+        - <referenced-rule-id-or-title>
+      selection:
+        Field: value
+      condition: not selection
+
+A Sigma Filter is detected by the presence of a top-level `filter:` mapping
+that itself contains a `rules:` list (the rules it targets) and a `condition:`
+string. There is no `kind: filter` field in the spec. Filters reference rules
+by either UUID id or title.
+"""
 from __future__ import annotations
 import glob
 from dataclasses import dataclass
 from pathlib import Path
+from uuid import UUID
 
 import yaml
 
@@ -2625,8 +2772,20 @@ class SigmaFilter:
     condition: str                  # the filter's appended condition
 
 
+def _is_uuid(s: str) -> bool:
+    try:
+        UUID(str(s))
+        return True
+    except (ValueError, TypeError):
+        return False
+
+
 def discover_filters(patterns: list[str], cwd: Path) -> list[SigmaFilter]:
-    """Find all Sigma Filter files (`kind: filter`) under the given glob patterns."""
+    """Find Sigma Filter files under the given glob patterns.
+
+    A YAML doc is treated as a Sigma Filter when it has a top-level mapping
+    `filter:` containing both `rules:` (non-empty list) and `condition:` (str).
+    """
     out: list[SigmaFilter] = []
     for pat in patterns:
         for p in glob.glob(str(cwd / pat), recursive=True):
@@ -2635,20 +2794,22 @@ def discover_filters(patterns: list[str], cwd: Path) -> list[SigmaFilter]:
                 doc = yaml.safe_load(pth.read_text(encoding="utf-8"))
             except (OSError, yaml.YAMLError):
                 continue
-            if not isinstance(doc, dict) or doc.get("kind") != "filter":
+            if not isinstance(doc, dict):
                 continue
-            filt = doc.get("filter") or {}
-            rules = filt.get("rules") or []
-            ids = tuple(r for r in rules if isinstance(r, str) and _looks_like_uuid(r))
-            names = tuple(r for r in rules if isinstance(r, str) and not _looks_like_uuid(r))
-            condition = str(filt.get("condition", ""))
+            filt = doc.get("filter")
+            if not isinstance(filt, dict):
+                continue
+            rules = filt.get("rules")
+            condition = filt.get("condition")
+            if not isinstance(rules, list) or not rules:
+                continue
+            if not isinstance(condition, str) or not condition.strip():
+                continue
+            ids = tuple(r for r in rules if isinstance(r, str) and _is_uuid(r))
+            names = tuple(r for r in rules if isinstance(r, str) and not _is_uuid(r))
             out.append(SigmaFilter(path=str(pth), targets_ids=ids,
                                    targets_names=names, condition=condition))
     return out
-
-
-def _looks_like_uuid(s: str) -> bool:
-    return len(s) == 36 and s.count("-") == 4
 
 
 def filters_for_rule(filters: list[SigmaFilter], rule_id: str | None,
@@ -3064,10 +3225,14 @@ app = typer.Typer(no_args_is_help=True, add_completion=False,
 
 
 def _collect_paths(paths: list[Path]) -> list[Path]:
+    """Recursively collect *.yml and *.yaml files. STY002 then flags .yaml."""
     out: list[Path] = []
     for p in paths:
         if p.is_dir():
-            out.extend(sorted(p.rglob("*.yml")))
+            collected: list[Path] = []
+            for pat in ("*.yml", "*.yaml"):
+                collected.extend(p.rglob(pat))
+            out.extend(sorted(set(collected)))
         elif p.is_file():
             out.append(p)
     return out
@@ -3086,14 +3251,16 @@ def lint(
     debug: Annotated[bool, typer.Option("--debug")] = False,
 ):
     """Lint Sigma rule file(s) or directory(ies)."""
+    import dataclasses
     try:
         cfg = load_config(config) if config else load_config(Path(".sigmalintrc.yml"))
+        # Config is frozen + slotted — use dataclasses.replace, not __dict__.
         if profile:
-            cfg = type(cfg)(**{**cfg.__dict__, "profile": profile})
+            cfg = dataclasses.replace(cfg, profile=profile)
         if fail_on:
-            cfg = type(cfg)(**{**cfg.__dict__, "fail_on": fail_on})
+            cfg = dataclasses.replace(cfg, fail_on=fail_on)
         if min_score is not None:
-            cfg = type(cfg)(**{**cfg.__dict__, "min_score": min_score})
+            cfg = dataclasses.replace(cfg, min_score=min_score)
 
         data_dir = Path(cfg.data_dir).expanduser()
         ctx = RunContext(
@@ -3111,14 +3278,21 @@ def lint(
         disable_set = list(cfg.disable) + (disable or [])
         enable_set = enable_only or (list(cfg.enable_only) if cfg.enable_only else None)
         rules = enabled_rules(disabled=disable_set, enable_only=enable_set)
-        # Apply profile severity overrides
+        # Severity resolution order (later wins):
+        #   1. rule.default_severity
+        #   2. profile override (PROFILES[cfg.profile])
+        #   3. user override (cfg.severities)
+        # A None at any layer means "disabled" and the rule is dropped.
+        kept: list = []
         for r in rules:
             eff = resolve_severity(cfg.profile, r.id, r.default_severity)
             if eff is None:
-                continue  # disabled by profile -> filtered below
+                continue  # disabled by profile
+            if r.id in cfg.severities:
+                eff = cfg.severities[r.id]
             r.default_severity = eff  # type: ignore[misc]
-        rules = [r for r in rules
-                 if resolve_severity(cfg.profile, r.id, r.default_severity) is not None]
+            kept.append(r)
+        rules = kept
 
         results = run_lint(all_paths, rules, ctx)
         scores = [score_file(r, cfg) for r in results]
