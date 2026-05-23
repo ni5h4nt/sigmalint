@@ -93,14 +93,17 @@ line-length = 100
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E","F","W","I","B","UP","SIM","RUF","D"]
-ignore = ["D203","D213"]
-# Note: type annotations are enforced by mypy (v0.1 baseline) on src/sigmalint;
-# ruff's ANN rules are intentionally disabled to avoid annotating fixtures
-# and tests where they add noise without value.
-
-[tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["D"]
+select = ["E","F","W","I","B","UP","SIM","RUF"]
+# Notes on intentionally-disabled rule families for v0.1:
+#  - ANN (type annotations): enforced by mypy on src/sigmalint via [tool.mypy].
+#                            Avoids annotating fixtures and tests where it
+#                            adds noise without value.
+#  - D   (pydocstyle): rule documentation lives in docs/rules/<id>.md, not
+#                      in docstrings. Tiny rule classes (Severity, Dimension,
+#                      Finding, Rule subclasses) intentionally skip docstrings.
+#                      Module-level docstrings exist organically in the
+#                      style guide and are reviewed in PRs.
+# Both rule families revisit when v0.2 broadens the strictness contract.
 
 [tool.mypy]
 python_version = "3.10"
@@ -1831,9 +1834,10 @@ Phase 10/22 of sigmalint v0.1"
 - Create: `src/sigmalint/data/vendored/attack-logsource-map.yml`
 - Create: `tests/unit/data/test_taxonomy.py`
 
-**Step 1: Write `sigma-modifiers.yml`** mirroring Sigma 2.1.0 modifiers appendix:
+**Step 1: Write `sigma-modifiers.yml`** mirroring Sigma 2.1.0 modifiers appendix. The leading `version:` is read by `SigmaModifiers.data_version` so reports record which modifier list was used:
 
 ```yaml
+version: "sigma-2.1.0"
 modifiers:
   - contains
   - startswith
@@ -2002,9 +2006,16 @@ class SigmaModifiers:
         self._requested_version = version  # reserved for v0.2 multi-version
         data = _load_yaml(_resolve(data_dir, "sigma-modifiers.yml"))
         self._known = set(data.get("modifiers") or [])
+        # Track which on-disk source was used so reports can include the
+        # modifier-list version under data_versions.modifiers.
+        self._version = data.get("version") or "sigma-2.1.0"
 
     def is_known(self, modifier: str) -> bool:
         return modifier in self._known
+
+    @property
+    def data_version(self) -> str:
+        return self._requested_version or self._version
 
 
 class AttackLogsourceMap:
@@ -3440,10 +3451,19 @@ def lint(
 
 
 def _data_versions(ctx: RunContext) -> dict:
+    """Record every dataset that contributed to a scoring decision.
+
+    Reproducibility contract: if two runs produce the same `data_versions`
+    block AND the same input file, they must produce the same findings.
+    TAX002 reads `modifiers`; ATK003 reads `attack_logsource_map`; both must
+    appear here, not just the schema/STIX/taxonomy datasets.
+    """
     return {
         "sigma_schema": ctx.sigma_schema.data_version,
         "attack": ctx.attack.data_version,
         "taxonomy": ctx.taxonomy.data_version,
+        "modifiers": ctx.modifiers.data_version,
+        "attack_logsource_map": ctx.attack_logsource.data_version,
         "corpus": ctx.corpus.data_version,
     }
 

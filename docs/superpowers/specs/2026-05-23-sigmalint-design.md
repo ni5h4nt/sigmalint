@@ -239,8 +239,10 @@ Exit codes: `0` clean, `1` findings above threshold or score below threshold, `2
   "profile": "sigmahq",
   "data_versions": {
     "sigma_schema": "2.1.0",
-    "attack": "16.1",
-    "taxonomy": "sigma@2025-08-02",
+    "attack": "v16.1",
+    "taxonomy": "sigma@v0.1",
+    "modifiers": "sigma-2.1.0",
+    "attack_logsource_map": "v0.1",
     "corpus": null
   },
   "files": [
