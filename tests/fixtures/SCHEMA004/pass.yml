@@ -1,0 +1,9 @@
+title: T
+logsource:
+  category: process_creation
+detection:
+  selection:
+    Image: x
+  filter:
+    User: SYSTEM
+  condition: selection and not filter
