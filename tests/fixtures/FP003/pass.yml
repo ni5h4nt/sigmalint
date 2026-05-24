@@ -1,0 +1,9 @@
+title: Process creation with negated filter
+logsource:
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: \powershell.exe
+  filter:
+    CommandLine|contains: trusted-tool
+  condition: selection and not filter
