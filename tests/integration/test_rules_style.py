@@ -51,7 +51,7 @@ def test_sty003_pass(fixtures_dir: Path):
 def test_sty003_fail(fixtures_dir: Path):
     findings = _findings_for("STY003", fixtures_dir / "STY003" / "fail.yml")
     assert len(findings) == 1
-    assert "multiple of 4" in findings[0].message
+    assert "4-space step" in findings[0].message
 
 
 @pytest.mark.parametrize("rule_id", ["STY001", "STY002", "STY003"])

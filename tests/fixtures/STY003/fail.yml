@@ -1,8 +1,8 @@
 title: STY003 fail
 logsource:
-  category: process_creation
-  product: windows
+   category: process_creation
+   product: windows
 detection:
-  selection:
-    Image: '\example.exe'
-  condition: selection
+   selection:
+      Image: '\example.exe'
+   condition: selection
