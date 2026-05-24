@@ -48,8 +48,8 @@ dev = [
 sigmalint = "sigmalint.cli.main:app"
 
 [project.urls]
-Homepage = "https://github.com/nishant/sigmalint"
-Issues = "https://github.com/nishant/sigmalint/issues"
+Homepage = "https://github.com/ni5h4nt/sigmalint"
+Issues = "https://github.com/ni5h4nt/sigmalint/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/sigmalint"]

@@ -6,7 +6,7 @@ sigmalint is used inside CI pipelines by red and blue teams. If you find a defec
 
 Use GitHub's private security advisory workflow:
 
-1. Open <https://github.com/nishant/sigmalint/security/advisories/new>
+1. Open <https://github.com/ni5h4nt/sigmalint/security/advisories/new>
 2. Describe the issue with a minimal reproducer (a small Sigma YAML file is usually enough).
 
 If you cannot use GitHub advisories, email `nishant.tyagi@gmail.com` with `sigmalint security` in the subject.

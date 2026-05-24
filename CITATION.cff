@@ -8,7 +8,7 @@ authors:
   - given-names: Nishant
     family-names: Tyagi
     email: nishant.tyagi@gmail.com
-repository-code: "https://github.com/nishant/sigmalint"
+repository-code: "https://github.com/ni5h4nt/sigmalint"
 license: MIT
 version: 0.1.0
 date-released: "2026-05-23"
@@ -26,4 +26,4 @@ preferred-citation:
     - given-names: Nishant
       family-names: Tyagi
   year: 2026
-  note: "Reference implementation: https://github.com/nishant/sigmalint"
+  note: "Reference implementation: https://github.com/ni5h4nt/sigmalint"

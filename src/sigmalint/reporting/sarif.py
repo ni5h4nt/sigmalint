@@ -71,7 +71,7 @@ def build_sarif(report: dict[str, Any]) -> dict[str, Any]:
                     "driver": {
                         "name": "sigmalint",
                         "version": report.get("sigmalint_version", ""),
-                        "informationUri": "https://github.com/nishant/sigmalint",
+                        "informationUri": "https://github.com/ni5h4nt/sigmalint",
                         "rules": list(rules_seen.values()),
                     }
                 },

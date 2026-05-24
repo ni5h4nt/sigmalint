@@ -1,10 +1,10 @@
 # sigmalint
 
-[![CI](https://github.com/nishant/sigmalint/actions/workflows/ci.yml/badge.svg)](https://github.com/nishant/sigmalint/actions/workflows/ci.yml)
+[![CI](https://github.com/ni5h4nt/sigmalint/actions/workflows/ci.yml/badge.svg)](https://github.com/ni5h4nt/sigmalint/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/sigmalint.svg)](https://pypi.org/project/sigmalint/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](pyproject.toml)
-[![codecov](https://codecov.io/gh/nishant/sigmalint/branch/main/graph/badge.svg)](https://codecov.io/gh/nishant/sigmalint)
+[![codecov](https://codecov.io/gh/ni5h4nt/sigmalint/branch/main/graph/badge.svg)](https://codecov.io/gh/ni5h4nt/sigmalint)
 
 ESLint-style linter for [Sigma](https://github.com/SigmaHQ/sigma) detection rules.
 Validates against Sigma 2.1.0, scores rules across six quality dimensions, and
@@ -49,7 +49,7 @@ per-rule documentation.
 ## In CI
 
 ```yaml
-- uses: nishant/sigmalint@v0.1.0
+- uses: ni5h4nt/sigmalint@v0.1.0
   with:
     path: rules/
     format: github

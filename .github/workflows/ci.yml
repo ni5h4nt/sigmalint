@@ -11,7 +11,7 @@ jobs:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
@@ -21,7 +21,18 @@ jobs:
       - run: mypy src/sigmalint
       - run: lint-imports
       - run: pytest --cov=sigmalint --cov-report=xml --cov-fail-under=90
+      - name: Self-lint (dogfood on test fixtures)
+        run: |
+          set -euo pipefail
+          # Lint only the pass.yml fixtures — they are curated as
+          # rules that should pass sigmalint's own validity gate.
+          # fail.yml fixtures are intentionally broken and excluded.
+          mapfile -t passes < <(find tests/fixtures -name 'pass.yml')
+          if [ ${#passes[@]} -eq 0 ]; then
+            echo "no pass.yml fixtures found" && exit 1
+          fi
+          sigmalint lint "${passes[@]}" --fail-on error
       - if: matrix.python-version == '3.12'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           file: ./coverage.xml

@@ -35,4 +35,4 @@ See `docs/versioning.md` for the full backward-compatibility policy.
 - Concept docs: `scoring`, `configuration`, `profiles`, `architecture`, `versioning`, `maintainers`.
 - Contributing guide centered on the rule-authoring workflow.
 
-[0.1.0]: https://github.com/nishant/sigmalint/releases/tag/v0.1.0
+[0.1.0]: https://github.com/ni5h4nt/sigmalint/releases/tag/v0.1.0
