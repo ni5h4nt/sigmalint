@@ -24,8 +24,14 @@ def _finding(
     parsed: ParsedRule,
     hint: str,
     *path: str,
+    severity: Severity | None = None,
 ) -> Finding:
-    """Build a Finding with line/col looked up from parsed.positions."""
+    """Build a Finding with line/col looked up from parsed.positions.
+
+    `severity` overrides `rule.default_severity` when supplied. A single rule
+    may emit findings at different severities (e.g. META001b emits ERROR for
+    an unparseable id but WARNING for a parseable non-v4 UUID).
+    """
     if path:
         line: int | None
         col: int | None
@@ -35,7 +41,7 @@ def _finding(
     return Finding(
         rule.id,
         rule.dimension,
-        rule.default_severity,
+        severity or rule.default_severity,
         msg,
         parsed.path,
         line=line,
@@ -65,8 +71,12 @@ class Meta001aIdPresent(Rule):
 class Meta001bIdValidUuid4(Rule):
     id = "META001b"
     dimension = Dimension.METADATA
-    default_severity = Severity.ERROR
-    summary = "id, if present, is a valid UUIDv4."
+    # Default is WARNING — the common real-world case (legacy UUIDv1 from
+    # `uuidgen` without -r) is technically a non-spec id but still globally
+    # unique, and SigmaHQ has 37 such rules. The unparseable case is emitted
+    # at ERROR severity inline (see check()).
+    default_severity = Severity.WARNING
+    summary = "id, if present, is a valid UUID (UUIDv4 recommended)."
 
     def check(self, parsed: ParsedRule, ctx: object) -> Iterable[Finding]:
         rid = parsed.data.get("id")
@@ -75,18 +85,24 @@ class Meta001bIdValidUuid4(Rule):
         try:
             u = UUID(str(rid))
         except (ValueError, TypeError):
+            # Not a UUID at all — hard error, no SIEM will treat this as a
+            # stable identifier.
             yield _finding(
                 self,
                 f"id {rid!r} is not a valid UUID",
                 parsed,
                 "Use a UUIDv4: `python -c 'import uuid;print(uuid.uuid4())'`.",
                 "id",
+                severity=Severity.ERROR,
             )
             return
         if u.version != 4:
+            # Parses as a UUID but not v4 — Sigma recommends v4 specifically.
+            # Emit at the default (warning), since the rule still has a
+            # stable identifier and existing tools accept it.
             yield _finding(
                 self,
-                f"id {rid!r} is UUIDv{u.version}, expected UUIDv4",
+                f"id {rid!r} is UUIDv{u.version}, Sigma recommends UUIDv4",
                 parsed,
                 "Regenerate with UUIDv4.",
                 "id",

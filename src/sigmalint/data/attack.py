@@ -16,7 +16,7 @@ ATTACK_TAG_RE = re.compile(r"^attack\.t(\d{4})(?:\.(\d{3}))?$")
 # sidecar `attack-version.txt` into the user cache; loader prefers that, else
 # falls back to this constant. STIX's `spec_version` is the spec rev, not the
 # ATT&CK release, so we record the release tag explicitly for reproducibility.
-VENDORED_ATTACK_VERSION = "v16.1"
+VENDORED_ATTACK_VERSION = "v19.1"
 
 
 def _vendored_path() -> Path:

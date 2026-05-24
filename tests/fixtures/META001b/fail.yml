@@ -3,7 +3,7 @@ id: not-a-uuid-at-all
 status: stable
 description: A test rule with a malformed id.
 author: Test Author
-date: 2026/05/23
+date: '2026-05-23'
 references:
   - https://example.com/ref
 logsource:

@@ -17,7 +17,7 @@ from pathlib import Path
 import requests
 import typer
 
-ATTACK_TAG = "v16.1"
+ATTACK_TAG = "v19.1"
 SIGMA_SCHEMA_TAG = "v2.1.0"
 
 # (relative cache filename, fetch URL or None for vendored mirror, sidecar)

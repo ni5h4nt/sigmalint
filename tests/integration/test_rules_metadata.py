@@ -42,3 +42,37 @@ def test_fail_fixture(rule_id, fixtures_dir):
     assert any(x.rule_id == rule_id for x in results[0].findings), (
         f"{rule_id} fail fixture did not produce a {rule_id} finding"
     )
+
+
+def test_meta001b_unparseable_id_is_error(tmp_path):
+    # Severity-split: an unparseable id (no UUID at all) stays at ERROR.
+    from sigmalint.core.types import Severity
+
+    f = tmp_path / "r.yml"
+    f.write_text(
+        "title: t\nid: not-a-uuid-at-all\nlogsource: {category: foo}\n"
+        "detection: {a: {b: 1}, condition: a}\n"
+    )
+    results = lint([f], [Meta001bIdValidUuid4()], RunContext())
+    meta = [x for x in results[0].findings if x.rule_id == "META001b"]
+    assert len(meta) == 1
+    assert meta[0].severity == Severity.ERROR
+
+
+def test_meta001b_uuidv1_is_warning(tmp_path):
+    # Severity-split: a parseable non-v4 UUID is WARNING (not ERROR).
+    # The string `572b12d4-9062-11ed-a1eb-0242ac120002` is a real UUIDv1
+    # (the `11ed` after `9062-` marks version 1).
+    from sigmalint.core.types import Severity
+
+    f = tmp_path / "r.yml"
+    f.write_text(
+        "title: t\nid: 572b12d4-9062-11ed-a1eb-0242ac120002\n"
+        "logsource: {category: foo}\n"
+        "detection: {a: {b: 1}, condition: a}\n"
+    )
+    results = lint([f], [Meta001bIdValidUuid4()], RunContext())
+    meta = [x for x in results[0].findings if x.rule_id == "META001b"]
+    assert len(meta) == 1
+    assert meta[0].severity == Severity.WARNING
+    assert "UUIDv1" in meta[0].message
