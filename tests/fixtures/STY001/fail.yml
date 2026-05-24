@@ -1,0 +1,8 @@
+Title: STY001 fail
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image: '\example.exe'
+    condition: selection

@@ -1,0 +1,9 @@
+title: RED002 unique pass title
+id: 11111111-2222-3333-4444-555555555555
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image: '\unique_red002_pass.exe'
+    condition: selection

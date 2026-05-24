@@ -1,0 +1,8 @@
+title: RED001 fail
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image: '\duplicate.exe'
+    condition: selection
