@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 See `docs/versioning.md` for the full backward-compatibility policy.
 
+## [Unreleased]
+
+### Notes for future releases
+
+Every release that refreshes vendored reference data (ATT&CK STIX, Sigma
+schema, modifier appendix, taxonomy, ATT&CK→logsource map) must include a
+**Score impact** subsection here documenting the mean-score delta against
+the SigmaHQ public corpus. The format is:
+
+> **Score impact:** SigmaHQ corpus mean score X.XX → Y.YY (Δ ±Z.ZZ).
+> Largest contributors: ...
+
+This is part of the backward-compat contract — see `docs/versioning.md`,
+"Reference-data refreshes" section, for why score-drift is a release-note
+concern.
+
 ## [0.1.0] — 2026-05-23
 
 ### Added
@@ -21,7 +37,7 @@ See `docs/versioning.md` for the full backward-compatibility policy.
 - Three built-in profiles: `strict`, `sigmahq` (default), `local`.
 - Sigma condition grammar parser (boolean ops, parens, negation, `1/all of <pattern>`, `1/all of them`, list-valued conditions).
 - Sigma Filters discovery via `filters_paths` config glob.
-- Cache-then-vendored data resolution for ATT&CK STIX (`v16.1`), Sigma JSON schema (`v2.1.0`), modifier appendix, field taxonomy, ATT&CK→logsource map.
+- Cache-then-vendored data resolution for ATT&CK STIX (`v19.1`), Sigma JSON schema (`v2.1.0`), modifier appendix (Sigma 2.1.0), field taxonomy (`sigma@v0.1`), ATT&CK→logsource map (`v0.1`).
 - `sigmalint update-data` command for cache refresh, never mutating the installed package.
 - Output formats: `text`, `json`, `sarif` (2.1.0), `github` (workflow annotations).
 - CLI subcommands: `lint`, `list-rules`, `explain`, `profiles`, `update-data`.
@@ -35,4 +51,13 @@ See `docs/versioning.md` for the full backward-compatibility policy.
 - Concept docs: `scoring`, `configuration`, `profiles`, `architecture`, `versioning`, `maintainers`.
 - Contributing guide centered on the rule-authoring workflow.
 
+### Score impact (baseline)
+
+Initial release; no prior baseline to compare against. The SigmaHQ public
+corpus (3,132 rules) lints cleanly at **mean score 99.61** with 0 errors,
+1,384 warnings, and 2,543 info findings. This is the baseline that future
+reference-data refreshes will be compared against in the "Score impact"
+subsection of each release.
+
+[Unreleased]: https://github.com/ni5h4nt/sigmalint/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/ni5h4nt/sigmalint/releases/tag/v0.1.0
