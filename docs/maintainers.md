@@ -75,6 +75,7 @@ the right configuration when the moment arrives.
 | Trigger event | What changes |
 |---|---|
 | **Today (solo, protected)** | Required CI status checks (`test (3.10/.11/.12/.13)`), block force-push, block deletion, linear history, include administrators, require conversation resolution. Required reviewers = 0. |
+| **First public push (repo flips public)** | Enable **Private vulnerability reporting** at <https://github.com/ni5h4nt/sigmalint/settings/security_analysis>. This feature is not available for personal-account private repos and the setting is genuinely absent from the UI until the repo is public. `SECURITY.md` cites the GitHub advisories URL as a secondary path; that URL only resolves once PVR is enabled. |
 | **First external PR merged** | No protection change required. Confirm `CONTRIBUTING.md` and the PR template are sufficient for a non-maintainer's first encounter. |
 | **Second maintainer joins** | Flip required reviewers `0 → 1`. Enable Code-Owner enforcement, "dismiss stale reviews on new push", and "require approval of most-recent reviewable push". Add new maintainer to `MAINTAINERS.md` and `CODEOWNERS`. |
 | **v1.0 cut** | Require signed commits. Restrict pushes to `main` to maintainers only (no admin override). Lock the public JSON output shape and rule-ID universe per `docs/versioning.md`. |
