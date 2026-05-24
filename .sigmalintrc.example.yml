@@ -1,0 +1,17 @@
+profile: sigmahq                     # strict | sigmahq | local (default: sigmahq)
+disable: [RED001, RED002]            # rule IDs to skip (overrides profile)
+enable_only: null                    # if set, only these run
+severities:                          # per-rule severity overrides (overrides profile)
+  TAX003: warning
+weights:
+  dimensions:                        # override default dimension weights
+    redundancy: 0.10
+  rules:                             # per-rule default_weight multiplier
+    FP003: 2.0
+taxonomy: sigma                      # sigma | <custom-name>
+# target_sigma_version: 2.1.0          # v0.1 supports only 2.1.0; key reserved for v0.2+
+filters_paths:                       # globs for Sigma Filter files (top-level filter: block)
+  - filters/**/*.yml
+data_dir: ~/.cache/sigmalint         # corpus + STIX cache location (writable)
+fail_on: error                       # error | warning | never
+min_score: null                      # numeric or null
