@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime as _dt
 import re
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
@@ -61,7 +62,17 @@ _SUPPRESS = re.compile(r"#\s*sigmalint:\s*disable\s*=\s*([A-Z0-9_,\s]+)")
 
 
 def _plain(x: Any) -> Any:
-    """Recursively flatten ruamel.yaml CommentedMap/CommentedSeq to plain types."""
+    """Recursively flatten ruamel.yaml CommentedMap/CommentedSeq to plain types.
+
+    YAML auto-parses unquoted ISO-8601 dates and datetimes into datetime
+    objects, but the Sigma JSON schema declares `date:` and `modified:` as
+    `type: string`. Coerce datetime types to their ISO-string form so
+    schema validation matches the lexical YAML input — every real-world
+    SigmaHQ rule uses unquoted dates, so without this coercion every
+    SigmaHQ rule fails SCHEMA002.
+    """
+    if isinstance(x, (_dt.datetime, _dt.date, _dt.time)):
+        return x.isoformat()
     if hasattr(x, "items"):
         return {k: _plain(v) for k, v in x.items()}
     if isinstance(x, list):

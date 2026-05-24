@@ -83,3 +83,21 @@ def test_inline_suppression(tmp_path: Path) -> None:
     results = lint([f], [AlwaysWarn()], RunContext())
     assert results[0].findings == ()
     assert "TST001" in results[0].suppressions
+
+
+def test_unquoted_date_coerced_to_string(tmp_path: Path) -> None:
+    # Regression: real SigmaHQ rules write `date: 2024-02-25` (unquoted),
+    # which YAML parses as datetime.date. Without coercion the bundled
+    # Sigma JSON schema rejects every such rule because it declares
+    # date/modified as type: string. _plain() must stringify these to
+    # match the lexical YAML input.
+    f = _write(
+        tmp_path / "r.yml",
+        "title: t\ndate: 2024-02-25\nmodified: 2025-08-02\n"
+        "logsource: {category: foo}\n"
+        "detection: {a: {b: 1}, condition: a}\n",
+    )
+    results = lint([f], [], RunContext())
+    data = results[0].parsed.data
+    assert isinstance(data["date"], str) and data["date"] == "2024-02-25"
+    assert isinstance(data["modified"], str) and data["modified"] == "2025-08-02"
