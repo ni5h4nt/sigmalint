@@ -1,0 +1,25 @@
+# Versioned; refreshable via `sigmalint update-data`.
+version: "v0.1"
+techniques:
+  T1059:
+    categories: [process_creation]
+    products: [windows, linux, macos]
+  T1059.001:
+    categories: [process_creation]
+    products: [windows]
+  T1059.003:
+    categories: [process_creation]
+    products: [windows]
+  T1547.001:
+    categories: [registry_event]
+    products: [windows]
+  T1071.001:
+    categories: [network_connection, proxy, web]
+    products: [windows, linux, macos]
+  T1071.004:
+    categories: [dns_query]
+    products: [windows, linux, macos]
+  T1003:
+    categories: [process_creation, file_event]
+    products: [windows]
+# (extended over time; out-of-scope techniques are silently skipped by ATK003)

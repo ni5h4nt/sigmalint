@@ -1,0 +1,18 @@
+version: "sigma-2.1.0"
+modifiers:
+  - contains
+  - startswith
+  - endswith
+  - all
+  - cased
+  - cidr
+  - base64
+  - base64offset
+  - re
+  - windash
+  - expand
+  - fieldref
+  - gt
+  - gte
+  - lt
+  - lte

@@ -1,0 +1,54 @@
+taxonomies:
+  sigma:
+    process_creation:
+      - Image
+      - CommandLine
+      - ParentImage
+      - ParentCommandLine
+      - User
+      - IntegrityLevel
+      - Hashes
+      - OriginalFileName
+      - Product
+      - Company
+      - Description
+      - LogonId
+      - CurrentDirectory
+    network_connection:
+      - Image
+      - Initiated
+      - SourceIp
+      - DestinationIp
+      - DestinationPort
+      - DestinationHostname
+      - Protocol
+      - User
+    registry_event:
+      - EventType
+      - TargetObject
+      - Details
+      - Image
+      - User
+    file_event:
+      - TargetFilename
+      - Image
+      - User
+      - Hashes
+    dns_query:
+      - QueryName
+      - QueryStatus
+      - Image
+      - User
+    web:
+      - cs-method
+      - cs-uri-stem
+      - cs-uri-query
+      - c-ip
+      - sc-status
+      - cs-user-agent
+canonical_aliases:
+  sigma:
+    process_creation:
+      ImagePath: Image
+      ProcessName: Image
+      ProcessCommandLine: CommandLine
