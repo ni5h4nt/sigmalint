@@ -1,8 +1,7 @@
 title: Multiple bad ATT&CK tags
 id: a2b2c3d4-1111-4222-8333-444444444444
 status: stable
-description: A rule that cites non-existent, revoked, and platform-mismatched
-  ATT&CK techniques.
+description: A rule that cites non-existent, revoked, and platform-mismatched ATT&CK techniques.
 author: Compound Tester
 date: '2026-05-23'
 references:

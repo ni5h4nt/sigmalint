@@ -1,19 +1,18 @@
 title: Noisy network connect
 id: a4b2c3d4-1111-4222-8333-444444444444
 status: stable
-description: Network rule with leading wildcard, trailing wildcard, env-specific
-  literals, single broad selection, and no negated filter.
+description: Network rule with leading wildcard, trailing wildcard, env-specific literals, single broad selection, and no negated filter.
 author: Compound Tester
 date: '2026-05-23'
 references:
   - https://example.com/net
 logsource:
-  category: network_connection
-  product: windows
+    category: network_connection
+    product: windows
 detection:
-  selection:
-    DestinationHostname: '*bad*'
-  condition: selection
+    selection:
+        DestinationHostname: '*bad*'
+    condition: selection
 falsepositives:
   - Internal scanners 10.0.7.42
 level: medium

@@ -1,21 +1,20 @@
 title: Everything wrong rule
 id: not-a-real-uuid
 status: stable
-description: A maximally broken rule combining schema-valid structure with defects
-  across every quality dimension that sigmalint covers.
+description: A maximally broken rule combining schema-valid structure with defects across every quality dimension that sigmalint covers.
 author: Compound Tester
 date: '2026-05-23'
 references: []
 Notes: extra capitalized key on purpose
 logsource:
-   category: process_creation
-   product: windows
+    category: process_creation
+    product: windows
 detection:
-   selection:
-      Image: 'x.exe'
-      ImagePath: 'C:\Users\admin\AppData\Local\Temp\thing.exe'
-      BogusFieldQQQ|contianz: 'foo'
-   condition: selection
+    selection:
+        Image: 'x.exe'
+        ImagePath: 'C:\Users\admin\AppData\Local\Temp\thing.exe'
+        BogusFieldQQQ|contianz: 'foo'
+    condition: selection
 falsepositives:
   - Unknown
 level: high
