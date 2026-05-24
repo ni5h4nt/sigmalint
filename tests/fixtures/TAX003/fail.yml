@@ -1,0 +1,7 @@
+title: TAX003 fail
+logsource:
+  category: process_creation
+detection:
+  selection:
+    ImagePath: C:\Windows\System32\cmd.exe
+  condition: selection
