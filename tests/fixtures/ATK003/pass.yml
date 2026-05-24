@@ -1,0 +1,10 @@
+title: ATK003 pass
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image: '\example.exe'
+  condition: selection
+tags:
+  - attack.t1059

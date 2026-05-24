@@ -1,0 +1,9 @@
+title: ATK003 fail
+logsource:
+  category: registry_event
+detection:
+  selection:
+    TargetObject: 'HKLM\Software\Example'
+  condition: selection
+tags:
+  - attack.t1059
