@@ -1,0 +1,127 @@
+{
+  "01-broken-process-creation.yml": {
+    "status": "valid",
+    "must_include": [
+      {"rule_id": "FP001", "severity": "warning"},
+      {"rule_id": "FP003", "severity": "warning"},
+      {"rule_id": "STY003", "severity": "info"}
+    ],
+    "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "META001a", "META001b", "META002", "META003", "META004", "ATK001", "ATK002", "TAX001"],
+    "score_floor": 96.7,
+    "score_ceiling": 100.7
+  },
+  "02-missing-metadata.yml": {
+    "status": "valid",
+    "must_include": [
+      {"rule_id": "FP003", "severity": "warning"},
+      {"rule_id": "META001a", "severity": "warning"},
+      {"rule_id": "META002", "severity": "warning"},
+      {"rule_id": "META004", "severity": "info"}
+    ],
+    "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "FP001", "ATK001", "ATK002", "ATK003"],
+    "score_floor": 94.5,
+    "score_ceiling": 98.5
+  },
+  "03-bad-attack-tags.yml": {
+    "status": "valid",
+    "must_include": [
+      {"rule_id": "ATK001", "severity": "error"},
+      {"rule_id": "ATK002", "severity": "warning"},
+      {"rule_id": "ATK003", "severity": "info"},
+      {"rule_id": "STY003", "severity": "info"}
+    ],
+    "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "FP001", "META001a", "META002", "TAX001", "TAX002"],
+    "score_floor": 94.8,
+    "score_ceiling": 98.8
+  },
+  "04-style-disaster.yml": {
+    "status": "valid",
+    "must_include": [
+      {"rule_id": "STY001", "severity": "info"},
+      {"rule_id": "STY003", "severity": "info"},
+      {"rule_id": "TAX001", "severity": "warning"},
+      {"rule_id": "TAX003", "severity": "info"}
+    ],
+    "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "ATK001", "META001a", "META001b", "META002"],
+    "score_floor": 96.4,
+    "score_ceiling": 100.4
+  },
+  "05-noisy-network.yml": {
+    "status": "valid",
+    "must_include": [
+      {"rule_id": "FP001", "severity": "warning"},
+      {"rule_id": "FP002", "severity": "info"},
+      {"rule_id": "FP003", "severity": "warning"},
+      {"rule_id": "FP004", "severity": "info"},
+      {"rule_id": "STY003", "severity": "info"}
+    ],
+    "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "ATK001", "META001a", "META001b", "TAX001"],
+    "score_floor": 96.3,
+    "score_ceiling": 100.3
+  },
+  "06-deprecated-modern.yml": {
+    "status": "valid",
+    "must_include": [
+      {"rule_id": "FP004", "severity": "info"},
+      {"rule_id": "STY003", "severity": "info"},
+      {"rule_id": "TAX001", "severity": "warning"}
+    ],
+    "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "FP001", "FP003", "ATK001", "ATK002", "META001a", "META001b"],
+    "score_floor": 97.1,
+    "score_ceiling": 100.1
+  },
+  "07-missing-references.yml": {
+    "status": "valid",
+    "must_include": [
+      {"rule_id": "META003", "severity": "warning"},
+      {"rule_id": "META004", "severity": "info"},
+      {"rule_id": "STY003", "severity": "info"}
+    ],
+    "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "FP001", "FP003", "ATK001", "ATK002", "META001a", "META001b", "META002"],
+    "score_floor": 97.2,
+    "score_ceiling": 100.2
+  },
+  "08-broad-and-unsigned.yml": {
+    "status": "valid",
+    "must_include": [
+      {"rule_id": "FP001", "severity": "warning"},
+      {"rule_id": "FP003", "severity": "warning"},
+      {"rule_id": "META001a", "severity": "warning"},
+      {"rule_id": "STY003", "severity": "info"}
+    ],
+    "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "META001b", "META002", "ATK001", "ATK002", "TAX001"],
+    "score_floor": 96.2,
+    "score_ceiling": 100.2
+  },
+  "09-taxonomy-typos.yml": {
+    "status": "valid",
+    "must_include": [
+      {"rule_id": "STY003", "severity": "info"},
+      {"rule_id": "TAX001", "severity": "warning"},
+      {"rule_id": "TAX002", "severity": "warning"}
+    ],
+    "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "FP001", "FP003", "ATK001", "META001a", "META001b"],
+    "score_floor": 96.7,
+    "score_ceiling": 100.7
+  },
+  "10-everything-wrong.yml": {
+    "status": "valid",
+    "must_include": [
+      {"rule_id": "ATK001", "severity": "error"},
+      {"rule_id": "ATK002", "severity": "warning"},
+      {"rule_id": "FP003", "severity": "warning"},
+      {"rule_id": "FP004", "severity": "info"},
+      {"rule_id": "META001b", "severity": "error"},
+      {"rule_id": "META003", "severity": "warning"},
+      {"rule_id": "META004", "severity": "info"},
+      {"rule_id": "STY001", "severity": "info"},
+      {"rule_id": "STY003", "severity": "info"},
+      {"rule_id": "TAX001", "severity": "warning"},
+      {"rule_id": "TAX002", "severity": "warning"},
+      {"rule_id": "TAX003", "severity": "info"}
+    ],
+    "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001"],
+    "score_floor": 89.6,
+    "score_ceiling": 93.6
+  }
+}
