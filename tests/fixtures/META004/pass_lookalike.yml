@@ -1,0 +1,19 @@
+title: Test rule META004 lookalike realistic falsepositives
+id: e5dbac17-4f6a-4eaf-bf5f-4e7a9bad2f6a
+status: stable
+description: A test rule with a realistic, non-Unknown falsepositives list.
+author: Test Author
+date: '2026-05-23'
+references:
+  - https://example.com/ref
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    EventID: 4688
+  condition: selection
+falsepositives:
+  - Legitimate administrative activity
+  - Patch management workflows
+level: medium

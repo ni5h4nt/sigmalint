@@ -44,6 +44,21 @@ def test_fail_fixture(rule_id, fixtures_dir):
     )
 
 
+@pytest.mark.parametrize("rule_id", list(RULE_MAP))
+def test_pass_lookalike_does_not_fire(rule_id, fixtures_dir):
+    """Lookalike fixture resembles the fail case but is NOT a violation
+    of THIS rule. Verifies no false positives on superficially-similar inputs."""
+    f = fixtures_dir / rule_id / "pass_lookalike.yml"
+    if not f.exists():
+        pytest.skip(f"no pass_lookalike fixture for {rule_id}")
+    ctx = RunContext()
+    results = lint([f], [RULE_MAP[rule_id]()], ctx)
+    assert all(x.rule_id != rule_id for x in results[0].findings), (
+        f"{rule_id} pass_lookalike unexpectedly produced a {rule_id} finding: "
+        f"{results[0].findings}"
+    )
+
+
 def test_meta001b_unparseable_id_is_error(tmp_path):
     # Severity-split: an unparseable id (no UUID at all) stays at ERROR.
     from sigmalint.core.types import Severity

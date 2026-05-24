@@ -1,0 +1,9 @@
+title: RED002 lookalike unique title and id
+id: dddddddd-2222-4333-8444-555555555555
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image: '\unique_red002_lookalike_xyz.exe'
+    condition: selection

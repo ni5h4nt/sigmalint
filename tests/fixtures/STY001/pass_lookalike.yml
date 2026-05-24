@@ -1,0 +1,8 @@
+title: STY001 lookalike all top-level keys lowercase
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image: '\example.exe'
+    condition: selection
