@@ -1,4 +1,16 @@
-# sigmalint v0.1 — Design Spec
+# sigmalint v0.1 — Design Spec (historical)
+
+> **This document is preserved for historical reference.** It captures the
+> original v0.1 design decisions and rationale before implementation. Some
+> details (rule severities, internal module names, fixture counts) may have
+> drifted as the code evolved. For current architecture truth, see
+> [`docs/architecture.md`](../architecture.md). For the current rule catalog
+> and severities, see [`docs/profiles.md`](../profiles.md) and
+> [`docs/rules/<id>.md`](../rules/).
+>
+> Preserved because the rationale here — the validity-gate vs. quality-dimensions
+> split, the bundled-data write model, the profile design — explains the *why*
+> behind the code in a way that the current docs intentionally don't repeat.
 
 **Date:** 2026-05-23 (revised same day to address spec-review findings)
 **Status:** Approved (brainstorming complete; awaiting plan)

@@ -30,3 +30,12 @@
 
 <!-- Anything non-obvious about the approach, alternatives considered,
      or follow-up work this PR defers. -->
+
+---
+
+## For first-time contributors
+
+A maintainer will review within 7 days. If there is no response in 7
+days, ping the PR — we are a small team and PRs occasionally fall
+through. See `MAINTAINERS.md` for the current maintainer list and how
+to become one.
