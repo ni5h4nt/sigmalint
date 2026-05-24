@@ -1,0 +1,51 @@
+name: New rule proposal
+description: Propose a new lint rule
+labels: ["new-rule"]
+body:
+  - type: dropdown
+    id: dimension
+    attributes:
+      label: Dimension
+      options:
+        - schema (validity gate)
+        - attack
+        - taxonomy
+        - fp_risk
+        - metadata
+        - redundancy
+        - style
+    validations: { required: true }
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What detection-engineering smell does this catch?
+    validations: { required: true }
+  - type: textarea
+    id: bad-example
+    attributes:
+      label: Example Sigma rule that should be flagged
+      render: yaml
+    validations: { required: true }
+  - type: textarea
+    id: good-example
+    attributes:
+      label: Example Sigma rule that should NOT be flagged
+      render: yaml
+  - type: textarea
+    id: check-logic
+    attributes:
+      label: Suggested check logic
+      description: Pseudocode is fine. Identify which data sources are needed (taxonomy, ATT&CK, condition AST, etc.).
+    validations: { required: true }
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Suggested default severity
+      options: [error, warning, info]
+    validations: { required: true }
+  - type: textarea
+    id: profile-fit
+    attributes:
+      label: Which profiles should enable this?
+      description: strict, sigmahq, local — and at what severity per profile?

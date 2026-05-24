@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+title: "sigmalint: A Linter for Sigma Detection Rules"
+message: >-
+  If you use this software, please cite both the software and
+  the accompanying paper on detection-rule quality assessment.
+type: software
+authors:
+  - given-names: Nishant
+    family-names: Tyagi
+    email: nishant.tyagi@gmail.com
+repository-code: "https://github.com/nishant/sigmalint"
+license: MIT
+version: 0.1.0
+date-released: "2026-05-23"
+keywords:
+  - sigma
+  - detection-engineering
+  - mitre-attack
+  - siem
+  - linter
+  - security
+preferred-citation:
+  type: article
+  title: "Detection-rule quality: a systematization of knowledge"
+  authors:
+    - given-names: Nishant
+      family-names: Tyagi
+  year: 2026
+  note: "Reference implementation: https://github.com/nishant/sigmalint"

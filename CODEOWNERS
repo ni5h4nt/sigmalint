@@ -1,0 +1,13 @@
+# sigmalint code ownership
+
+# Default owner for everything in the repo.
+* @nishant
+
+# Vendored reference data — flagged for explicit review on every change
+# because refreshes touch the same blobs that feed scoring decisions.
+/src/sigmalint/data/vendored/ @nishant
+
+# Versioning policy and rule-ID stability commitments — review separately
+# from regular doc updates.
+/docs/versioning.md @nishant
+/CHANGELOG.md @nishant
