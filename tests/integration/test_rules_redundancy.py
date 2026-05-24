@@ -116,9 +116,7 @@ def test_red001_pass_lookalike_does_not_fire(fixtures_dir: Path):
     # Use an empty stub corpus so the rule executes its main branch but finds
     # no near-duplicate of the unique fingerprint in the fixture.
     stub = _StubCorpus(_entries=[])
-    findings = _findings_for(
-        Red001NearDuplicateFingerprint, f, _ctx(corpus=stub), "RED001"
-    )
+    findings = _findings_for(Red001NearDuplicateFingerprint, f, _ctx(corpus=stub), "RED001")
     assert findings == []
 
 
@@ -137,9 +135,7 @@ def test_red002_pass_lookalike_does_not_fire(fixtures_dir: Path):
         fingerprint=frozenset({"image::\\other.exe"}),
     )
     stub = _StubCorpus(_entries=[entry])
-    findings = _findings_for(
-        Red002TitleOrIdCollision, f, _ctx(corpus=stub), "RED002"
-    )
+    findings = _findings_for(Red002TitleOrIdCollision, f, _ctx(corpus=stub), "RED002")
     assert findings == []
 
 

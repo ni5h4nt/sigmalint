@@ -54,8 +54,7 @@ def test_pass_lookalike_does_not_fire(rule_id, fixtures_dir):
     ctx = RunContext()
     results = lint([f], [RULE_MAP[rule_id]()], ctx)
     assert all(x.rule_id != rule_id for x in results[0].findings), (
-        f"{rule_id} pass_lookalike unexpectedly produced a {rule_id} finding: "
-        f"{results[0].findings}"
+        f"{rule_id} pass_lookalike unexpectedly produced a {rule_id} finding: {results[0].findings}"
     )
 
 
