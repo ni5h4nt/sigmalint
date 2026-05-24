@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sigmalint-cli"
-version = "0.1.0"
+version = "0.1.1"
 description = "ESLint-style linter for Sigma detection rules"
 readme = "README.md"
 license = "MIT"
@@ -53,6 +53,9 @@ Issues = "https://github.com/ni5h4nt/sigmalint/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/sigmalint"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"docs/rules" = "sigmalint/rule_docs"
 
 [tool.ruff]
 line-length = 100
