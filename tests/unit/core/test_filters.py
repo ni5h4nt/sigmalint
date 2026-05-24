@@ -1,4 +1,5 @@
 """Unit tests for Sigma Filter discovery and rule matching."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -31,10 +32,7 @@ def test_discover_filters_no_kind_field_required(tmp_path: Path) -> None:
     # Real Sigma spec does NOT include a `kind: filter` field.
     _write(
         tmp_path / "f.yml",
-        "title: t\n"
-        "filter:\n"
-        "  rules:\n    - some-rule-name\n"
-        "  condition: not x\n",
+        "title: t\nfilter:\n  rules:\n    - some-rule-name\n  condition: not x\n",
     )
     found = discover_filters(["*.yml"], tmp_path)
     assert len(found) == 1
@@ -73,9 +71,7 @@ def test_filters_for_rule_matches_by_id() -> None:
         targets_names=(),
         condition="not selection",
     )
-    out = filters_for_rule(
-        [f], "12345678-1234-1234-1234-1234567890ab", None, None
-    )
+    out = filters_for_rule([f], "12345678-1234-1234-1234-1234567890ab", None, None)
     assert out == [f]
 
 

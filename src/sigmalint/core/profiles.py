@@ -48,12 +48,8 @@ PROFILES: dict[str, dict[str, Severity | None]] = {
 DEFAULT_PROFILE = "sigmahq"
 
 
-def resolve_severity(
-    profile_name: str, rule_id: str, default: Severity
-) -> Severity | None:
+def resolve_severity(profile_name: str, rule_id: str, default: Severity) -> Severity | None:
     """Return the effective severity for `rule_id` under `profile_name`."""
     if profile_name not in PROFILES:
-        raise ConfigError(
-            f"Unknown profile: {profile_name!r}. Known: {sorted(PROFILES)}"
-        )
+        raise ConfigError(f"Unknown profile: {profile_name!r}. Known: {sorted(PROFILES)}")
     return PROFILES[profile_name].get(rule_id, default)

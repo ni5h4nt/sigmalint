@@ -108,11 +108,7 @@ class RuleCorpus:
     def near_duplicates(
         self, fingerprint: frozenset[str], threshold: float = 0.85
     ) -> list[CorpusEntry]:
-        return [
-            e
-            for e in self.entries()
-            if self.jaccard(e.fingerprint, fingerprint) >= threshold
-        ]
+        return [e for e in self.entries() if self.jaccard(e.fingerprint, fingerprint) >= threshold]
 
 
 def fingerprint_for_rule(data: dict) -> frozenset[str]:

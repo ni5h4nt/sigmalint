@@ -1,4 +1,5 @@
 """STY001-003 - Sigma interoperability style."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable

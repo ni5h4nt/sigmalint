@@ -18,6 +18,7 @@ def _make_rule(rid: str):
 
         def check(self, parsed: ParsedRule, ctx) -> Iterable[Finding]:
             return ()
+
     return _R
 
 
@@ -41,6 +42,7 @@ def test_register_rejects_duplicate_id():
 
 def test_register_rejects_missing_id():
     with pytest.raises(ConfigError):
+
         @register
         class _Bad(Rule):
             dimension = Dimension.SCHEMA

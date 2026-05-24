@@ -1,4 +1,5 @@
 """Module-level rule registry with a @register decorator."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -32,8 +33,11 @@ def enabled_rules(disabled: Iterable[str], enable_only: Iterable[str] | None) ->
         unknown = enable_set - _REGISTRY.keys()
         if unknown:
             raise ConfigError(f"Unknown rule id(s) in enable_only: {sorted(unknown)}")
-        return [cls() for rid, cls in sorted(_REGISTRY.items())
-                if rid in enable_set and rid not in disabled_set]
+        return [
+            cls()
+            for rid, cls in sorted(_REGISTRY.items())
+            if rid in enable_set and rid not in disabled_set
+        ]
     unknown = disabled_set - _REGISTRY.keys()
     if unknown:
         raise ConfigError(f"Unknown rule id(s) in disable: {sorted(unknown)}")

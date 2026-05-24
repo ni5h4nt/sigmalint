@@ -1,4 +1,5 @@
 """Rule-agnostic runner: parses files, dispatches rules, collects findings."""
+
 from __future__ import annotations
 
 import re
@@ -22,9 +23,7 @@ from sigmalint.core.types import (
 _yaml = YAML(typ="rt")  # round-trip preserves line/col
 
 
-def _extract_positions(
-    node: Any, prefix: str = ""
-) -> dict[str, tuple[int, int]]:
+def _extract_positions(node: Any, prefix: str = "") -> dict[str, tuple[int, int]]:
     """Walk a ruamel.yaml CommentedMap, returning {key_path: (line, col)}.
 
     Lines/columns from ruamel.yaml are 0-based; we convert to 1-based.
@@ -89,9 +88,7 @@ def _parse_file(path: Path) -> ParsedRule:
             positions=positions,
         )
     except YAMLError as e:
-        return ParsedRule(
-            path=str(path), raw_text=text, data={}, yaml_error=str(e)
-        )
+        return ParsedRule(path=str(path), raw_text=text, data={}, yaml_error=str(e))
 
 
 def _collect_suppressions(text: str) -> set[str]:
@@ -104,9 +101,7 @@ def _collect_suppressions(text: str) -> set[str]:
     return out
 
 
-def _safe_check(
-    rule: Rule, parsed: ParsedRule, ctx: RunContext
-) -> Iterable[Finding]:
+def _safe_check(rule: Rule, parsed: ParsedRule, ctx: RunContext) -> Iterable[Finding]:
     try:
         yield from rule.check(parsed, ctx)  # type: ignore[arg-type]
     except Exception as e:
@@ -119,9 +114,7 @@ def _safe_check(
         )
 
 
-def lint(
-    paths: Sequence[Path], rules: Sequence[Rule], ctx: RunContext
-) -> list[LintResult]:
+def lint(paths: Sequence[Path], rules: Sequence[Rule], ctx: RunContext) -> list[LintResult]:
     """Lint files. `rules` should already be filtered by enable/disable."""
     results: list[LintResult] = []
     for p in paths:

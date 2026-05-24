@@ -1,0 +1,46 @@
+name: sigmalint
+description: Lint Sigma detection rules for quality and validity
+branding:
+  icon: shield
+  color: blue
+inputs:
+  path:
+    description: "Path(s) to lint"
+    required: true
+  format:
+    description: "Output format (text|json|sarif|github)"
+    required: false
+    default: "github"
+  fail-on:
+    description: "Fail threshold: error|warning|never"
+    required: false
+    default: "error"
+  min-score:
+    description: "Minimum mean score (0-100); empty to disable"
+    required: false
+    default: ""
+  version:
+    description: "sigmalint version to install"
+    required: false
+    default: "0.1.0"
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+    - shell: bash
+      run: pip install "sigmalint==${{ inputs.version }}"
+    - shell: bash
+      env:
+        SIGMALINT_PATH: ${{ inputs.path }}
+        SIGMALINT_FORMAT: ${{ inputs.format }}
+        SIGMALINT_FAIL_ON: ${{ inputs.fail-on }}
+        SIGMALINT_MIN_SCORE: ${{ inputs.min-score }}
+      run: |
+        set -euo pipefail
+        args=( "$SIGMALINT_PATH" --format "$SIGMALINT_FORMAT" --fail-on "$SIGMALINT_FAIL_ON" )
+        if [ -n "$SIGMALINT_MIN_SCORE" ]; then
+          args+=( --min-score "$SIGMALINT_MIN_SCORE" )
+        fi
+        sigmalint lint "${args[@]}"

@@ -1,4 +1,5 @@
 """Integration tests for RED001-002 rules."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -32,9 +33,7 @@ def _ctx(corpus: object | None = None) -> RunContext:
     return RunContext(corpus=corpus)
 
 
-def _findings_for(
-    rule_cls, fixture: Path, ctx: RunContext, rule_id: str
-) -> list:
+def _findings_for(rule_cls, fixture: Path, ctx: RunContext, rule_id: str) -> list:
     results = lint([fixture], [rule_cls()], ctx)
     return [f for r in results for f in r.findings if f.rule_id == rule_id]
 

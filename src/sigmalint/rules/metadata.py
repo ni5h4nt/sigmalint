@@ -5,6 +5,7 @@ Pattern note: rules pass key paths (e.g. "id", "logsource/category") to
 ParsedRule.positions. Findings without a meaningful path may omit it; the
 formatter defaults to file-level (line=None).
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -127,9 +128,7 @@ class Meta003ReferencesForHigh(Rule):
         if level not in {"high", "critical"}:
             return
         refs = parsed.data.get("references") or []
-        if not isinstance(refs, list) or not any(
-            isinstance(r, str) and r.strip() for r in refs
-        ):
+        if not isinstance(refs, list) or not any(isinstance(r, str) and r.strip() for r in refs):
             yield _finding(
                 self,
                 f"level={level} but references is empty",
@@ -156,9 +155,7 @@ class Meta004FalsepositivesPopulated(Rule):
         else:
             fps = []
         meaningful = [
-            f
-            for f in fps
-            if isinstance(f, str) and f.strip() and f.strip().lower() != "unknown"
+            f for f in fps if isinstance(f, str) and f.strip() and f.strip().lower() != "unknown"
         ]
         if not meaningful:
             yield _finding(

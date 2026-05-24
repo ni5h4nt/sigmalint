@@ -1,4 +1,5 @@
 """Shared frozen data types: Severity, Dimension, Finding, ParsedRule, LintResult."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -45,9 +46,7 @@ class ParsedRule:
     positions: dict[str, tuple[int, int]] = field(default_factory=dict)
     yaml_error: str | None = None
 
-    def position_for(
-        self, *path: str, default: tuple[int, int] = (1, 1)
-    ) -> tuple[int, int]:
+    def position_for(self, *path: str, default: tuple[int, int] = (1, 1)) -> tuple[int, int]:
         return self.positions.get("/".join(path), default)
 
 

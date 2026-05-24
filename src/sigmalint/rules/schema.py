@@ -3,6 +3,7 @@
 SCHEMA001 (YAML parses) is emitted by the runner directly. The rules below
 run only on successfully-parsed files.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable

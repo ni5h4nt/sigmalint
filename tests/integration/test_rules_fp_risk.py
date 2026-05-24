@@ -1,4 +1,5 @@
 """Integration tests for FP001-004 against pass/fail fixtures."""
+
 from __future__ import annotations
 
 import pytest
@@ -25,8 +26,7 @@ def test_pass_fixture(rule_id, fixtures_dir):
     ctx = RunContext()
     results = lint([f], [RULE_MAP[rule_id]()], ctx)
     assert all(x.rule_id != rule_id for x in results[0].findings), (
-        f"{rule_id} pass fixture unexpectedly produced findings: "
-        f"{results[0].findings}"
+        f"{rule_id} pass fixture unexpectedly produced findings: {results[0].findings}"
     )
 
 

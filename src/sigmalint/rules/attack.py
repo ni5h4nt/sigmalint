@@ -1,4 +1,5 @@
 """ATK001-004 - MITRE ATT&CK alignment rules."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable

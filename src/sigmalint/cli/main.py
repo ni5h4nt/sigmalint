@@ -1,4 +1,5 @@
 """sigmalint CLI."""
+
 from __future__ import annotations
 
 import dataclasses
@@ -78,9 +79,7 @@ def _data_versions(ctx: RunContext) -> dict[str, Any]:
 
 
 def _compute_exit(report: dict[str, Any], cfg: Config) -> int:
-    severities = {
-        f["severity"] for fobj in report["files"] for f in fobj["findings"]
-    }
+    severities = {f["severity"] for fobj in report["files"] for f in fobj["findings"]}
     if cfg.fail_on == "error" and "error" in severities:
         return 1
     if cfg.fail_on == "warning" and {"error", "warning"} & severities:
@@ -133,9 +132,7 @@ def lint(
 
         all_paths = _collect_paths(paths)
         disable_set = list(cfg.disable) + (disable or [])
-        enable_set = enable_only or (
-            list(cfg.enable_only) if cfg.enable_only else None
-        )
+        enable_set = enable_only or (list(cfg.enable_only) if cfg.enable_only else None)
         rules = enabled_rules(disabled=disable_set, enable_only=enable_set)
         # Severity resolution order (later wins):
         #   1. rule.default_severity
@@ -191,20 +188,13 @@ def list_rules(
     for r in all_rules():
         eff = resolve_severity(profile, r.id, r.default_severity)
         sev = eff.value if eff is not None else "OFF"
-        typer.echo(
-            f"{r.id:<10} [{r.dimension.value:<10}] {sev:<8}  {r.summary}"
-        )
+        typer.echo(f"{r.id:<10} [{r.dimension.value:<10}] {sev:<8}  {r.summary}")
 
 
 @app.command()
 def explain(rule_id: str) -> None:
     """Print the rule documentation for `rule_id`."""
-    doc = (
-        Path(__file__).parent.parent.parent.parent
-        / "docs"
-        / "rules"
-        / f"{rule_id}.md"
-    )
+    doc = Path(__file__).parent.parent.parent.parent / "docs" / "rules" / f"{rule_id}.md"
     if not doc.exists():
         typer.echo(f"No documentation for {rule_id}.", err=True)
         raise typer.Exit(2)

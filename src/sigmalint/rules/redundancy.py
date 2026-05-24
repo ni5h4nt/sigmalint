@@ -1,4 +1,5 @@
 """RED001-002 - overlap with SigmaHQ public corpus."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -14,10 +15,7 @@ class Red001NearDuplicateFingerprint(Rule):
     id = "RED001"
     dimension = Dimension.REDUNDANCY
     default_severity = Severity.INFO
-    summary = (
-        "Detection fingerprint near-duplicates an existing SigmaHQ rule "
-        "(>=0.85 Jaccard)."
-    )
+    summary = "Detection fingerprint near-duplicates an existing SigmaHQ rule (>=0.85 Jaccard)."
 
     def check(self, parsed: ParsedRule, ctx) -> Iterable[Finding]:
         corpus = getattr(ctx, "corpus", None)
@@ -36,10 +34,7 @@ class Red001NearDuplicateFingerprint(Rule):
                 self.default_severity,
                 f"near-duplicate of public rule {m.title!r} ({m.path})",
                 parsed.path,
-                fix_hint=(
-                    "If this is a meaningful extension, document the delta "
-                    "in description."
-                ),
+                fix_hint=("If this is a meaningful extension, document the delta in description."),
             )
 
 

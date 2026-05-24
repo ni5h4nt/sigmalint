@@ -4,6 +4,7 @@
 JSON shape described in the design spec §12. All four formatters
 (text/json/sarif/github) render purely from this dict.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping

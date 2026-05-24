@@ -1,4 +1,5 @@
 """Two-layer scoring: validity gate + weighted quality dimensions."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -54,21 +55,15 @@ def score_file(result: LintResult, cfg: Config) -> FileScore:
         mult = cfg.rule_weights.get(f.rule_id, 1.0)
         penalties[f.dimension] += sev * mult
 
-    dim_scores = {
-        d.value: max(0.0, 100.0 - penalties[d]) for d in _QUALITY_DIMENSIONS
-    }
+    dim_scores = {d.value: max(0.0, 100.0 - penalties[d]) for d in _QUALITY_DIMENSIONS}
 
     # Normalize weights over enabled dimensions only.
-    weights = {
-        d.value: cfg.dimension_weights.get(d.value, 0.0) for d in _QUALITY_DIMENSIONS
-    }
+    weights = {d.value: cfg.dimension_weights.get(d.value, 0.0) for d in _QUALITY_DIMENSIONS}
     total_weight = sum(weights.values())
     if total_weight == 0:
         total = 0.0
     else:
-        total = sum(
-            dim_scores[d] * (weights[d] / total_weight) for d in dim_scores
-        )
+        total = sum(dim_scores[d] * (weights[d] / total_weight) for d in dim_scores)
 
     return FileScore(
         path=result.parsed.path,

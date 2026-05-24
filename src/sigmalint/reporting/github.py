@@ -3,6 +3,7 @@
 Emits one `::error|warning|notice file=…,line=…,col=…::message` line per finding,
 plus a final summary line. Annotations show up inline on pull requests.
 """
+
 from __future__ import annotations
 
 from typing import Any, TextIO
@@ -16,11 +17,7 @@ _SEVERITY_TO_COMMAND = {
 
 def _escape(value: str) -> str:
     # GitHub workflow-command escaping for the message portion: %25, %0D, %0A.
-    return (
-        value.replace("%", "%25")
-        .replace("\r", "%0D")
-        .replace("\n", "%0A")
-    )
+    return value.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
 
 
 def render(report: dict[str, Any], stream: TextIO) -> None:

@@ -1,4 +1,5 @@
 """FP001-004 - false-positive risk rules."""
+
 from __future__ import annotations
 
 import re
@@ -27,11 +28,7 @@ def _is_filter_selector(name: str) -> bool:
 
 
 def _selectors(detection: dict) -> dict[str, dict]:
-    return {
-        k: v
-        for k, v in detection.items()
-        if k != "condition" and isinstance(v, dict)
-    }
+    return {k: v for k, v in detection.items() if k != "condition" and isinstance(v, dict)}
 
 
 @register
@@ -73,9 +70,7 @@ class Fp002PreferModifiers(Rule):
     summary = "Prefer modifiers over leading/trailing wildcards."
 
     def check(self, parsed: ParsedRule, ctx: object) -> Iterable[Finding]:
-        for selname, body in _selectors(
-            parsed.data.get("detection") or {}
-        ).items():
+        for selname, body in _selectors(parsed.data.get("detection") or {}).items():
             for field, value in body.items():
                 if "|" in field:
                     continue  # already using a modifier
@@ -88,8 +83,7 @@ class Fp002PreferModifiers(Rule):
                             self.id,
                             self.dimension,
                             self.default_severity,
-                            f"{selname}.{field}={v!r}: prefer "
-                            f"`{field}|contains: {v.strip('*')!r}`",
+                            f"{selname}.{field}={v!r}: prefer `{field}|contains: {v.strip('*')!r}`",
                             parsed.path,
                             fix_hint="Replace with modifier `|contains`.",
                         )
@@ -98,8 +92,7 @@ class Fp002PreferModifiers(Rule):
                             self.id,
                             self.dimension,
                             self.default_severity,
-                            f"{selname}.{field}={v!r}: prefer "
-                            f"`{field}|startswith`",
+                            f"{selname}.{field}={v!r}: prefer `{field}|startswith`",
                             parsed.path,
                             fix_hint="Use `|startswith`.",
                         )
@@ -108,8 +101,7 @@ class Fp002PreferModifiers(Rule):
                             self.id,
                             self.dimension,
                             self.default_severity,
-                            f"{selname}.{field}={v!r}: prefer "
-                            f"`{field}|endswith`",
+                            f"{selname}.{field}={v!r}: prefer `{field}|endswith`",
                             parsed.path,
                             fix_hint="Use `|endswith`.",
                         )
@@ -188,8 +180,5 @@ class Fp004HardcodedLiterals(Rule):
                     self.default_severity,
                     f"likely environment-specific literal: {m.group(0)!r}",
                     parsed.path,
-                    fix_hint=(
-                        "Generalize (e.g., `C:\\Users\\*\\...`) or move to a "
-                        "filter."
-                    ),
+                    fix_hint=("Generalize (e.g., `C:\\Users\\*\\...`) or move to a filter."),
                 )

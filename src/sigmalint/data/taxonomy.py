@@ -1,4 +1,5 @@
 """Field-name taxonomy + modifier list + ATT&CK->logsource map loaders."""
+
 from __future__ import annotations
 
 from importlib.resources import files
@@ -32,9 +33,7 @@ class SigmaTaxonomy:
             tax: {ls: set(fs) for ls, fs in (entries or {}).items()}
             for tax, entries in (data.get("taxonomies") or {}).items()
         }
-        self._aliases: dict[str, dict[str, dict[str, str]]] = (
-            data.get("canonical_aliases") or {}
-        )
+        self._aliases: dict[str, dict[str, dict[str, str]]] = data.get("canonical_aliases") or {}
 
     def is_known(self, taxonomy: str, logsource: str, field: str) -> bool:
         # Strip Sigma value-modifiers like Field|contains
@@ -82,9 +81,7 @@ class AttackLogsourceMap:
     def data_version(self) -> str:
         return self._version
 
-    def plausible(
-        self, technique: str, category: str | None, product: str | None
-    ) -> bool:
+    def plausible(self, technique: str, category: str | None, product: str | None) -> bool:
         entry = self._t.get(technique)
         if not entry:
             return True  # unknown technique -> no signal

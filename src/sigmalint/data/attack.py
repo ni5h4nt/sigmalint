@@ -1,4 +1,5 @@
 """Lookup over the MITRE ATT&CK STIX enterprise-attack bundle."""
+
 from __future__ import annotations
 
 import json

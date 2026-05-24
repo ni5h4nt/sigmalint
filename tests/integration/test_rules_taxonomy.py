@@ -1,4 +1,5 @@
 """Integration tests for TAX001-003 against fixture YAMLs."""
+
 from __future__ import annotations
 
 from pathlib import Path

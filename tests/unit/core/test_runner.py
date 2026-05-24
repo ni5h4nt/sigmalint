@@ -66,8 +66,7 @@ def test_yaml_error_becomes_schema001(tmp_path: Path) -> None:
 def test_rule_exception_becomes_internal001(tmp_path: Path) -> None:
     f = _write(
         tmp_path / "r.yml",
-        "title: t\ndetection: {a: {b: 1}, condition: a}\n"
-        "logsource: {category: foo}\n",
+        "title: t\ndetection: {a: {b: 1}, condition: a}\nlogsource: {category: foo}\n",
     )
     results = lint([f], [Crashy()], RunContext())
     rids = [fi.rule_id for fi in results[0].findings]

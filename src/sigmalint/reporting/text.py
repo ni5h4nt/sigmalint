@@ -1,4 +1,5 @@
 """Text formatter — rich Table summary of the canonical report."""
+
 from __future__ import annotations
 
 from typing import Any, TextIO
@@ -20,9 +21,7 @@ def _top_findings(file_entry: dict[str, Any], limit: int = 3) -> str:
     if not findings:
         return ""
     severity_order = {"error": 0, "warning": 1, "info": 2}
-    ordered = sorted(
-        findings, key=lambda f: severity_order.get(f.get("severity", "info"), 99)
-    )
+    ordered = sorted(findings, key=lambda f: severity_order.get(f.get("severity", "info"), 99))
     bits = []
     for f in ordered[:limit]:
         bits.append(f"{f['rule_id']} ({f['severity']})")

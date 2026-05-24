@@ -1,4 +1,5 @@
 """JSON formatter — serialises the canonical report dict."""
+
 from __future__ import annotations
 
 import json as _json

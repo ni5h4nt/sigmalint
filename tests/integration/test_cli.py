@@ -1,4 +1,5 @@
 """Smoke tests for the sigmalint Typer app."""
+
 from __future__ import annotations
 
 import json
@@ -54,9 +55,7 @@ def test_explain_missing_rule_exits_2() -> None:
 
 
 def test_lint_json_emits_canonical_report() -> None:
-    result = runner.invoke(
-        app, ["lint", str(FIXTURE_PASS), "--format", "json"]
-    )
+    result = runner.invoke(app, ["lint", str(FIXTURE_PASS), "--format", "json"])
     # Exit may be 0 or 1 depending on quality findings; output must parse.
     assert result.exit_code in (0, 1), result.output
     payload = json.loads(result.stdout)

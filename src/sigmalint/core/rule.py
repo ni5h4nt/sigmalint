@@ -1,4 +1,5 @@
 """Rule base class: the unit a registry registers and the runner executes."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

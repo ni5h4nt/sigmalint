@@ -1,0 +1,47 @@
+name: Self-lint nightly
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lint-sigmahq:
+    name: Lint SigmaHQ/sigma corpus
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install sigmalint from source
+        run: pip install -e ".[dev]"
+      - name: Clone SigmaHQ corpus
+        run: git clone --depth 1 https://github.com/SigmaHQ/sigma.git sigmahq
+      - name: Run sigmalint over corpus
+        id: lint
+        run: |
+          set +e
+          sigmalint lint sigmahq/rules --format json --fail-on never > report.json
+          rc=$?
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Summarize
+        if: always()
+        run: |
+          set -euo pipefail
+          mean=$(python -c "import json; r=json.load(open('report.json')); s=r.get('summary',{}); print(s.get('mean_score'))")
+          files=$(python -c "import json; r=json.load(open('report.json')); print(len(r.get('files',[])))")
+          {
+            echo "## sigmalint nightly self-lint"
+            echo ""
+            echo "- Files scanned: $files"
+            echo "- Mean score: $mean"
+            echo "- CLI exit code: ${{ steps.lint.outputs.rc }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sigmalint-corpus-report
+          path: report.json

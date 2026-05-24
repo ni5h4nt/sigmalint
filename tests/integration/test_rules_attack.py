@@ -1,4 +1,5 @@
 """Integration tests for ATK001-004 rules."""
+
 from __future__ import annotations
 
 from pathlib import Path

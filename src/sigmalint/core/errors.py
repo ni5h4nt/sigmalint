@@ -1,4 +1,5 @@
 """Custom exception hierarchy for sigmalint."""
+
 from __future__ import annotations
 
 

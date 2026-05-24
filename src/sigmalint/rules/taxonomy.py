@@ -1,4 +1,5 @@
 """TAX001-003 - Sigma taxonomy correctness rules."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable

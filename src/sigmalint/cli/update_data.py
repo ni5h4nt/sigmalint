@@ -6,6 +6,7 @@ only writes to `cfg.data_dir`. Sidecar version files (e.g.
 `attack-version.txt`) are written next to each dataset so loaders can report a
 reproducible version under the report's `data_versions` block.
 """
+
 from __future__ import annotations
 
 import shutil
@@ -72,9 +73,7 @@ def refresh(corpus: bool = False, dry_run: bool = False) -> None:
         if repo.exists():
             typer.echo(f"  pull {repo}")
             if not dry_run:
-                subprocess.check_call(
-                    ["git", "-C", str(repo), "pull", "--ff-only"]
-                )
+                subprocess.check_call(["git", "-C", str(repo), "pull", "--ff-only"])
         else:
             typer.echo(f"  clone SigmaHQ/sigma -> {repo}")
             if not dry_run:

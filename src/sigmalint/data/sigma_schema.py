@@ -1,4 +1,5 @@
 """Loader for the bundled Sigma JSON schema, with user-cache override."""
+
 from __future__ import annotations
 
 import json
@@ -41,11 +42,7 @@ class SigmaSchema:
         # If a version was requested, that's the canonical answer (used in
         # multi-version mode). Else prefer the schema's own $id/version, else
         # fall back to the vendored baseline.
-        return (
-            self._requested_version
-            or self._schema.get("version")
-            or VENDORED_VERSION
-        )
+        return self._requested_version or self._schema.get("version") or VENDORED_VERSION
 
     def validate(self, data: dict) -> list[str]:
         """Return a list of human-readable error messages (empty if valid)."""

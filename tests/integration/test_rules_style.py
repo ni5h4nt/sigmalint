@@ -1,4 +1,5 @@
 """Integration tests for STY001-003 rules."""
+
 from __future__ import annotations
 
 from pathlib import Path

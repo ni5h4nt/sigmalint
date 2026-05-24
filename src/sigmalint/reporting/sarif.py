@@ -1,4 +1,5 @@
 """SARIF 2.1.0 formatter — minimum-viable wrapper around the canonical report."""
+
 from __future__ import annotations
 
 import json as _json
@@ -6,8 +7,7 @@ from typing import Any, TextIO
 
 _SARIF_VERSION = "2.1.0"
 _SARIF_SCHEMA = (
-    "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/"
-    "Schemata/sarif-schema-2.1.0.json"
+    "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json"
 )
 _SEVERITY_TO_SARIF_LEVEL = {
     "error": "error",

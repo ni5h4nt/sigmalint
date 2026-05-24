@@ -17,6 +17,7 @@ that itself contains a `rules:` list (the rules it targets) and a `condition:`
 string. There is no `kind: filter` field in the spec. Filters reference rules
 by either UUID id or title.
 """
+
 from __future__ import annotations
 
 import glob
@@ -38,9 +39,9 @@ class SigmaFilter:
     """
 
     path: str
-    targets_ids: tuple[str, ...]    # UUID ids referenced
+    targets_ids: tuple[str, ...]  # UUID ids referenced
     targets_names: tuple[str, ...]  # `name` (or `title` fallback) values referenced
-    condition: str                  # the filter's appended condition
+    condition: str  # the filter's appended condition
 
 
 def _is_uuid(s: str) -> bool:
@@ -77,9 +78,7 @@ def discover_filters(patterns: list[str], cwd: Path) -> list[SigmaFilter]:
             if not isinstance(condition, str) or not condition.strip():
                 continue
             ids = tuple(r for r in rules if isinstance(r, str) and _is_uuid(r))
-            names = tuple(
-                r for r in rules if isinstance(r, str) and not _is_uuid(r)
-            )
+            names = tuple(r for r in rules if isinstance(r, str) and not _is_uuid(r))
             out.append(
                 SigmaFilter(
                     path=str(pth),

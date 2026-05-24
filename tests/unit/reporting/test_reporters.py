@@ -1,4 +1,5 @@
 """Tests for the reporting layer: model builder + 4 formatters."""
+
 from __future__ import annotations
 
 import io
@@ -15,9 +16,7 @@ from sigmalint.reporting import model as model_mod
 from sigmalint.reporting import sarif as sarif_fmt
 from sigmalint.reporting import text as text_fmt
 
-GOLDEN_PATH = (
-    Path(__file__).resolve().parents[2] / "fixtures" / "reports" / "golden.json"
-)
+GOLDEN_PATH = Path(__file__).resolve().parents[2] / "fixtures" / "reports" / "golden.json"
 
 
 @pytest.fixture
@@ -40,8 +39,7 @@ def _make_results_and_scores() -> tuple[list[LintResult], list[FileScore]]:
                 dimension=Dimension.FP_RISK,
                 severity=Severity.WARNING,
                 message=(
-                    "process_creation rule has no negated filter "
-                    "selector in detection.condition"
+                    "process_creation rule has no negated filter selector in detection.condition"
                 ),
                 file="rules/win_susp_foo.yml",
                 line=12,
@@ -53,9 +51,7 @@ def _make_results_and_scores() -> tuple[list[LintResult], list[FileScore]]:
             ),
         ),
     )
-    invalid_parsed = ParsedRule(
-        path="rules/broken.yml", raw_text="", data={}, positions={}
-    )
+    invalid_parsed = ParsedRule(path="rules/broken.yml", raw_text="", data={}, positions={})
     invalid_result = LintResult(
         parsed=invalid_parsed,
         findings=(
@@ -124,9 +120,7 @@ def test_build_report_empty_inputs() -> None:
 
 def test_build_report_mean_over_valid_only() -> None:
     results, scores = _make_results_and_scores()
-    report = model_mod.build_report(
-        results, scores, profile="sigmahq", data_versions={}
-    )
+    report = model_mod.build_report(results, scores, profile="sigmahq", data_versions={})
     # invalid file's None total must not pollute mean
     assert report["summary"]["mean_score"] == 95.8
 

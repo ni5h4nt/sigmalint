@@ -14,6 +14,7 @@ Grammar (Sigma 2.1.0):
 
 The runner also accepts a list of strings under `condition`, OR-joined.
 """
+
 from __future__ import annotations
 
 import re
@@ -74,12 +75,8 @@ def _build_grammar() -> pp.ParserElement:
     expr = pp.Forward()
     primary = pp.Suppress("(") + expr + pp.Suppress(")") | quant | ident
     not_expr = pp.Group(pp.Keyword("not") + primary) | primary
-    and_expr = (
-        pp.Group(not_expr + pp.OneOrMore(pp.Keyword("and") + not_expr)) | not_expr
-    )
-    or_expr = (
-        pp.Group(and_expr + pp.OneOrMore(pp.Keyword("or") + and_expr)) | and_expr
-    )
+    and_expr = pp.Group(not_expr + pp.OneOrMore(pp.Keyword("and") + not_expr)) | not_expr
+    or_expr = pp.Group(and_expr + pp.OneOrMore(pp.Keyword("or") + and_expr)) | and_expr
     expr <<= or_expr
     return expr
 
@@ -175,10 +172,7 @@ def has_negated_selector(
     if isinstance(ast, Not):
         return has_negated_selector(ast.expr, predicate, _negated=not _negated)
     if isinstance(ast, (And, Or)):
-        return any(
-            has_negated_selector(item, predicate, _negated=_negated)
-            for item in ast.items
-        )
+        return any(has_negated_selector(item, predicate, _negated=_negated) for item in ast.items)
     if isinstance(ast, Ident):
         return _negated and predicate(ast.name)
     if isinstance(ast, Quantifier):

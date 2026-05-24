@@ -1,4 +1,5 @@
 """Shared pytest fixtures for sigmalint tests."""
+
 from __future__ import annotations
 
 from pathlib import Path

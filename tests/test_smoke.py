@@ -4,6 +4,7 @@ pytest exits with code 5 if no tests are collected, which would fail the
 Phase 1 CI matrix before the rest of the codebase exists. This file may be
 extended in later phases but the version check stays.
 """
+
 from sigmalint import __version__
 
 

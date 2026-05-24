@@ -20,7 +20,7 @@ jobs:
       - run: ruff format --check .
       - run: mypy src/sigmalint
       - run: lint-imports
-      - run: pytest --cov=sigmalint --cov-report=xml --cov-fail-under=60
+      - run: pytest --cov=sigmalint --cov-report=xml --cov-fail-under=90
       - if: matrix.python-version == '3.12'
         uses: codecov/codecov-action@v4
         with:

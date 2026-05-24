@@ -1,5 +1,5 @@
 import pytest
-from hypothesis import given
+from hypothesis import assume, given
 from hypothesis import strategies as st
 
 from sigmalint.core.condition import (
@@ -74,7 +74,12 @@ def test_has_negated_selector_grouped_quantifier():
     assert has_negated_selector(ast, lambda n: n.startswith("filter"))
 
 
+_RESERVED = {"or", "and", "not", "of", "all", "them"}
+
+
 @given(st.from_regex(r"^[a-z][a-z0-9_]{0,8}$", fullmatch=True))
 def test_single_ident_round_trip(name):
+    # Skip reserved condition keywords which are not valid bare identifiers.
+    assume(name not in _RESERVED)
     ast = parse(name)
     assert ast == Ident(name)
