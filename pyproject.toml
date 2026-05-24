@@ -41,6 +41,7 @@ dev = [
   "pre-commit>=3.7",
   "types-PyYAML",
   "types-requests",
+  "types-jsonschema",
 ]
 
 [project.scripts]

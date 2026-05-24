@@ -5,7 +5,7 @@ import json
 from importlib.resources import files
 from pathlib import Path
 
-import jsonschema  # type: ignore[import-untyped]
+import jsonschema
 
 from sigmalint.core.errors import DataLoadError
 
