@@ -1,0 +1,18 @@
+title: Test rule META001b lookalike valid UUIDv4
+id: 8f14e45f-ceea-467a-a3bc-fb83cfa37bce
+status: stable
+description: A test rule with a valid UUIDv4 id (not v1/v3/v5).
+author: Test Author
+date: '2026-05-23'
+references:
+  - https://example.com/ref
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    EventID: 4688
+  condition: selection
+falsepositives:
+  - Legitimate admin activity
+level: medium

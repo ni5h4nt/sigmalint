@@ -105,6 +105,44 @@ def test_red002_pass_with_stub_corpus_no_collision(fixtures_dir: Path):
     assert findings == []
 
 
+def test_red001_pass_lookalike_does_not_fire(fixtures_dir: Path):
+    """Lookalike fixture resembles the fail case but is NOT a violation
+    of RED001. Verifies no false positives on superficially-similar inputs."""
+    f = fixtures_dir / "RED001" / "pass_lookalike.yml"
+    if not f.exists():
+        import pytest
+
+        pytest.skip("no pass_lookalike fixture for RED001")
+    # Use an empty stub corpus so the rule executes its main branch but finds
+    # no near-duplicate of the unique fingerprint in the fixture.
+    stub = _StubCorpus(_entries=[])
+    findings = _findings_for(
+        Red001NearDuplicateFingerprint, f, _ctx(corpus=stub), "RED001"
+    )
+    assert findings == []
+
+
+def test_red002_pass_lookalike_does_not_fire(fixtures_dir: Path):
+    """Lookalike fixture resembles the fail case but is NOT a violation
+    of RED002. Verifies no false positives on superficially-similar inputs."""
+    f = fixtures_dir / "RED002" / "pass_lookalike.yml"
+    if not f.exists():
+        import pytest
+
+        pytest.skip("no pass_lookalike fixture for RED002")
+    entry = CorpusEntry(
+        path="public/rules/other.yml",
+        title="Some Other Rule",
+        id="99999999-9999-9999-9999-999999999999",
+        fingerprint=frozenset({"image::\\other.exe"}),
+    )
+    stub = _StubCorpus(_entries=[entry])
+    findings = _findings_for(
+        Red002TitleOrIdCollision, f, _ctx(corpus=stub), "RED002"
+    )
+    assert findings == []
+
+
 def test_red002_fail_title_collision(fixtures_dir: Path):
     entry = CorpusEntry(
         path="public/rules/collide.yml",

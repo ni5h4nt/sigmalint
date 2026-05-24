@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from sigmalint.core.runner import RunContext, lint
 from sigmalint.data.attack import AttackTaxonomy
 from sigmalint.data.taxonomy import AttackLogsourceMap
@@ -71,3 +73,13 @@ def test_atk004_fail(fixtures_dir: Path, tmp_path: Path):
     findings = _findings_for("ATK004", fixtures_dir / "ATK004" / "fail.yml", tmp_path)
     assert len(findings) == 1
     assert "T1059.001" in findings[0].message
+
+
+@pytest.mark.parametrize("rule_id", ["ATK001", "ATK002", "ATK003", "ATK004"])
+def test_pass_lookalike_does_not_fire(rule_id: str, fixtures_dir: Path, tmp_path: Path):
+    """Lookalike fixture resembles the fail case but is NOT a violation
+    of THIS rule. Verifies no false positives on superficially-similar inputs."""
+    f = fixtures_dir / rule_id / "pass_lookalike.yml"
+    if not f.exists():
+        pytest.skip(f"no pass_lookalike fixture for {rule_id}")
+    assert _findings_for(rule_id, f, tmp_path) == []

@@ -1,0 +1,18 @@
+title: Test rule META002 lookalike all core populated
+id: c3b9eaf5-2d4e-4c8b-bf3d-2c5e7a8b0d4f
+status: stable
+description: A test rule with author, date, description, and level all populated.
+author: Test Author
+date: '2026-05-23'
+references:
+  - https://example.com/ref
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    EventID: 4688
+  condition: selection
+falsepositives:
+  - Legitimate admin activity
+level: low

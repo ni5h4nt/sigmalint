@@ -67,3 +67,21 @@ def test_tax003_fail(tmp_path: Path) -> None:
     assert len(fs) == 1
     assert "Image" in fs[0].message
     assert "ImagePath" in fs[0].message
+
+
+_TAX_RULE_MAP = {
+    "TAX001": Tax001KnownFields,
+    "TAX002": Tax002ValidModifiers,
+    "TAX003": Tax003CanonicalField,
+}
+
+
+@pytest.mark.parametrize("rule_id", list(_TAX_RULE_MAP))
+def test_pass_lookalike_does_not_fire(rule_id: str, tmp_path: Path) -> None:
+    """Lookalike fixture resembles the fail case but is NOT a violation
+    of THIS rule. Verifies no false positives on superficially-similar inputs."""
+    path = FIXTURES / rule_id / "pass_lookalike.yml"
+    if not path.exists():
+        pytest.skip(f"no pass_lookalike fixture for {rule_id}")
+    rule = _TAX_RULE_MAP[rule_id]()
+    assert _findings(rule, rule_id, "pass_lookalike.yml", tmp_path) == []

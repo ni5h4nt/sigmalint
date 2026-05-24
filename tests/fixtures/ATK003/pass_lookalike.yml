@@ -1,0 +1,10 @@
+title: ATK003 lookalike process_creation + t1059.001
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\powershell.exe'
+  condition: selection
+tags:
+  - attack.t1059.001

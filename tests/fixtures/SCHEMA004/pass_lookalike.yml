@@ -1,0 +1,9 @@
+title: SCHEMA004 lookalike wildcard selector that resolves
+logsource:
+  category: process_creation
+detection:
+  selection_a:
+    Image: a
+  selection_b:
+    Image: b
+  condition: 1 of selection*

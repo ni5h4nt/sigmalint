@@ -1,0 +1,9 @@
+title: RED001 lookalike unique fingerprint
+id: cccccccc-1111-4222-8333-444444444444
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image: '\unique_red001_lookalike_xyz.exe'
+    condition: selection

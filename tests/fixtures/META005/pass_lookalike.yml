@@ -1,0 +1,18 @@
+title: Test rule META005 lookalike experimental status
+id: f6ecbd28-5a7b-4faf-bf6a-5f8babbe3a7b
+status: experimental
+description: A test rule with a valid Sigma 2.1.0 status vocabulary value.
+author: Test Author
+date: '2026-05-23'
+references:
+  - https://example.com/ref
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    EventID: 4688
+  condition: selection
+falsepositives:
+  - Legitimate admin activity
+level: medium

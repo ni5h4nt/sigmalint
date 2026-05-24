@@ -1,0 +1,8 @@
+title: TAX002 lookalike valid modifiers
+logsource:
+  category: process_creation
+detection:
+  selection:
+    Image|contains: cmd.exe
+    CommandLine|endswith: whoami
+  condition: selection
