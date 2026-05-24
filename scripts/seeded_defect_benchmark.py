@@ -13,6 +13,7 @@ Usage:
         --sigmalint .venv/bin/sigmalint \
         --out seeded_defect_results.json
 """
+
 from __future__ import annotations
 
 import argparse
@@ -20,16 +21,14 @@ import io
 import json
 import random
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
 
 from ruamel.yaml import YAML
-from ruamel.yaml.scalarstring import PlainScalarString
 
 SEED = 42
 SAMPLE_SIZE = 50
@@ -161,7 +160,7 @@ def _find_field_named(data, name):
     for sel_name, sel in det.items():
         if sel_name == "condition" or not isinstance(sel, dict):
             continue
-        for key in sel.keys():
+        for key in sel:
             if not isinstance(key, str):
                 continue
             base = key.split("|", 1)[0]
@@ -176,8 +175,11 @@ def _find_field_named(data, name):
 # outside this set. Restricting candidates avoids false negatives that
 # would otherwise reflect taxonomy coverage rather than mutator efficacy.
 _KNOWN_CATEGORIES_WITH_IMAGE = {
-    "process_creation", "network_connection", "registry_event",
-    "file_event", "dns_query",
+    "process_creation",
+    "network_connection",
+    "registry_event",
+    "file_event",
+    "dns_query",
 }
 
 
@@ -367,9 +369,7 @@ def lint_paths(sigmalint: str, paths: list[Path]) -> dict[str, list[str]]:
     data = json.loads(out.stdout)
     result = {}
     for f in data["files"]:
-        result[str(Path(f["path"]).resolve())] = [
-            x["rule_id"] for x in f.get("findings", [])
-        ]
+        result[str(Path(f["path"]).resolve())] = [x["rule_id"] for x in f.get("findings", [])]
     return result
 
 
@@ -380,8 +380,13 @@ def lint_paths(sigmalint: str, paths: list[Path]) -> dict[str, list[str]]:
 
 def collect_rule_files(corpus: Path) -> list[Path]:
     roots = []
-    for name in ["rules", "rules-emerging-threats", "rules-threat-hunting",
-                 "rules-compliance", "rules-dfir"]:
+    for name in [
+        "rules",
+        "rules-emerging-threats",
+        "rules-threat-hunting",
+        "rules-compliance",
+        "rules-dfir",
+    ]:
         p = corpus / name
         if p.is_dir():
             roots.append(p)
@@ -397,8 +402,12 @@ def sigmalint_commit(sigmalint: str) -> str:
     for parent in [p.parent, *p.parents]:
         if (parent / ".git").exists():
             try:
-                r = subprocess.run(["git", "-C", str(parent), "rev-parse", "--short", "HEAD"],
-                                   capture_output=True, text=True, check=True)
+                r = subprocess.run(
+                    ["git", "-C", str(parent), "rev-parse", "--short", "HEAD"],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
                 return r.stdout.strip()
             except Exception:
                 pass
@@ -437,9 +446,9 @@ def main():
     BATCH = 200
     paths_only = [p for p, _, _ in loaded]
     for i in range(0, len(paths_only), BATCH):
-        chunk = paths_only[i:i + BATCH]
+        chunk = paths_only[i : i + BATCH]
         baseline.update(lint_paths(args.sigmalint, chunk))
-        print(f"      baseline {i+len(chunk)}/{len(paths_only)}", file=sys.stderr)
+        print(f"      baseline {i + len(chunk)}/{len(paths_only)}", file=sys.stderr)
 
     print("[4/4] Mutate & lint per mutator", file=sys.stderr)
     results = []
@@ -459,21 +468,22 @@ def main():
         n = min(args.sample_size, pool_size)
         sample = rng.sample(pool, n) if n else []
 
-        print(f"  - {mut.name} -> {mut.target_rule}: pool={pool_size}, n={n}",
-              file=sys.stderr)
+        print(f"  - {mut.name} -> {mut.target_rule}: pool={pool_size}, n={n}", file=sys.stderr)
 
         if n == 0:
-            results.append({
-                "mutator": mut.name,
-                "target_rule": mut.target_rule,
-                "candidate_pool_size": 0,
-                "samples_tested": 0,
-                "recall": None,
-                "true_positives": 0,
-                "missed": 0,
-                "mean_collateral_findings": None,
-                "missed_examples": [],
-            })
+            results.append(
+                {
+                    "mutator": mut.name,
+                    "target_rule": mut.target_rule,
+                    "candidate_pool_size": 0,
+                    "samples_tested": 0,
+                    "recall": None,
+                    "true_positives": 0,
+                    "missed": 0,
+                    "mean_collateral_findings": None,
+                    "missed_examples": [],
+                }
+            )
             continue
 
         # Write mutated copies to a temp dir; lint as batch.
@@ -495,7 +505,7 @@ def main():
             tmp_paths = [t for _, t in mapping]
             mfindings: dict[str, list[str]] = {}
             for i in range(0, len(tmp_paths), BATCH):
-                chunk = tmp_paths[i:i + BATCH]
+                chunk = tmp_paths[i : i + BATCH]
                 mfindings.update(lint_paths(args.sigmalint, chunk))
 
             tp = 0
@@ -518,17 +528,21 @@ def main():
             denom = len(mapping)
             recall = tp / denom if denom else None
             mean_coll = sum(collateral_totals) / denom if denom else None
-            results.append({
-                "mutator": mut.name,
-                "target_rule": mut.target_rule,
-                "candidate_pool_size": pool_size,
-                "samples_tested": denom,
-                "recall": round(recall, 4) if recall is not None else None,
-                "true_positives": tp,
-                "missed": denom - tp,
-                "mean_collateral_findings": round(mean_coll, 4) if mean_coll is not None else None,
-                "missed_examples": missed_examples,
-            })
+            results.append(
+                {
+                    "mutator": mut.name,
+                    "target_rule": mut.target_rule,
+                    "candidate_pool_size": pool_size,
+                    "samples_tested": denom,
+                    "recall": round(recall, 4) if recall is not None else None,
+                    "true_positives": tp,
+                    "missed": denom - tp,
+                    "mean_collateral_findings": round(mean_coll, 4)
+                    if mean_coll is not None
+                    else None,
+                    "missed_examples": missed_examples,
+                }
+            )
 
     payload = {
         "version": "0.1.0",
@@ -547,10 +561,13 @@ def main():
     print(f"{'mutator':32s} {'target':10s} {'pool':>6s} {'N':>4s} {'recall':>8s} {'coll':>6s}")
     for r in results:
         rec = "n/a" if r["recall"] is None else f"{r['recall']:.3f}"
-        coll = "n/a" if r["mean_collateral_findings"] is None else f"{r['mean_collateral_findings']:.2f}"
-        print(f"{r['mutator']:32s} {r['target_rule']:10s} "
-              f"{r['candidate_pool_size']:>6d} {r['samples_tested']:>4d} "
-              f"{rec:>8s} {coll:>6s}")
+        mc = r["mean_collateral_findings"]
+        coll = "n/a" if mc is None else f"{mc:.2f}"
+        print(
+            f"{r['mutator']:32s} {r['target_rule']:10s} "
+            f"{r['candidate_pool_size']:>6d} {r['samples_tested']:>4d} "
+            f"{rec:>8s} {coll:>6s}"
+        )
     print(f"\nWritten: {args.out}")
 
 
