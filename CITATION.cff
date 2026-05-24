@@ -21,9 +21,9 @@ keywords:
   - security
 preferred-citation:
   type: article
-  title: "Detection-rule quality: a systematization of knowledge"
+  title: "Static Quality Assessment of Sigma Detection Rules: Framework and Empirical Evaluation"
   authors:
     - given-names: Nishant
       family-names: Tyagi
   year: 2026
-  note: "Reference implementation: https://github.com/ni5h4nt/sigmalint"
+  note: "Reference implementation: https://github.com/ni5h4nt/sigmalint  (preprint pending)"

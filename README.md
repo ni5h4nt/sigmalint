@@ -110,7 +110,7 @@ entry, doc page). Issues use a structured **new rule proposal** template.
 ## Citation
 
 If you use sigmalint in research, please cite via `CITATION.cff`.
-This implementation accompanies the SoK paper on detection-rule quality assessment.
+This implementation accompanies a forthcoming paper, *Static Quality Assessment of Sigma Detection Rules: Framework and Empirical Evaluation* (preprint pending).
 
 ## License
 
