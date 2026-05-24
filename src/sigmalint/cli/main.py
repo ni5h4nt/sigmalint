@@ -151,7 +151,7 @@ def lint(
         rules = kept
 
         results = run_lint(all_paths, rules, ctx)
-        scores = [score_file(res, cfg) for res in results]
+        scores = [score_file(res, cfg, rules) for res in results]
 
         report = build_report(results, scores, cfg.profile, _data_versions(ctx))
         out = sys.stdout

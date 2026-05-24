@@ -6,7 +6,17 @@ is enforced by `import-linter` (`.importlinter.cfg`).
 ```
 cli      ──▶ reporting ──▶ core ──▶ data
                  └──────────▶ rules ──▶ core
+                                  └──▶ data
 ```
+
+The `rules → data` edge is explicit: most rules cannot evaluate
+without a reference dataset. `ATK*` rules need ATT&CK STIX bundles
+loaded from `core/data` (techniques, platforms, kill-chain phases);
+`TAX*` rules need Sigma's modifier and taxonomy lists; `RED*` rules
+need the SigmaHQ corpus fingerprint index; `SCHEMA*` rules need the
+Sigma JSON schema. Removing the `data/` layer breaks the quality
+dimensions, not just the user-facing CLI — they are not stylistic
+checks.
 
 ## Layers
 

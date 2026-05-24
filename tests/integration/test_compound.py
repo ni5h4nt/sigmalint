@@ -79,7 +79,7 @@ def test_compound_fixture(filename: str) -> None:
     ctx = _build_ctx(cfg)
     results = lint([f], rules, ctx)
     result = results[0]
-    score = score_file(result, cfg)
+    score = score_file(result, cfg, rules)
 
     assert result.parsed.yaml_error is None, (
         f"{filename}: YAML parse failed: {result.parsed.yaml_error}"

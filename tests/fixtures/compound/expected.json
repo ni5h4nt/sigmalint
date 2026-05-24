@@ -7,8 +7,8 @@
       {"rule_id": "STY003", "severity": "info"}
     ],
     "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "META001a", "META001b", "META002", "META003", "META004", "ATK001", "ATK002", "TAX001"],
-    "score_floor": 96.7,
-    "score_ceiling": 100.7
+    "score_floor": 94.7,
+    "score_ceiling": 98.7
   },
   "02-missing-metadata.yml": {
     "status": "valid",
@@ -19,8 +19,8 @@
       {"rule_id": "META004", "severity": "info"}
     ],
     "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "FP001", "ATK001", "ATK002", "ATK003"],
-    "score_floor": 94.5,
-    "score_ceiling": 98.5
+    "score_floor": 91.7,
+    "score_ceiling": 95.7
   },
   "03-bad-attack-tags.yml": {
     "status": "valid",
@@ -31,8 +31,8 @@
       {"rule_id": "STY003", "severity": "info"}
     ],
     "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "FP001", "META001a", "META002", "TAX001", "TAX002"],
-    "score_floor": 94.8,
-    "score_ceiling": 98.8
+    "score_floor": 89.9,
+    "score_ceiling": 93.9
   },
   "04-style-disaster.yml": {
     "status": "valid",
@@ -43,8 +43,8 @@
       {"rule_id": "TAX003", "severity": "info"}
     ],
     "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "ATK001", "META001a", "META001b", "META002"],
-    "score_floor": 96.4,
-    "score_ceiling": 100.4
+    "score_floor": 92.7,
+    "score_ceiling": 96.7
   },
   "05-noisy-network.yml": {
     "status": "valid",
@@ -56,8 +56,8 @@
       {"rule_id": "STY003", "severity": "info"}
     ],
     "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "ATK001", "META001a", "META001b", "TAX001"],
-    "score_floor": 96.3,
-    "score_ceiling": 100.3
+    "score_floor": 93.7,
+    "score_ceiling": 97.7
   },
   "06-deprecated-modern.yml": {
     "status": "valid",
@@ -67,8 +67,8 @@
       {"rule_id": "TAX001", "severity": "warning"}
     ],
     "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "FP001", "FP003", "ATK001", "ATK002", "META001a", "META001b"],
-    "score_floor": 97.1,
-    "score_ceiling": 100.1
+    "score_floor": 95.1,
+    "score_ceiling": 99.1
   },
   "07-missing-references.yml": {
     "status": "valid",
@@ -78,8 +78,8 @@
       {"rule_id": "STY003", "severity": "info"}
     ],
     "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "FP001", "FP003", "ATK001", "ATK002", "META001a", "META001b", "META002"],
-    "score_floor": 97.2,
-    "score_ceiling": 100.2
+    "score_floor": 95.2,
+    "score_ceiling": 99.2
   },
   "08-broad-and-unsigned.yml": {
     "status": "valid",
@@ -90,8 +90,8 @@
       {"rule_id": "STY003", "severity": "info"}
     ],
     "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "META001b", "META002", "ATK001", "ATK002", "TAX001"],
-    "score_floor": 96.2,
-    "score_ceiling": 100.2
+    "score_floor": 93.8,
+    "score_ceiling": 97.8
   },
   "09-taxonomy-typos.yml": {
     "status": "valid",
@@ -101,8 +101,8 @@
       {"rule_id": "TAX002", "severity": "warning"}
     ],
     "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001", "FP001", "FP003", "ATK001", "META001a", "META001b"],
-    "score_floor": 96.7,
-    "score_ceiling": 100.7
+    "score_floor": 93.7,
+    "score_ceiling": 97.7
   },
   "10-everything-wrong.yml": {
     "status": "valid",
@@ -121,7 +121,7 @@
       {"rule_id": "TAX003", "severity": "info"}
     ],
     "must_not_include": ["SCHEMA001", "SCHEMA002", "SCHEMA003", "SCHEMA004", "INTERNAL001"],
-    "score_floor": 89.6,
-    "score_ceiling": 93.6
+    "score_floor": 77.3,
+    "score_ceiling": 81.3
   }
 }
