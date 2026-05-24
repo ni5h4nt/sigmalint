@@ -3,6 +3,21 @@
 Thanks for your interest. The most valuable contributions are **new
 rules** and **rule improvements**.
 
+## Workflow
+
+1. **Fork** the repository (or branch directly if you're a
+   collaborator).
+2. **Create a feature branch** off the latest `main`.
+3. **Commit your changes** and make sure `ruff check`, `ruff format
+   --check`, `mypy`, `lint-imports`, and `pytest` pass locally
+   (see *Quality gates* below).
+4. **Open a PR** against `main`. The four-version Python matrix
+   (3.10, 3.11, 3.12, 3.13) runs automatically.
+5. `main` is protected: all four matrix jobs must be green, the
+   branch must be rebased onto the latest `main`, and all review
+   comments must be marked resolved. Merge is squash or rebase only
+   (linear history — no merge commits).
+
 ## How to add a new rule
 
 A new rule is four files. That's the whole contract.
