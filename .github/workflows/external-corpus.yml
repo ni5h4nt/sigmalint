@@ -1,0 +1,234 @@
+name: External corpora smoke
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 8 * * MON"
+permissions:
+  contents: read
+jobs:
+  matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        corpus: [neo23x0, custom-snippets]
+        profile: [sigmahq, local]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install sigmalint
+        run: pip install -e ".[dev]"
+      - name: Prepare corpus
+        id: prep
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          case "${{ matrix.corpus }}" in
+            neo23x0)
+              git clone --depth 1 https://github.com/Neo23x0/sigma.git corpus
+              # Build a combined corpus path list (use rules/ as primary; include emerging-threats/threat-hunting if present)
+              mkdir -p combined
+              cp -r corpus/rules combined/rules
+              if [ -d corpus/rules-emerging-threats ]; then
+                cp -r corpus/rules-emerging-threats combined/rules-emerging-threats
+              fi
+              if [ -d corpus/rules-threat-hunting ]; then
+                cp -r corpus/rules-threat-hunting combined/rules-threat-hunting
+              fi
+              echo "path=combined" >> "$GITHUB_OUTPUT"
+              ;;
+            custom-snippets)
+              mkdir -p custom-snippets
+              cat > custom-snippets/clean_minimal.yml <<'RULE_EOF'
+              title: Suspicious Whoami Execution From Web Service
+              id: 8a1b6c2d-3f4e-4a5b-9c8d-1e2f3a4b5c6d
+              status: experimental
+              description: Detects execution of whoami by a web service account, which is commonly used by attackers post-exploitation to identify the compromised user context.
+              author: sigmalint-smoke
+              date: 2026-01-01
+              logsource:
+                category: process_creation
+                product: windows
+              detection:
+                selection:
+                  Image|endswith: '\whoami.exe'
+                  ParentImage|endswith:
+                    - '\w3wp.exe'
+                    - '\httpd.exe'
+                condition: selection
+              falsepositives:
+                - Administrative scripts running under service accounts
+              level: high
+              tags:
+                - attack.discovery
+                - attack.t1033
+              RULE_EOF
+              # strip leading 14 spaces of indentation from heredoc
+              sed -i 's/^              //' custom-snippets/clean_minimal.yml
+
+              cat > custom-snippets/fp_risky.yml <<'RULE_EOF'
+              title: Broad PowerShell Activity
+              id: 1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f
+              status: experimental
+              description: Flags any PowerShell.
+              author: sigmalint-smoke
+              date: 2026-01-01
+              logsource:
+                category: process_creation
+                product: windows
+              detection:
+                selection:
+                  Image: 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
+                condition: selection
+              level: critical
+              RULE_EOF
+              sed -i 's/^              //' custom-snippets/fp_risky.yml
+
+              cat > custom-snippets/feature_heavy.yml <<'RULE_EOF'
+              title: Multi-Source Credential Access Behavior With Extensive Context
+              id: 9f8e7d6c-5b4a-3210-fedc-ba9876543210
+              status: test
+              description: |
+                Detects a pattern of credential access behavior that spans multiple
+                telemetry sources. The rule is intentionally verbose to exercise
+                long-description handling, multi-logsource handling, multiple
+                references, and a populated falsepositives list. Adversaries
+                commonly enumerate stored credentials by reading registry hives,
+                dumping LSASS, or accessing the SAM database; this rule represents
+                that broader behavior pattern across categories.
+              references:
+                - https://attack.mitre.org/techniques/T1003/
+                - https://attack.mitre.org/techniques/T1555/
+                - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4663
+              author: sigmalint-smoke
+              date: 2026-01-01
+              modified: 2026-01-02
+              logsource:
+                category: process_creation
+                product: windows
+              detection:
+                selection_proc:
+                  Image|endswith:
+                    - '\reg.exe'
+                    - '\procdump.exe'
+                  CommandLine|contains:
+                    - 'save'
+                    - 'HKLM\SAM'
+                    - 'lsass'
+                condition: selection_proc
+              fields:
+                - Image
+                - CommandLine
+                - ParentImage
+                - User
+              falsepositives:
+                - Legitimate backup software accessing registry hives
+                - Authorized red team operations
+                - Forensic tools run by IR staff
+              level: high
+              tags:
+                - attack.credential_access
+                - attack.t1003
+                - attack.t1003.002
+                - attack.t1555
+              RULE_EOF
+              sed -i 's/^              //' custom-snippets/feature_heavy.yml
+
+              echo "path=custom-snippets" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+      - name: Lint corpus
+        if: steps.prep.outcome == 'success'
+        run: |
+          set +e
+          sigmalint lint "${{ steps.prep.outputs.path }}" \
+            --format json --fail-on never --profile "${{ matrix.profile }}" \
+            > "report-${{ matrix.corpus }}-${{ matrix.profile }}.json"
+          rc=$?
+          echo "sigmalint exit code: $rc"
+          exit 0
+      - name: Summarize
+        if: always() && steps.prep.outcome == 'success'
+        env:
+          CORPUS: ${{ matrix.corpus }}
+          PROFILE: ${{ matrix.profile }}
+        run: |
+          python - <<'PY'
+          import json, os, collections, pathlib
+          corpus = os.environ["CORPUS"]
+          profile = os.environ["PROFILE"]
+          report_path = pathlib.Path(f"report-{corpus}-{profile}.json")
+          summary_path = pathlib.Path(os.environ["GITHUB_STEP_SUMMARY"])
+          lines = [f"## {corpus} (profile: {profile})", ""]
+          if not report_path.exists() or report_path.stat().st_size == 0:
+              lines.append("- (no report produced)")
+              summary_path.write_text(summary_path.read_text() + "\n".join(lines) + "\n" if summary_path.exists() else "\n".join(lines) + "\n")
+              raise SystemExit(0)
+          try:
+              data = json.loads(report_path.read_text())
+          except Exception as e:
+              lines.append(f"- (failed to parse report: {e})")
+              with summary_path.open("a") as f:
+                  f.write("\n".join(lines) + "\n")
+              raise SystemExit(0)
+
+          # Try multiple shapes; sigmalint JSON tends to be {"files":[...], "findings":[...]} or similar.
+          files = data.get("files") or data.get("results") or []
+          findings = data.get("findings") or []
+          # If findings live per-file, flatten.
+          if not findings and files and isinstance(files, list):
+              flat = []
+              for f in files:
+                  flat.extend(f.get("findings", []) or [])
+              findings = flat
+
+          n_files = len(files) if files else data.get("file_count", 0)
+          valid = sum(1 for f in files if f.get("valid") is True) if files else data.get("valid_count", 0)
+          invalid = sum(1 for f in files if f.get("valid") is False) if files else data.get("invalid_count", 0)
+
+          sev = collections.Counter()
+          rule_ids = collections.Counter()
+          for fi in findings:
+              s = (fi.get("severity") or fi.get("level") or "").lower()
+              sev[s] += 1
+              rid = fi.get("rule_id") or fi.get("ruleId") or fi.get("id") or fi.get("code")
+              if rid:
+                  rule_ids[rid] += 1
+
+          scores = []
+          for f in files:
+              s = f.get("score")
+              if isinstance(s, (int, float)):
+                  scores.append(s)
+          mean_score = (sum(scores) / len(scores)) if scores else None
+
+          total_findings = len(findings)
+          lines.append(f"- Files scanned: {n_files}")
+          lines.append(f"- Valid: {valid}")
+          lines.append(f"- Invalid: {invalid}")
+          lines.append(
+              f"- Findings: {total_findings} (errors: {sev.get('error',0)}, "
+              f"warnings: {sev.get('warning',0)}, info: {sev.get('info',0)})"
+          )
+          if mean_score is not None:
+              lines.append(f"- Mean score: {mean_score:.2f}")
+          else:
+              lines.append("- Mean score: n/a")
+          lines.append("- Top 5 rule_ids by frequency:")
+          if rule_ids:
+              for rid, count in rule_ids.most_common(5):
+                  lines.append(f"  - {rid} — {count}")
+          else:
+              lines.append("  - (none)")
+          lines.append("")
+          with summary_path.open("a") as f:
+              f.write("\n".join(lines) + "\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.prep.outcome == 'success'
+        with:
+          name: ${{ matrix.corpus }}-${{ matrix.profile }}
+          path: report-${{ matrix.corpus }}-${{ matrix.profile }}.json
+          if-no-files-found: ignore
