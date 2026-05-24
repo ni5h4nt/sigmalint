@@ -1,0 +1,17 @@
+title: Test rule META001a fail
+status: stable
+description: A test rule missing the id field.
+author: Test Author
+date: 2026/05/23
+references:
+  - https://example.com/ref
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    EventID: 4688
+  condition: selection
+falsepositives:
+  - Legitimate admin activity
+level: medium

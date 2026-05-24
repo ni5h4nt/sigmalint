@@ -1,0 +1,19 @@
+title: Test rule META004 pass
+id: b2a8d9e4-1f3c-4a7b-9f2d-1c5e7a8b0d4e
+status: stable
+description: A test rule with realistic falsepositives.
+author: Test Author
+date: 2026/05/23
+references:
+  - https://example.com/ref
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    EventID: 4688
+  condition: selection
+falsepositives:
+  - Legitimate administrative activity
+  - Software installers
+level: medium
