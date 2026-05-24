@@ -1,0 +1,66 @@
+{
+  "sigmalint_version": "0.1.0",
+  "profile": "sigmahq",
+  "data_versions": {
+    "sigma_schema": "2.1.0",
+    "attack": "v16.1",
+    "taxonomy": "sigma@v0.1",
+    "modifiers": "sigma-2.1.0",
+    "attack_logsource_map": "v0.1",
+    "corpus": null
+  },
+  "files": [
+    {
+      "path": "rules/win_susp_foo.yml",
+      "rule_title": "Suspicious Foo",
+      "status": "valid",
+      "findings": [
+        {
+          "rule_id": "FP003",
+          "dimension": "fp_risk",
+          "severity": "warning",
+          "message": "process_creation rule has no negated filter selector in detection.condition",
+          "line": 12,
+          "col": 3,
+          "fix_hint": "Add a filter selector and exclude it in the condition, e.g. `selection and not filter_known_admin`"
+        }
+      ],
+      "suppressions": [],
+      "scores": {
+        "attack": 97,
+        "taxonomy": 100,
+        "fp_risk": 91,
+        "metadata": 94,
+        "redundancy": 100,
+        "style": 100,
+        "total": 95.8
+      }
+    },
+    {
+      "path": "rules/broken.yml",
+      "rule_title": null,
+      "status": "invalid",
+      "findings": [
+        {
+          "rule_id": "SCHEMA002",
+          "dimension": "schema",
+          "severity": "error",
+          "message": "missing required property 'detection'",
+          "line": 1,
+          "col": 1,
+          "fix_hint": "Add a 'detection:' block."
+        }
+      ],
+      "suppressions": [],
+      "scores": null
+    }
+  ],
+  "summary": {
+    "files": 2,
+    "valid": 1,
+    "invalid": 1,
+    "findings": 2,
+    "by_severity": {"error": 1, "warning": 1, "info": 0},
+    "mean_score": 95.8
+  }
+}
