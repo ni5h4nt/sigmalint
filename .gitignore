@@ -67,3 +67,4 @@ coverage.xml
 
 # CASEF / session artifacts
 .casef/
+uv.lock

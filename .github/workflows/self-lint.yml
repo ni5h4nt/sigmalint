@@ -17,7 +17,13 @@ jobs:
       - name: Install sigmalint from source
         run: pip install -e ".[dev]"
       - name: Clone SigmaHQ corpus
-        run: git clone --depth 1 https://github.com/SigmaHQ/sigma.git sigmahq
+        id: clone
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/SigmaHQ/sigma.git sigmahq
+          sha=$(git -C sigmahq rev-parse HEAD)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Cloned SigmaHQ/sigma at $sha"
       - name: Run sigmalint over corpus
         id: lint
         run: |
@@ -35,6 +41,7 @@ jobs:
           {
             echo "## sigmalint nightly self-lint"
             echo ""
+            echo "- SigmaHQ/sigma commit: \`${{ steps.clone.outputs.sha }}\`"
             echo "- Files scanned: $files"
             echo "- Mean score: $mean"
             echo "- CLI exit code: ${{ steps.lint.outputs.rc }}"

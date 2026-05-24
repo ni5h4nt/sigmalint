@@ -16,7 +16,7 @@ detection:
         BogusFieldQQQ|contianz: 'foo'
     condition: selection
 falsepositives:
-  - Unknown
+   - Unknown
 level: high
 tags:
   - attack.t9999

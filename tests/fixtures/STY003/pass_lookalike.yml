@@ -1,8 +1,29 @@
-title: STY003 lookalike four-space indent
+title: STY003 lookalike — list-item continuation at 4n+2 indent
+# Regression guard for the v0.1.x false-positive fix. Previous STY003
+# implementation flagged every line at indent 4n+2, but list-item mappings
+# legitimately land there. SigmaHQ corpus had 1048/1053 STY003 fires that
+# were this pattern.
+id: 12345678-1234-4abc-9def-001122334455
+status: experimental
+description: A lookalike fixture exercising list-item continuation.
+author: sigmalint tests
+date: '2026-05-23'
+related:
+    - id: 22345678-1234-4abc-9def-001122334455
+      type: similar
+references:
+    - https://example.com/ref-1
+    - https://example.com/ref-2
+tags:
+    - attack.execution
+    - attack.t1059.001
 logsource:
     category: process_creation
     product: windows
 detection:
     selection:
-        Image: '\example.exe'
+        Image|endswith: '\example.exe'
     condition: selection
+falsepositives:
+    - Legitimate uses of example.exe by admins
+level: medium
