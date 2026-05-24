@@ -1,0 +1,24 @@
+title: Taxonomy typos and unknown fields
+id: a7b2c3d4-1111-4222-8333-444444444444
+status: stable
+description: A rule with a misspelled modifier and a field name that does not exist
+  in the process_creation taxonomy.
+author: Compound Tester
+date: '2026-05-23'
+references:
+  - https://example.com/taxonomy
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image|contianz: 'cmd.exe'
+    BogusFieldZZZ: 'foo'
+  filter:
+    ParentImage|endswith: '\explorer.exe'
+  condition: selection and not filter
+falsepositives:
+  - Legitimate admin activity
+level: medium
+tags:
+  - attack.t1059.003

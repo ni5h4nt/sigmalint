@@ -1,0 +1,25 @@
+title: Multiple bad ATT&CK tags
+id: a2b2c3d4-1111-4222-8333-444444444444
+status: stable
+description: A rule that cites non-existent, revoked, and platform-mismatched
+  ATT&CK techniques.
+author: Compound Tester
+date: '2026-05-23'
+references:
+  - https://attack.mitre.org/techniques/T1059/
+logsource:
+    product: linux
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '/something'
+    filter:
+        Image|endswith: '/trusted'
+    condition: selection and not filter
+falsepositives:
+  - Legitimate admin activity
+level: medium
+tags:
+  - attack.t9999
+  - attack.t1086
+  - attack.t1547.001

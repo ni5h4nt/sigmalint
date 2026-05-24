@@ -1,0 +1,9 @@
+title: Detect cmd via explorer
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith: '\cmd.exe'
+        ParentImage|endswith: '\explorer.exe'
+    condition: selection
