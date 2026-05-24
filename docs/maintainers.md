@@ -60,14 +60,24 @@ as the primary backlog for new rules; cluster duplicates and link.
 
 ## Branch-protection escalation
 
-`main` is protected. The settings are designed to evolve with the
-project; the table below documents the trigger event for each change so
-no one has to rediscover the right configuration when the moment
-arrives.
+The settings are designed to evolve with the project; the table below
+documents the trigger event for each change so no one has to rediscover
+the right configuration when the moment arrives.
+
+> **Current status (pre-public):** Branch protection and Repository
+> Rulesets are gated behind GitHub Pro for **private** repos on the free
+> plan, so `main` is currently unprotected at the GitHub level. The
+> protections in the "First public push" row below land automatically
+> the moment the repo flips public — at which point the free-tier API
+> accepts the rules. Apply via the `gh api PUT
+> /repos/ni5h4nt/sigmalint/branches/main/protection` call documented in
+> `/tmp/protection.json` (see commit history) or recreate from the rule
+> set described below.
 
 | Trigger event | What changes |
 |---|---|
-| **Today (solo maintainer)** | Required CI status checks (`test (3.10/.11/.12/.13)`), block force-push, block deletion, linear history, include administrators, require conversation resolution. Required reviewers = 0 (placeholder). |
+| **Today (solo, private)** | No protection enforceable at GitHub level. Self-discipline: do not force-push, do not delete main, push only when CI is green locally. |
+| **First public push** | Required CI status checks (`test (3.10/.11/.12/.13)`), block force-push, block deletion, linear history, include administrators, require conversation resolution. Required reviewers = 0 (placeholder). |
 | **First external PR merged** | No protection change required. Confirm `CONTRIBUTING.md` and the PR template are sufficient for a non-maintainer's first encounter. |
 | **Second maintainer joins** | Flip required reviewers `0 → 1`. Enable Code-Owner enforcement, "dismiss stale reviews on new push", and "require approval of most-recent reviewable push". Add new maintainer to `MAINTAINERS.md` and `CODEOWNERS`. |
 | **v1.0 cut** | Require signed commits. Restrict pushes to `main` to maintainers only (no admin override). Lock the public JSON output shape and rule-ID universe per `docs/versioning.md`. |
