@@ -22,6 +22,19 @@ This is part of the backward-compat contract — see `docs/versioning.md`,
 "Reference-data refreshes" section, for why score-drift is a release-note
 concern.
 
+## [0.1.1] — 2026-05-24
+
+### Fixed
+
+- `sigmalint explain <ID>` returned `"No documentation for <ID>."` on
+  PyPI-installed copies because the per-rule docs at `docs/rules/` were
+  not bundled into the wheel. The command now reads the docs from a
+  wheel-bundled `sigmalint/rule_docs/` directory (via Hatchling
+  `force-include`) with a fallback to the dev-tree `docs/rules/` path
+  so editable installs continue to work. Only `sigmalint explain` was
+  affected; `lint`, `list-rules`, `profiles`, and the GitHub Action
+  worked correctly in 0.1.0.
+
 ## [0.1.0] — 2026-05-23
 
 ### Added

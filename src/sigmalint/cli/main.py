@@ -194,7 +194,9 @@ def list_rules(
 @app.command()
 def explain(rule_id: str) -> None:
     """Print the rule documentation for `rule_id`."""
-    doc = Path(__file__).parent.parent.parent.parent / "docs" / "rules" / f"{rule_id}.md"
+    pkg_doc = Path(__file__).parent.parent / "rule_docs" / f"{rule_id}.md"
+    dev_doc = Path(__file__).parent.parent.parent.parent / "docs" / "rules" / f"{rule_id}.md"
+    doc = pkg_doc if pkg_doc.exists() else dev_doc
     if not doc.exists():
         typer.echo(f"No documentation for {rule_id}.", err=True)
         raise typer.Exit(2)
