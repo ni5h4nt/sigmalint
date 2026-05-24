@@ -1,5 +1,5 @@
 import pytest
-from hypothesis import assume, given
+from hypothesis import assume, given, settings
 from hypothesis import strategies as st
 
 from sigmalint.core.condition import (
@@ -83,3 +83,29 @@ def test_single_ident_round_trip(name):
     assume(name not in _RESERVED)
     ast = parse(name)
     assert ast == Ident(name)
+
+
+@given(st.binary(min_size=0, max_size=200))
+@settings(max_examples=500, deadline=None)
+def test_parse_is_total_no_unexpected_exception(payload: bytes):
+    """Totality property: parse() over any byte string either returns an AST
+    or raises ConditionParseError. No other exception escapes.
+
+    This underwrites the validity gate: SCHEMA004 uses parse() to determine
+    whether detection.condition is well-formed; if parse() could raise something
+    other than ConditionParseError on a malformed condition, the runner's
+    _safe_check wrapper would catch it as INTERNAL001 instead of producing the
+    intended SCHEMA004 finding.
+    """
+    try:
+        text = payload.decode("utf-8", errors="replace")
+    except UnicodeDecodeError:
+        text = ""
+    try:
+        parse(text)
+    except ConditionParseError:
+        pass  # expected on malformed input
+    except Exception as e:  # pragma: no cover - property-test guard
+        raise AssertionError(
+            f"parse() raised non-ConditionParseError on {text!r}: {type(e).__name__}: {e}"
+        ) from e
