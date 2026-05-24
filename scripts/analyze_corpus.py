@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Empirical corpus analysis for the sigmalint paper.
+"""Empirical corpus analysis for sigmalint.
 
 Reads a sigmalint JSON report (default `/tmp/sigmalint-report/report.json`)
 and produces an analysis markdown document covering:
