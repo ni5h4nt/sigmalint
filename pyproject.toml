@@ -3,7 +3,7 @@ requires = ["hatchling>=1.29.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "sigmalint"
+name = "sigmalint-cli"
 version = "0.1.0"
 description = "ESLint-style linter for Sigma detection rules"
 readme = "README.md"

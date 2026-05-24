@@ -30,7 +30,7 @@ runs:
       with:
         python-version: "3.11"
     - shell: bash
-      run: pip install "sigmalint==${{ inputs.version }}"
+      run: pip install "sigmalint-cli==${{ inputs.version }}"
     - shell: bash
       env:
         SIGMALINT_PATH: ${{ inputs.path }}

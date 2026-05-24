@@ -74,7 +74,7 @@ We split the difference by:
 1. **Recording the SigmaHQ-corpus mean-score delta** for every release
    that refreshes reference data. See the "Score impact" subsection in
    `CHANGELOG.md` per release.
-2. **Pinning behaviour** — `pip install sigmalint==0.1.0` always loads
+2. **Pinning behaviour** — `pip install sigmalint-cli==0.1.0` always loads
    the bundled-data snapshot that shipped with `0.1.0`. The package
    version is sufficient to pin the score for a corpus, provided the
    user does not run `sigmalint update-data` to write a newer copy
