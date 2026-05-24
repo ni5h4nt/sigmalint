@@ -8,15 +8,15 @@ references:
   - https://example.com/style
 License: MIT
 logsource:
-   category: process_creation
-   product: windows
+    category: process_creation
+    product: windows
 detection:
-   selection:
-      ImagePath: 'C:\Windows\System32\cmd.exe'
-      BogusFieldXyz: anything
-   filter:
-      ParentImage|endswith: '\explorer.exe'
-   condition: selection and not filter
+    selection:
+        ImagePath: 'C:\Windows\System32\cmd.exe'
+        BogusFieldXyz: anything
+    filter:
+        ParentImage|endswith: '\explorer.exe'
+    condition: selection and not filter
 falsepositives:
   - Legitimate admin activity
 level: medium

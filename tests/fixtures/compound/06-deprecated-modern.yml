@@ -1,23 +1,22 @@
 title: Deprecated rule combined with modern fields
 id: a5b2c3d4-1111-4222-8333-444444444444
 status: deprecated
-description: A deprecated rule that still has a hardcoded admin Users path and a
-  bogus field name a maintainer left behind.
+description: A deprecated rule that still has a hardcoded admin Users path and a bogus field name a maintainer left behind.
 author: Compound Tester
 date: '2026-05-23'
 references:
   - https://example.com/legacy
 logsource:
-  category: process_creation
-  product: windows
+    category: process_creation
+    product: windows
 detection:
-  selection:
-    Image|endswith: '\rundll32.exe'
-    CommandLine|contains: 'C:\Users\admin\AppData'
-    BogusLegacyField: 'legacy'
-  filter:
-    ParentImage|endswith: '\explorer.exe'
-  condition: selection and not filter
+    selection:
+        Image|endswith: '\rundll32.exe'
+        CommandLine|contains: 'C:\Users\admin\AppData'
+        BogusLegacyField: 'legacy'
+    filter:
+        ParentImage|endswith: '\explorer.exe'
+    condition: selection and not filter
 falsepositives:
   - Legitimate admin activity
 level: medium

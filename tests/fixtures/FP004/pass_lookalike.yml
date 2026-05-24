@@ -1,9 +1,9 @@
 title: FP004 lookalike generalized user path
 logsource:
-  category: process_creation
+    category: process_creation
 detection:
-  selection:
-    Image|startswith: 'C:\Users\*\AppData\Local\Temp\'
-  filter:
-    CommandLine|contains: legitimate
-  condition: selection and not filter
+    selection:
+        Image|startswith: 'C:\Users\*\AppData\Local\Temp\'
+    filter:
+        CommandLine|contains: legitimate
+    condition: selection and not filter

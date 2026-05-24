@@ -33,6 +33,6 @@ jobs:
           fi
           sigmalint lint "${passes[@]}" --fail-on error
       - if: matrix.python-version == '3.12'
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
-          file: ./coverage.xml
+          files: ./coverage.xml

@@ -6,12 +6,12 @@ author: Test Author
 date: '2026-05-23'
 references: []
 logsource:
-  category: process_creation
-  product: windows
+    category: process_creation
+    product: windows
 detection:
-  selection:
-    EventID: 4688
-  condition: selection
+    selection:
+        EventID: 4688
+    condition: selection
 falsepositives:
   - Legitimate admin activity
 level: high

@@ -1,9 +1,9 @@
 title: FP001 lookalike single selection with filter
 logsource:
-  category: process_creation
+    category: process_creation
 detection:
-  selection:
-    Image: x.exe
-  filter:
-    CommandLine: legitimate
-  condition: selection and not filter
+    selection:
+        Image: x.exe
+    filter:
+        CommandLine: legitimate
+    condition: selection and not filter

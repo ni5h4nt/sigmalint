@@ -1,9 +1,9 @@
 title: FP002 lookalike regex modifier with asterisk
 logsource:
-  category: process_creation
+    category: process_creation
 detection:
-  selection:
-    Image|re: '.*bar.*'
-  filter:
-    CommandLine|contains: trusted
-  condition: selection and not filter
+    selection:
+        Image|re: '.*bar.*'
+    filter:
+        CommandLine|contains: trusted
+    condition: selection and not filter

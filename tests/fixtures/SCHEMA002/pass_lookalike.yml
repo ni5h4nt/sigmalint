@@ -1,8 +1,8 @@
 title: SCHEMA002 lookalike with extra non-spec field
 logsource:
-  category: process_creation
+    category: process_creation
 detection:
-  selection:
-    Image: x
-  condition: selection
+    selection:
+        Image: x
+    condition: selection
 custom_extra_field: this is allowed; Sigma permits additional keys

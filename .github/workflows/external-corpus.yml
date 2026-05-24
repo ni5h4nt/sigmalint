@@ -226,7 +226,7 @@ jobs:
           with summary_path.open("a") as f:
               f.write("\n".join(lines) + "\n")
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always() && steps.prep.outcome == 'success'
         with:
           name: ${{ matrix.corpus }}-${{ matrix.profile }}

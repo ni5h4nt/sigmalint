@@ -1,18 +1,17 @@
 title: Broad selection on noisy file_event source
 status: stable
-description: A rule on a noisy log source with a single broad selection and no
-  rule id at all.
+description: A rule on a noisy log source with a single broad selection and no rule id at all.
 author: Compound Tester
 date: '2026-05-23'
 references:
   - https://example.com/file
 logsource:
-  category: file_event
-  product: windows
+    category: file_event
+    product: windows
 detection:
-  selection:
-    TargetFilename: 'a.dll'
-  condition: selection
+    selection:
+        TargetFilename: 'a.dll'
+    condition: selection
 falsepositives:
   - Legitimate admin activity
 level: medium
