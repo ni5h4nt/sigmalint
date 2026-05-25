@@ -5,6 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](pyproject.toml)
 [![codecov](https://codecov.io/gh/ni5h4nt/sigmalint/branch/main/graph/badge.svg)](https://codecov.io/gh/ni5h4nt/sigmalint)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20371168.svg)](https://doi.org/10.5281/zenodo.20371168)
 
 Created and maintained by [Nishant Tyagi](https://github.com/ni5h4nt).
 
@@ -192,8 +193,14 @@ entry, doc page). Issues use a structured **new rule proposal** template.
 
 ## Citation
 
-If you use sigmalint in research, please cite via `CITATION.cff`.
-This implementation accompanies a forthcoming paper, *Static Quality Assessment of Sigma Detection Rules: Framework and Empirical Evaluation* (preprint pending).
+If you use sigmalint in research, cite via the Zenodo DOI
+[`10.5281/zenodo.20371168`](https://doi.org/10.5281/zenodo.20371168)
+(concept DOI — always resolves to the latest archived version) or via
+`CITATION.cff`.
+
+This implementation accompanies a forthcoming paper, *Static Quality
+Assessment of Sigma Detection Rules: Framework and Empirical Evaluation*
+(preprint pending).
 
 ## License
 
