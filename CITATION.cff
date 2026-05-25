@@ -9,9 +9,17 @@ authors:
     family-names: Tyagi
     email: nishant.tyagi@gmail.com
 repository-code: "https://github.com/ni5h4nt/sigmalint"
+doi: 10.5281/zenodo.20371168
 license: MIT
-version: 0.1.0
-date-released: "2026-05-23"
+version: 0.1.1
+date-released: "2026-05-24"
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.20371168
+    description: Concept DOI — always resolves to the latest archived version
+  - type: doi
+    value: 10.5281/zenodo.20371169
+    description: Versioned DOI for v0.1.1
 keywords:
   - sigma
   - detection-engineering
