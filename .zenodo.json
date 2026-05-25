@@ -1,0 +1,41 @@
+{
+  "title": "sigmalint: A Linter for Sigma Detection Rules",
+  "description": "<p><code>sigmalint</code> is an ESLint-style linter for <a href=\"https://github.com/SigmaHQ/sigma\">Sigma</a> detection rules. It validates rules against the Sigma 2.1.0 specification (a binary validity gate) and scores them across six quality dimensions &mdash; MITRE ATT&amp;CK alignment, taxonomy correctness, false-positive risk, metadata completeness, redundancy with the SigmaHQ public corpus, and stylistic consistency &mdash; using 22 deterministic checks with stable, citeable rule IDs.</p><p>The tool is designed to run on every pull request in detection-engineering workflows, the same way ESLint runs on JavaScript or RuboCop runs on Ruby. It ships with a composite GitHub Action, four output formats (text, JSON, SARIF 2.1.0, GitHub Actions inline annotations), and runs on Python 3.10&ndash;3.13.</p><p>A companion paper, <em>Static Quality Assessment of Sigma Detection Rules: Framework and Empirical Evaluation</em>, describes the framework and reports an empirical evaluation against the full public SigmaHQ corpus (3,132 rules) plus a seeded-defect benchmark (450 mutations across nine mutators).</p><p>Source code, contribution guide, full per-rule documentation, and reproducibility scripts: <a href=\"https://github.com/ni5h4nt/sigmalint\">https://github.com/ni5h4nt/sigmalint</a>.</p>",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "MIT",
+  "creators": [
+    {
+      "name": "Tyagi, Nishant",
+      "orcid": "0009-0008-4747-6088",
+      "affiliation": "Independent Researcher"
+    }
+  ],
+  "keywords": [
+    "sigma",
+    "sigma-rules",
+    "detection-engineering",
+    "detection-as-code",
+    "linter",
+    "static-analysis",
+    "siem",
+    "mitre-attack",
+    "yaml",
+    "security"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/ni5h4nt/sigmalint",
+      "relation": "isSupplementTo",
+      "scheme": "url",
+      "resource_type": "software"
+    },
+    {
+      "identifier": "https://pypi.org/project/sigmalint-cli/",
+      "relation": "isIdenticalTo",
+      "scheme": "url",
+      "resource_type": "software"
+    }
+  ],
+  "communities": []
+}
