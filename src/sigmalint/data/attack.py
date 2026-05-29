@@ -30,7 +30,7 @@ def _resolve(data_dir: Path) -> Path:
 
 class AttackTaxonomy:
     def __init__(self, data_dir: Path, version: str | None = None):
-        # `version` is reserved for v0.2's multi-version support; v0.1 ignores
+        # `version` is reserved for v0.3's multi-version support; v0.1 ignores
         # it for resolution but plumbs it through the API.
         self._requested_version = version
         path = _resolve(data_dir)

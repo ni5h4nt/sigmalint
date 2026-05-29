@@ -26,7 +26,7 @@ def _load_yaml(p: Path) -> dict:
 
 class SigmaTaxonomy:
     def __init__(self, data_dir: Path, version: str | None = None):
-        # `version` is reserved for v0.2's multi-Sigma-version support.
+        # `version` is reserved for v0.3's multi-Sigma-version support.
         self._requested_version = version
         data = _load_yaml(_resolve(data_dir, "fields.yml"))
         self._fields: dict[str, dict[str, set[str]]] = {
@@ -53,7 +53,7 @@ class SigmaTaxonomy:
 
 class SigmaModifiers:
     def __init__(self, data_dir: Path, version: str | None = None):
-        # `version` is reserved for v0.2's multi-Sigma-version support.
+        # `version` is reserved for v0.3's multi-Sigma-version support.
         self._requested_version = version
         data = _load_yaml(_resolve(data_dir, "sigma-modifiers.yml"))
         self._known = set(data.get("modifiers") or [])
@@ -71,7 +71,7 @@ class SigmaModifiers:
 
 class AttackLogsourceMap:
     def __init__(self, data_dir: Path, version: str | None = None):
-        # `version` is reserved for v0.2's multi-version support.
+        # `version` is reserved for v0.3's multi-version support.
         self._requested_version = version
         data = _load_yaml(_resolve(data_dir, "attack-logsource-map.yml"))
         self._t: dict = data.get("techniques") or {}

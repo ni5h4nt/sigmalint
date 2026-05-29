@@ -23,7 +23,7 @@ _DEFAULT_DIMENSION_WEIGHTS = {
 
 
 # Sigma spec versions sigmalint can validate against. v0.1 ships exactly one;
-# the key is reserved and accepted in config so v0.2's multi-version support
+# the key is reserved and accepted in config so v0.3's multi-version support
 # does not require a config-schema bump.
 SUPPORTED_SIGMA_VERSIONS = ("2.1.0",)
 DEFAULT_SIGMA_VERSION = "2.1.0"
@@ -72,7 +72,7 @@ def _from_dict(d: dict[str, Any]) -> Config:
         raise ConfigError(
             f"target_sigma_version={tsv!r} not supported by this sigmalint "
             f"release. Supported: {list(SUPPORTED_SIGMA_VERSIONS)}. "
-            f"Multi-version support arrives in v0.2."
+            f"Multi-version support arrives in v0.3."
         )
     severities = {k: Severity(v) for k, v in (d.get("severities") or {}).items()}
     weights = d.get("weights") or {}

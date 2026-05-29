@@ -137,7 +137,7 @@ Override per rule via `.sigmalintrc.yml`. See `docs/profiles.md`.
 
 ```yaml
 profile: sigmahq
-target_sigma_version: 2.1.0   # reserved; multi-version arrives in v0.2
+target_sigma_version: 2.1.0   # reserved; multi-version arrives in v0.3
 disable: [RED001]
 severities:
   TAX003: warning
