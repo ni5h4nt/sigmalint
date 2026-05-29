@@ -31,7 +31,6 @@ import pytest
 import yaml
 
 from sigmalint.core.config import Config
-from sigmalint.core.registry import reset_registry_for_tests
 from sigmalint.core.runner import RunContext, lint
 from sigmalint.data.taxonomy import SigmaModifiers, SigmaTaxonomy
 from sigmalint.rules.taxonomy import (
@@ -74,11 +73,6 @@ def _case_id(val: Any) -> str:
     if isinstance(val, Path):
         return val.name
     return str(val)
-
-
-@pytest.fixture(autouse=True)
-def _reset() -> None:
-    reset_registry_for_tests()
 
 
 def _ctx(tmp_path: Path) -> RunContext:
