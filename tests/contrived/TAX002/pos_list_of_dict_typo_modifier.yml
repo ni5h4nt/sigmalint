@@ -1,0 +1,9 @@
+title: TAX002 positive - list-of-dict, misspelled modifier (walker gap)
+# Same walker gap as TAX001: pre-fix the list-of-dict selector was
+# skipped, so misspelled modifiers in this shape were never reported.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        - Image|enswith: ".exe"
+    condition: selection

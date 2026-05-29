@@ -1,0 +1,11 @@
+title: TAX002 positive - chained modifiers, one known one unknown
+# `contains|allz` - contains is valid, allz is not. The rule walks
+# every modifier in the chain, so it fires once on `allz` only.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        CommandLine|contains|allz:
+            - "powershell"
+            - "wscript"
+    condition: selection

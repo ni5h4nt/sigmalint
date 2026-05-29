@@ -1,0 +1,10 @@
+title: TAX001 positive - list-of-dict selector, unknown field (walker gap)
+# This shape is structurally an OR over each list entry's keys.
+# Pre-fix walker iterated only dict-valued selectors and silently
+# skipped this shape; post-fix walker yields field names from both.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        - BogusField: cmd.exe
+    condition: selection

@@ -1,0 +1,5 @@
+title: TAX003 negative - rule has no logsource block
+detection:
+    selection:
+        ImagePath: cmd.exe
+    condition: selection

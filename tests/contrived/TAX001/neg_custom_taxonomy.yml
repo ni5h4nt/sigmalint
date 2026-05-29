@@ -1,0 +1,12 @@
+title: TAX001 negative - explicit custom taxonomy
+# Setting `taxonomy:` at the rule level overrides the configured
+# taxonomy. A taxonomy name not present in the bundled fields.yml
+# resolves as "unknown taxonomy" and is_known returns True, so TAX001
+# does not fire on field names the bundle has no opinion on.
+taxonomy: org-internal
+logsource:
+    category: process_creation
+detection:
+    selection:
+        InternalFieldName: foo
+    condition: selection

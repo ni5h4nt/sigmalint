@@ -1,0 +1,9 @@
+title: TAX003 positive - list-of-dict, ProcessName alias (walker gap)
+# ProcessName is an alias for Image. Pre-fix walker skipped this
+# shape; post-fix it fires the alias finding.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        - ProcessName: cmd.exe
+    condition: selection

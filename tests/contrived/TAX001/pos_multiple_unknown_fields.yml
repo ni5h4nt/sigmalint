@@ -1,0 +1,11 @@
+title: TAX001 positive - two distinct unknown fields, one finding each
+# Walker yields each field name; rule emits one Finding per unknown.
+# Asserts the rule does not deduplicate, does not short-circuit on the
+# first unknown.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        BogusFieldA: foo
+        BogusFieldB: bar
+    condition: selection

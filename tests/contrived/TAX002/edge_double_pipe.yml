@@ -1,0 +1,10 @@
+title: TAX002 edge - `Field||contains` produces an empty modifier segment
+# Splitting `Field||contains` on `|` yields `["Field", "", "contains"]`.
+# The empty string is not a known modifier, so TAX002 fires once.
+# This documents the rule's behaviour for adversarial/malformed shapes.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image||contains: "powershell"
+    condition: selection

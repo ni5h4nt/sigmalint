@@ -1,0 +1,9 @@
+title: TAX001 positive - list-of-dict, unknown base with modifier (walker gap)
+# Combines the list-of-dict shape (walker gap) with the modifier
+# stripping logic. Pre-fix: silent pass. Post-fix: fires on `Frobnicate`.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        - Frobnicate|endswith: ".exe"
+    condition: selection

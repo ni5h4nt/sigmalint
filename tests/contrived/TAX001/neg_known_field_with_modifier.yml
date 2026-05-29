@@ -1,0 +1,10 @@
+title: TAX001 negative - known field carrying a modifier
+# Modifier suffix is stripped before taxonomy lookup. `Image|endswith`
+# becomes `Image`, which is known for process_creation.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+        CommandLine|contains: "-enc"
+    condition: selection

@@ -8,6 +8,28 @@ See `docs/versioning.md` for the full backward-compatibility policy.
 
 ## [Unreleased]
 
+### Added
+
+- **Contrived rule-shape test methodology** (`tests/contrived/`). For
+  each rule a manifest-driven distribution of positive, negative, and
+  edge fixtures asserts the rule fires the expected number of times on
+  each shape. Complements code-coverage tests (which check every line
+  was executed) with shape-coverage tests (which check every legal
+  input shape was exercised). v0.2 ships full coverage for the
+  taxonomy dimension (TAX001/TAX002/TAX003) - 40 fixtures total. Other
+  dimensions follow in v0.3 (FP, META), v0.4 (ATK, RED, STY), and v0.5
+  (SCHEMA).
+
+### Fixed
+
+- **TAX001/TAX002/TAX003 walker now traverses list-of-dict selectors.**
+  Sigma 2.1.0 allows two selector shapes - `dict` and `list-of-dict` -
+  but `_walk_detection_fields` in v0.1.x iterated dict-valued selectors
+  only. Taxonomy and modifier defects in list-of-dict-shaped rules
+  silently passed. Paper §6.6 acknowledged this as a v0.1.0 coverage
+  gap; the contrived shape distribution surfaced it in 5 positive
+  fixtures, and the walker fix makes all 39 contrived TAX cases pass.
+
 ### Notes for future releases
 
 Every release that refreshes vendored reference data (ATT&CK STIX, Sigma

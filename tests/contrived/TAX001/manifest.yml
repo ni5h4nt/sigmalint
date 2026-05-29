@@ -1,0 +1,51 @@
+# TAX001 contrived shape distribution.
+#
+# Rule: every detection field name must exist in the configured taxonomy
+# for the rule's logsource.category. The rule walks all detection
+# selectors and yields a finding per unknown field. v0.1.x had a walker
+# gap: only dict-shaped selectors were iterated, so list-of-dict
+# selectors silently passed regardless of field validity. This fixture
+# distribution covers both shapes and the modifier-attached variant.
+rule_id: TAX001
+
+positives:
+  - file: pos_dict_unknown_field.yml
+    expect: 1
+    summary: dict selector with one unknown field
+  - file: pos_list_of_dict_unknown_field.yml
+    expect: 1
+    summary: list-of-dict selector with one unknown field (walker gap)
+  - file: pos_dict_unknown_with_modifier.yml
+    expect: 1
+    summary: dict selector, unknown base field with modifier suffix
+  - file: pos_list_of_dict_unknown_with_modifier.yml
+    expect: 1
+    summary: list-of-dict selector, unknown base with modifier (walker gap)
+  - file: pos_multiple_unknown_fields.yml
+    expect: 2
+    summary: dict selector, two distinct unknown fields
+  - file: pos_mixed_dict_and_list_of_dict.yml
+    expect: 2
+    summary: one dict selector plus one list-of-dict selector, each with an unknown field
+
+negatives:
+  - file: neg_dict_known_field.yml
+    summary: dict selector, every field name known to taxonomy
+  - file: neg_list_of_dict_known_fields.yml
+    summary: list-of-dict selector, every field known (walker gap manifest)
+  - file: neg_unknown_logsource_category.yml
+    summary: known field shape but logsource.category is unknown - rule short-circuits
+  - file: neg_no_logsource_block.yml
+    summary: rule has no logsource block, rule returns early
+  - file: neg_known_field_with_modifier.yml
+    summary: known field with a known modifier - field-name check ignores modifier
+  - file: neg_custom_taxonomy.yml
+    summary: rule declares taxonomy=custom-not-in-bundle - is_known returns True for unknown taxonomy
+
+edges:
+  - file: edge_empty_detection.yml
+    summary: detection block is the empty dict - nothing to walk
+  - file: edge_condition_only.yml
+    summary: detection block has only the condition key - no selectors
+  - file: edge_empty_selector.yml
+    summary: selector is an empty dict - no keys to yield

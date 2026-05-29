@@ -1,0 +1,13 @@
+title: TAX001 positive - mixed selector shapes, one unknown in each
+# Two selectors: one dict-shaped, one list-of-dict-shaped. Each has a
+# distinct unknown field. Walker should yield from both shapes, so
+# both findings should fire. Pre-fix: only the dict finding fires;
+# post-fix: both fire.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        BogusFromDict: foo
+    filter:
+        - BogusFromList: bar
+    condition: selection and not filter
