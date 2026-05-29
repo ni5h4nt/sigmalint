@@ -25,10 +25,10 @@ def _resolve(data_dir: Path) -> Path:
 class SigmaSchema:
     def __init__(self, data_dir: Path, version: str | None = None):
         # v0.1 ships a single Sigma version; the `version` parameter is
-        # accepted now so v0.2's multi-version loader does not change the
+        # accepted now so v0.3's multi-version loader does not change the
         # signature. When set, it is recorded in `data_version` to preserve
         # report reproducibility; resolution against versioned vendored
-        # bundles arrives in v0.2.
+        # bundles arrives in v0.3.
         self._requested_version = version
         path = _resolve(data_dir)
         try:
