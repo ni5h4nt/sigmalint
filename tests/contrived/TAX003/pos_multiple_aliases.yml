@@ -1,0 +1,11 @@
+title: TAX003 positive - two distinct aliases for the same canonical field
+# Both ImagePath and ProcessName resolve to Image. Rule emits one
+# finding per aliased key, so two findings here.
+logsource:
+    category: process_creation
+detection:
+    selection_a:
+        ImagePath: cmd.exe
+    selection_b:
+        ProcessName: powershell.exe
+    condition: 1 of selection_*

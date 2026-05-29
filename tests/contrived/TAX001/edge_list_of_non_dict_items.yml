@@ -1,0 +1,13 @@
+title: TAX001 edge - list-of-non-dict items in selector
+# Documents the walker's robustness to list-of-dict selectors that
+# contain non-dict members. Valid Sigma rules use lists of dicts; a
+# list of bare strings or numbers is shape-malformed. Walker should
+# skip non-dict items inside the list (yielding no field names) and
+# TAX001 should not fire.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        - "string-item-not-a-dict"
+        - 12345
+    condition: selection

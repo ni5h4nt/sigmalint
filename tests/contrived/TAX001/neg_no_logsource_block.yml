@@ -1,0 +1,8 @@
+title: TAX001 negative - rule has no logsource block
+# TAX001 returns early when category is absent. (SCHEMA validity gate
+# is responsible for flagging the missing logsource elsewhere; TAX001
+# just avoids tripping on it.)
+detection:
+    selection:
+        FieldNameNotChecked: foo
+    condition: selection

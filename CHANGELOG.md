@@ -8,6 +8,62 @@ See `docs/versioning.md` for the full backward-compatibility policy.
 
 ## [Unreleased]
 
+### Added
+
+- **Contrived rule-shape test methodology** (`tests/contrived/`). For
+  each rule a manifest-driven distribution of positive, negative, and
+  edge fixtures asserts the rule fires the expected number of times on
+  each shape. Complements code-coverage tests (which check every line
+  was executed) with shape-coverage tests (which check every legal
+  input shape was exercised). This patch ships full coverage for the
+  taxonomy dimension (TAX001/TAX002/TAX003) - 39 fixtures total. Other
+  dimensions follow on a v0.1.x patch cadence: v0.1.3 (FP, META),
+  v0.1.4 (ATK, RED, STY), v0.1.5 (SCHEMA). The README Roadmap remains
+  the source of truth for v0.2+ scope (additional rule formats,
+  expanded FP heuristics, AI-assisted explanations) and v0.3+
+  (multi-version Sigma support).
+
+### Fixed
+
+- **TAX001/TAX002/TAX003 walker now traverses list-of-dict selectors.**
+  Sigma 2.1.0 allows two selector shapes - `dict` and `list-of-dict` -
+  but `_walk_detection_fields` in v0.1.x iterated dict-valued selectors
+  only. Taxonomy and modifier defects in list-of-dict-shaped rules
+  silently passed. Paper §6.6 acknowledged this as a v0.1.0 coverage
+  gap; the contrived shape distribution surfaced it in 5 positive
+  fixtures, and the walker fix makes all 39 contrived TAX cases pass.
+
+### Score impact
+
+Per the docs/versioning.md convention for fixes that change finding
+counts on previously-clean rules: rules using list-of-dict selectors
+with unknown field names were silently passing TAX001 pre-fix and now
+correctly fire post-fix.
+
+**SigmaHQ corpus (commit `994da16`, 3,132 rules, sigmahq profile,
+ATT&CK v19.1 / Sigma 2.1.0 / taxonomy sigma@v0.1):**
+
+| Metric | v0.1.1 | post-fix | Delta |
+|---|---|---|---|
+| Mean total score | 99.18 | 99.18 | +0.00 (Δ < 0.0001) |
+| Total findings | 2,881 | 2,888 | +7 |
+| TAX001 findings | 35 | 42 | +7 |
+| TAX002 findings | 1 | 1 | 0 |
+| TAX003 findings | 0 | 0 | 0 |
+
+Five SigmaHQ rules with newly-surfaced TAX001 findings (all use
+list-of-dict selectors with unknown field names):
+
+- `windows/file/file_event/file_event_win_susp_wdac_policy_creation.yml` (+3)
+- `windows/file/file_event/file_event_win_office_macro_files_from_susp_process.yml` (+1)
+- `windows/registry/registry_event/registry_event_disable_security_events_logging_adding_reg_key_minint.yml` (+1)
+- `windows/registry/registry_event/registry_event_new_dll_added_to_appcertdlls_registry_key.yml` (+1)
+- `windows/registry/registry_event/registry_event_new_dll_added_to_appinit_dlls_registry_key.yml` (+1)
+
+The mean-score delta is comfortably within the 2.0-point patch-release
+score-floor stability promise documented in docs/versioning.md, so
+this releases as a patch.
+
 ### Notes for future releases
 
 Every release that refreshes vendored reference data (ATT&CK STIX, Sigma

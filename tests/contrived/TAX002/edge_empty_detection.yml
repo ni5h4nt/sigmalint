@@ -1,0 +1,4 @@
+title: TAX002 edge - empty detection block
+logsource:
+    category: process_creation
+detection: {}

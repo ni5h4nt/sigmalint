@@ -10,10 +10,26 @@ from sigmalint.core.types import Dimension, Finding, ParsedRule, Severity
 
 
 def _walk_detection_fields(detection: dict) -> Iterable[str]:
+    """Walk all detection field-name keys, including list-of-dict selectors.
+
+    Sigma 2.1.0 allows two selector shapes:
+      - dict:         selection: { Image: foo, CommandLine: bar }
+      - list-of-dict: selection: [ { Image: foo }, { CommandLine: bar } ]
+
+    The list-of-dict shape is structurally an OR over each dict's keys.
+    sigmalint 0.1.x walked only dict selectors; list-of-dict selectors
+    were silently skipped, masking taxonomy and modifier defects in
+    rules that used that shape.
+    """
     for name, sel in detection.items():
-        if name == "condition" or not isinstance(sel, dict):
+        if name == "condition":
             continue
-        yield from sel.keys()
+        if isinstance(sel, dict):
+            yield from sel.keys()
+        elif isinstance(sel, list):
+            for item in sel:
+                if isinstance(item, dict):
+                    yield from item.keys()
 
 
 @register

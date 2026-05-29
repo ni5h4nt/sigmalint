@@ -1,0 +1,9 @@
+title: TAX003 negative - canonical field carrying a modifier
+# Modifier suffix is stripped before alias lookup, so `Image|endswith`
+# resolves to `Image` which is itself canonical.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

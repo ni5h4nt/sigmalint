@@ -1,0 +1,11 @@
+title: TAX001 negative - list-of-dict selector, every field known
+# Pre-fix: silent pass because the walker skipped this shape entirely
+# (the wrong-reason pass). Post-fix: still no findings, but for the
+# right reason - all field names resolve in the taxonomy.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        - Image: C:\Windows\System32\cmd.exe
+        - CommandLine: "*-encodedcommand*"
+    condition: selection
