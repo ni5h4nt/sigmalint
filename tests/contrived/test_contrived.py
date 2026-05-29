@@ -20,6 +20,11 @@ list-of-dict selector shape was never input.
 
 To add a new dimension's coverage, drop a manifest + fixtures into
 `tests/contrived/<RULE_ID>/` and extend `_RULE_MAP` below.
+
+Rollout cadence (patches, not minors): v0.1.2 ships TAX; v0.1.3 adds
+FP + META; v0.1.4 adds ATK + RED + STY; v0.1.5 adds SCHEMA. The
+README Roadmap remains canonical for v0.2 (formats + AI) and v0.3
+(multi-version Sigma) scope.
 """
 
 from __future__ import annotations
