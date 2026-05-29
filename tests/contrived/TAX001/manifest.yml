@@ -49,3 +49,7 @@ edges:
     summary: detection block has only the condition key - no selectors
   - file: edge_empty_selector.yml
     summary: selector is an empty dict - no keys to yield
+  - file: edge_selector_is_string_literal.yml
+    summary: selector is a plain string - walker skips non-dict non-list values
+  - file: edge_list_of_non_dict_items.yml
+    summary: list-of-non-dict items - walker skips non-dict items inside list
