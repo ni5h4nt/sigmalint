@@ -59,3 +59,19 @@ register_function("pattern", _pattern)
 register_function("enum", _enum)
 register_function("min_length", _min_length)
 register_function("max_length", _max_length)
+
+
+# ── List membership checks ───────────────────────────────────────────────────
+
+def _contains_match(value: Any, options: dict[str, Any], parsed: Any, ctx: Any) -> bool:
+    items = value if isinstance(value, list) else [value]
+    return any(re.search(options["pattern"], str(item)) for item in items)
+
+
+def _all_match(value: Any, options: dict[str, Any], parsed: Any, ctx: Any) -> bool:
+    items = value if isinstance(value, list) else [value]
+    return all(re.search(options["pattern"], str(item)) for item in items)
+
+
+register_function("contains_match", _contains_match)
+register_function("all_match", _all_match)

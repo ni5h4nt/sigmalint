@@ -87,3 +87,33 @@ def test_max_length_passes_list():
 def test_max_length_fails_list():
     fn = get_function("max_length")
     assert fn(["a", "b", "c", "d"], {"max": 3}, None, None) is False
+
+
+def test_contains_match_passes_when_any_item_matches():
+    fn = get_function("contains_match")
+    assert fn(["attack.defense", "org.ref.123"], {"pattern": "^org\\.ref\\."}, None, None) is True
+
+
+def test_contains_match_fails_when_no_item_matches():
+    fn = get_function("contains_match")
+    assert fn(["attack.defense", "attack.t1059"], {"pattern": "^org\\.ref\\."}, None, None) is False
+
+
+def test_contains_match_works_on_scalar():
+    fn = get_function("contains_match")
+    assert fn("org.ref.123", {"pattern": "^org\\.ref\\."}, None, None) is True
+
+
+def test_all_match_passes_when_all_items_match():
+    fn = get_function("all_match")
+    assert fn(["org.ref.1", "org.ref.2"], {"pattern": "^org\\."}, None, None) is True
+
+
+def test_all_match_fails_when_any_item_mismatches():
+    fn = get_function("all_match")
+    assert fn(["org.ref.1", "attack.t1059"], {"pattern": "^org\\."}, None, None) is False
+
+
+def test_all_match_works_on_scalar():
+    fn = get_function("all_match")
+    assert fn("org.ref.1", {"pattern": "^org\\."}, None, None) is True
