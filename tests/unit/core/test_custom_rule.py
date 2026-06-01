@@ -74,6 +74,14 @@ def test_when_in_fails():
     assert evaluate_when("low", {"in": ["high", "critical"]}) is False
 
 
+def test_when_in_passes_when_list_item_in_set():
+    assert evaluate_when(["high", "critical"], {"in": ["critical", "medium"]}) is True
+
+
+def test_when_in_fails_when_no_list_item_in_set():
+    assert evaluate_when(["low", "info"], {"in": ["critical", "medium"]}) is False
+
+
 def test_when_exists_true_passes():
     assert evaluate_when("something", {"exists": True}) is True
 

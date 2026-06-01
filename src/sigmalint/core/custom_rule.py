@@ -42,7 +42,10 @@ def evaluate_when(value: Any, when: dict[str, Any]) -> bool:
             return any(re.search(pattern, str(item)) for item in value)
         return bool(re.search(pattern, str(value)))
     if "in" in when:
-        return bool(value in when["in"])
+        allowed = when["in"]
+        if isinstance(value, list):
+            return any(item in allowed for item in value)
+        return value in allowed
     if "exists" in when:
         return bool((value is not None) == when["exists"])
     if "not_exists" in when:
@@ -101,7 +104,8 @@ def _parse_definition(rule_id: str, d: dict[str, Any]) -> CustomRuleDefinition:
 
 def _build_rule_class(defn: CustomRuleDefinition) -> type[Rule]:
     fn = get_function(defn.then_function)
-    assert fn is not None  # validated in _parse_definition
+    if fn is None:
+        raise ConfigError(f"Function '{defn.then_function}' not found in registry")
 
     def check(self: Rule, parsed: ParsedRule, ctx: Any) -> Iterable[Finding]:
         value = resolve_path(parsed.data, defn.given)
@@ -157,7 +161,7 @@ def import_plugin(module_spec: str, config_dir: Path) -> None:
             raise ConfigError(f"plugin path '{module_spec}' could not be loaded")
         mod = importlib.util.module_from_spec(spec)
         try:
-            spec.loader.exec_module(mod)  # type: ignore[union-attr]
+            spec.loader.exec_module(mod)
         except Exception as e:
             raise ConfigError(
                 f"plugin path '{module_spec}' failed to load: {e}"
