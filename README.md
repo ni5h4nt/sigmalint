@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/ni5h4nt/sigmalint/actions/workflows/ci.yml/badge.svg)](https://github.com/ni5h4nt/sigmalint/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/sigmalint-cli.svg)](https://pypi.org/project/sigmalint-cli/)
+[![Downloads](https://static.pepy.tech/badge/sigmalint-cli)](https://pepy.tech/project/sigmalint-cli)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](pyproject.toml)
 [![codecov](https://codecov.io/gh/ni5h4nt/sigmalint/branch/main/graph/badge.svg)](https://codecov.io/gh/ni5h4nt/sigmalint)
