@@ -1,0 +1,75 @@
+from __future__ import annotations
+
+from sigmalint.core.check_functions import (
+    get_function,
+    register_function,
+)
+
+
+def test_register_and_get():
+    register_function("_test_fn", lambda v, o, p, c: True)
+    assert get_function("_test_fn") is not None
+
+
+def test_get_unknown_returns_none():
+    assert get_function("no_such_fn") is None
+
+
+def test_required_passes_when_value_present():
+    fn = get_function("required")
+    assert fn("hello", {}, None, None) is True
+
+
+def test_required_fails_when_value_none():
+    fn = get_function("required")
+    assert fn(None, {}, None, None) is False
+
+
+def test_pattern_passes_when_matches():
+    fn = get_function("pattern")
+    assert fn("proc_creation", {"match": "^proc_"}, None, None) is True
+
+
+def test_pattern_fails_when_no_match():
+    fn = get_function("pattern")
+    assert fn("other", {"match": "^proc_"}, None, None) is False
+
+
+def test_enum_passes_when_in_set():
+    fn = get_function("enum")
+    assert fn("stable", {"values": ["stable", "test"]}, None, None) is True
+
+
+def test_enum_fails_when_not_in_set():
+    fn = get_function("enum")
+    assert fn("unknown", {"values": ["stable", "test"]}, None, None) is False
+
+
+def test_min_length_passes_string():
+    fn = get_function("min_length")
+    assert fn("hello", {"min": 3}, None, None) is True
+
+
+def test_min_length_fails_string():
+    fn = get_function("min_length")
+    assert fn("hi", {"min": 3}, None, None) is False
+
+
+def test_min_length_passes_list():
+    fn = get_function("min_length")
+    assert fn(["a", "b"], {"min": 2}, None, None) is True
+
+
+def test_min_length_fails_list():
+    fn = get_function("min_length")
+    assert fn(["a"], {"min": 2}, None, None) is False
+
+
+def test_max_length_passes():
+    fn = get_function("max_length")
+    assert fn("hi", {"max": 5}, None, None) is True
+
+
+def test_max_length_fails():
+    fn = get_function("max_length")
+    assert fn("toolongstring", {"max": 5}, None, None) is False
