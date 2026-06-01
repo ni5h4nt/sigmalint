@@ -15,3 +15,37 @@ filters_paths:                       # globs for Sigma Filter files (top-level f
 data_dir: ~/.cache/sigmalint         # corpus + STIX cache location (writable)
 fail_on: error                       # error | warning | never
 min_score: null                      # numeric or null
+
+load_plugins:                        # Python modules to import before rule compilation
+  - my_org.sigmalint_rules           # importable module on sys.path
+  # - ./local_rules.py              # relative path from this config file
+
+custom_rules:                        # org-specific rules defined in YAML (no Python needed)
+  ORG001:
+    message: "All rules must have an org.ref tag"
+    given: tags                      # dot-path into the Sigma doc
+    then:
+      function: contains_match
+      options: {pattern: "^org\\.ref\\."}
+    severity: warning
+    dimension: metadata
+    fix_hint: "Add a tag matching 'org.ref.<id>'"
+
+  ORG002:
+    message: "Critical rules must have references"
+    given: level
+    when: {equals: critical}         # only fires when level == critical
+    then:
+      function: field_required
+      options: {field: references}
+    severity: error
+    dimension: metadata
+
+  ORG003:
+    message: "process_creation rules must have a filter selector"
+    given: logsource.category
+    when: {equals: process_creation}
+    then:
+      function: condition_has_filter
+    severity: warning
+    dimension: fp_risk
