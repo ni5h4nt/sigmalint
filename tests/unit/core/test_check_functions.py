@@ -7,8 +7,12 @@ from sigmalint.core.check_functions import (
 
 
 def test_register_and_get():
-    register_function("_test_fn", lambda v, o, p, c: True)
-    assert get_function("_test_fn") is not None
+    name = "_test_fn_unique_12345"
+    register_function(name, lambda v, o, p, c: True)
+    assert get_function(name) is not None
+    # Clean up to avoid polluting registry for other tests
+    from sigmalint.core.check_functions import _REGISTRY
+    _REGISTRY.pop(name, None)
 
 
 def test_get_unknown_returns_none():
@@ -73,3 +77,13 @@ def test_max_length_passes():
 def test_max_length_fails():
     fn = get_function("max_length")
     assert fn("toolongstring", {"max": 5}, None, None) is False
+
+
+def test_max_length_passes_list():
+    fn = get_function("max_length")
+    assert fn(["a", "b"], {"max": 3}, None, None) is True
+
+
+def test_max_length_fails_list():
+    fn = get_function("max_length")
+    assert fn(["a", "b", "c", "d"], {"max": 3}, None, None) is False

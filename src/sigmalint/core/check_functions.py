@@ -30,11 +30,12 @@ def get_function(name: str) -> CheckFn | None:
 # ── Structural checks ────────────────────────────────────────────────────────
 
 def _required(value: Any, options: dict[str, Any], parsed: Any, ctx: Any) -> bool:
+    # Fires only when the field is absent (None). Empty string/list are considered present.
     return value is not None
 
 
 def _pattern(value: Any, options: dict[str, Any], parsed: Any, ctx: Any) -> bool:
-    return bool(re.search(options.get("match", ""), str(value)))
+    return bool(re.search(options["match"], str(value)))
 
 
 def _enum(value: Any, options: dict[str, Any], parsed: Any, ctx: Any) -> bool:
