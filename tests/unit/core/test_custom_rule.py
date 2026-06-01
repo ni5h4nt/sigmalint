@@ -88,3 +88,115 @@ def test_when_not_exists_passes_on_none():
 
 def test_when_not_exists_fails_on_value():
     assert evaluate_when("something", {"not_exists": True}) is False
+
+
+import pytest
+from sigmalint.core.check_functions import register_function
+from sigmalint.core.custom_rule import CustomRuleLoader
+from sigmalint.core.errors import ConfigError
+from sigmalint.core.registry import all_rules, reset_registry_for_tests
+from sigmalint.core.types import Dimension, Finding, ParsedRule, Severity
+
+
+@pytest.fixture(autouse=True)
+def clean_registry():
+    """Reset rule registry between tests to avoid ID collision."""
+    yield
+    reset_registry_for_tests()
+
+
+def _minimal_rule_dict() -> dict:
+    return {
+        "message": "Tags must include org.ref",
+        "given": "tags",
+        "then": {"function": "contains_match", "options": {"pattern": "^org\\.ref\\."}},
+    }
+
+
+def test_compile_produces_registered_rule():
+    CustomRuleLoader.compile({"ORG001": _minimal_rule_dict()})
+    ids = [r.id for r in all_rules()]
+    assert "ORG001" in ids
+
+
+def test_compiled_rule_has_correct_dimension_and_severity():
+    d = {**_minimal_rule_dict(), "severity": "error", "dimension": "fp_risk"}
+    CustomRuleLoader.compile({"ORG001": d})
+    rule = next(r for r in all_rules() if r.id == "ORG001")
+    assert rule.default_severity == Severity.ERROR
+    assert rule.dimension == Dimension.FP_RISK
+
+
+def test_compiled_rule_check_yields_finding_on_fail():
+    CustomRuleLoader.compile({"ORG001": _minimal_rule_dict()})
+    rule = next(r for r in all_rules() if r.id == "ORG001")
+    parsed = ParsedRule(
+        path="test.yml", raw_text="", data={"tags": ["attack.t1059"]}
+    )
+    findings = list(rule.check(parsed, None))
+    assert len(findings) == 1
+    assert findings[0].rule_id == "ORG001"
+    assert findings[0].severity == Severity.WARNING
+
+
+def test_compiled_rule_check_no_finding_on_pass():
+    CustomRuleLoader.compile({"ORG001": _minimal_rule_dict()})
+    rule = next(r for r in all_rules() if r.id == "ORG001")
+    parsed = ParsedRule(
+        path="test.yml", raw_text="", data={"tags": ["org.ref.123"]}
+    )
+    findings = list(rule.check(parsed, None))
+    assert findings == []
+
+
+def test_compiled_rule_when_guard_skips_when_condition_not_met():
+    d = {
+        "message": "process_creation needs filter",
+        "given": "logsource.category",
+        "when": {"equals": "process_creation"},
+        "then": {"function": "condition_has_filter"},
+    }
+    CustomRuleLoader.compile({"ORG002": d})
+    rule = next(r for r in all_rules() if r.id == "ORG002")
+    # logsource.category = "network" — when guard not met → no finding
+    parsed = ParsedRule(
+        path="test.yml",
+        raw_text="",
+        data={
+            "logsource": {"category": "network"},
+            "detection": {"condition": "selection"},
+        },
+    )
+    assert list(rule.check(parsed, None)) == []
+
+
+def test_missing_message_raises_config_error():
+    with pytest.raises(ConfigError, match="missing required key 'message'"):
+        CustomRuleLoader.compile(
+            {"ORG001": {"then": {"function": "required"}}}
+        )
+
+
+def test_missing_then_function_raises_config_error():
+    with pytest.raises(ConfigError, match="missing required key 'then.function'"):
+        CustomRuleLoader.compile({"ORG001": {"message": "x", "then": {}}})
+
+
+def test_unknown_function_raises_config_error():
+    with pytest.raises(ConfigError, match="unknown function 'no_such_fn'"):
+        CustomRuleLoader.compile(
+            {"ORG001": {"message": "x", "then": {"function": "no_such_fn"}}}
+        )
+
+
+def test_invalid_severity_raises_config_error():
+    with pytest.raises(ConfigError):
+        CustomRuleLoader.compile(
+            {
+                "ORG001": {
+                    "message": "x",
+                    "then": {"function": "required"},
+                    "severity": "super_error",
+                }
+            }
+        )

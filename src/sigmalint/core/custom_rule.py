@@ -2,10 +2,15 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Any
 
-from sigmalint.core.types import Dimension, Severity
+from sigmalint.core.check_functions import get_function
+from sigmalint.core.errors import ConfigError
+from sigmalint.core.registry import register
+from sigmalint.core.rule import Rule
+from sigmalint.core.types import Dimension, Finding, ParsedRule, Severity
 
 
 def resolve_path(data: dict[str, Any], path: str) -> Any:
@@ -52,3 +57,83 @@ class CustomRuleDefinition:
     then_function: str = ""
     then_options: dict[str, Any] = field(default_factory=dict)
     fix_hint: str | None = None
+
+
+def _validate_path(rule_id: str, path: str) -> None:
+    if path != "." and ".." in path:
+        raise ConfigError(f"Custom rule '{rule_id}' given path '{path}' is invalid")
+
+
+def _parse_definition(rule_id: str, d: dict[str, Any]) -> CustomRuleDefinition:
+    if "message" not in d:
+        raise ConfigError(f"Custom rule '{rule_id}' missing required key 'message'")
+    then = d.get("then") or {}
+    fn_name = then.get("function", "")
+    if not fn_name:
+        raise ConfigError(f"Custom rule '{rule_id}' missing required key 'then.function'")
+    if get_function(fn_name) is None:
+        raise ConfigError(
+            f"Custom rule '{rule_id}' references unknown function '{fn_name}'"
+        )
+    given = d.get("given", ".")
+    _validate_path(rule_id, given)
+    try:
+        severity = Severity(d.get("severity", "warning"))
+        dimension = Dimension(d.get("dimension", "metadata"))
+    except ValueError as e:
+        raise ConfigError(f"Custom rule '{rule_id}': {e}") from e
+    return CustomRuleDefinition(
+        id=rule_id,
+        message=d.get("message", ""),
+        severity=severity,
+        dimension=dimension,
+        given=given,
+        when=d.get("when"),
+        then_function=fn_name,
+        then_options=dict(then.get("options") or {}),
+        fix_hint=d.get("fix_hint"),
+    )
+
+
+def _build_rule_class(defn: CustomRuleDefinition) -> type[Rule]:
+    fn = get_function(defn.then_function)
+    assert fn is not None  # validated in _parse_definition
+
+    def check(self: Rule, parsed: ParsedRule, ctx: Any) -> Iterable[Finding]:
+        value = resolve_path(parsed.data, defn.given)
+        if defn.when is not None and not evaluate_when(value, defn.when):
+            return
+        if not fn(value, defn.then_options, parsed, ctx):
+            yield Finding(
+                rule_id=defn.id,
+                dimension=defn.dimension,
+                severity=defn.severity,
+                message=defn.message,
+                file=parsed.path,
+                fix_hint=defn.fix_hint,
+            )
+
+    return type(
+        defn.id,
+        (Rule,),
+        {
+            "id": defn.id,
+            "dimension": defn.dimension,
+            "default_severity": defn.severity,
+            "summary": defn.message[:60],
+            "check": check,
+        },
+    )
+
+
+class CustomRuleLoader:
+    @staticmethod
+    def compile(custom_rules: dict[str, Any]) -> list[type[Rule]]:
+        """Compile custom rule dicts into Rule subclasses and register them."""
+        compiled: list[type[Rule]] = []
+        for rule_id, rule_dict in custom_rules.items():
+            defn = _parse_definition(rule_id, rule_dict)
+            rule_cls = _build_rule_class(defn)
+            register(rule_cls)
+            compiled.append(rule_cls)
+        return compiled
