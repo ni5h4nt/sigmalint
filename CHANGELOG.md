@@ -8,6 +8,8 @@ See `docs/versioning.md` for the full backward-compatibility policy.
 
 ## [Unreleased]
 
+## [0.1.2] — 2026-06-01
+
 ### Added
 
 - **Contrived rule-shape test methodology** (`tests/contrived/`). For
@@ -16,12 +18,32 @@ See `docs/versioning.md` for the full backward-compatibility policy.
   each shape. Complements code-coverage tests (which check every line
   was executed) with shape-coverage tests (which check every legal
   input shape was exercised). This patch ships full coverage for the
-  taxonomy dimension (TAX001/TAX002/TAX003) - 39 fixtures total. Other
+  taxonomy dimension (TAX001/TAX002/TAX003) - 41 fixtures total. Other
   dimensions follow on a v0.1.x patch cadence: v0.1.3 (FP, META),
   v0.1.4 (ATK, RED, STY), v0.1.5 (SCHEMA). The README Roadmap remains
   the source of truth for v0.2+ scope (additional rule formats,
   expanded FP heuristics, AI-assisted explanations) and v0.3+
   (multi-version Sigma support).
+- **Zenodo DOI** for citation: concept DOI
+  [`10.5281/zenodo.20371168`](https://doi.org/10.5281/zenodo.20371168)
+  always resolves to the latest archived version; versioned DOI
+  `10.5281/zenodo.20371169` pins to v0.1.1 specifically. README badge
+  + Citation section + `CITATION.cff` `identifiers` block point at
+  both. Future releases auto-deposit via the new `.zenodo.json`
+  metadata file (sets title, description, creators with ORCID,
+  license, keywords, related identifiers — overrides Zenodo's
+  defaults that would otherwise use release notes as the abstract).
+
+### Changed
+
+- **Multi-Sigma-version target aligned with README Roadmap.** Inline
+  comments in the example config (`README.md` Configuration block,
+  `.sigmalintrc.example.yml`), three internal source-code comments
+  (`config.py`, `taxonomy.py`, `attack.py`, `sigma_schema.py`), and
+  one externally-observable `ConfigError` message ("Multi-version
+  support arrives in v0.3.") moved from `v0.2` to `v0.3` to match
+  the canonical Roadmap statement. v0.2 ships rule-format expansion;
+  multi-Sigma-version support is v0.3 scope.
 
 ### Fixed
 
@@ -31,7 +53,7 @@ See `docs/versioning.md` for the full backward-compatibility policy.
   only. Taxonomy and modifier defects in list-of-dict-shaped rules
   silently passed. Paper §6.6 acknowledged this as a v0.1.0 coverage
   gap; the contrived shape distribution surfaced it in 5 positive
-  fixtures, and the walker fix makes all 39 contrived TAX cases pass.
+  fixtures, and the walker fix makes all 41 contrived TAX cases pass.
 
 ### Score impact
 

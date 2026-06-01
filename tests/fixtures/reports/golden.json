@@ -1,5 +1,5 @@
 {
-  "sigmalint_version": "0.1.1",
+  "sigmalint_version": "0.1.2",
   "profile": "sigmahq",
   "data_versions": {
     "sigma_schema": "2.1.0",
