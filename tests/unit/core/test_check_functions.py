@@ -117,3 +117,46 @@ def test_all_match_fails_when_any_item_mismatches():
 def test_all_match_works_on_scalar():
     fn = get_function("all_match")
     assert fn("org.ref.1", {"pattern": "^org\\."}, None, None) is True
+
+
+from sigmalint.core.types import ParsedRule
+
+
+def _make_parsed(detection: dict) -> ParsedRule:
+    return ParsedRule(path="test.yml", raw_text="", data={"detection": detection})
+
+
+def test_condition_has_filter_passes_when_negated_filter_present():
+    fn = get_function("condition_has_filter")
+    parsed = _make_parsed({"condition": "selection and not filter_known"})
+    assert fn(None, {}, parsed, None) is True
+
+
+def test_condition_has_filter_fails_when_no_negated_filter():
+    fn = get_function("condition_has_filter")
+    parsed = _make_parsed({"condition": "selection"})
+    assert fn(None, {}, parsed, None) is False
+
+
+def test_condition_has_filter_fails_when_no_detection():
+    fn = get_function("condition_has_filter")
+    parsed = ParsedRule(path="test.yml", raw_text="", data={})
+    assert fn(None, {}, parsed, None) is False
+
+
+def test_condition_references_selector_passes_when_name_found():
+    fn = get_function("condition_references_selector")
+    parsed = _make_parsed({"condition": "selection and not filter_admin"})
+    assert fn(None, {"name": "filter_admin"}, parsed, None) is True
+
+
+def test_condition_references_selector_fails_when_name_absent():
+    fn = get_function("condition_references_selector")
+    parsed = _make_parsed({"condition": "selection"})
+    assert fn(None, {"name": "filter_admin"}, parsed, None) is False
+
+
+def test_condition_references_selector_supports_regex():
+    fn = get_function("condition_references_selector")
+    parsed = _make_parsed({"condition": "selection and not filter_known_admin"})
+    assert fn(None, {"name": "filter_.*"}, parsed, None) is True

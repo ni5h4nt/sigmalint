@@ -75,3 +75,22 @@ def _all_match(value: Any, options: dict[str, Any], parsed: Any, ctx: Any) -> bo
 
 register_function("contains_match", _contains_match)
 register_function("all_match", _all_match)
+
+
+# ── Condition-aware checks ───────────────────────────────────────────────────
+
+def _condition_has_filter(value: Any, options: dict[str, Any], parsed: Any, ctx: Any) -> bool:
+    condition = str((parsed.data.get("detection") or {}).get("condition", ""))
+    return bool(re.search(r"\band\s+not\s+filter", condition, re.IGNORECASE))
+
+
+def _condition_references_selector(
+    value: Any, options: dict[str, Any], parsed: Any, ctx: Any
+) -> bool:
+    name_pattern = options["name"]
+    condition = str((parsed.data.get("detection") or {}).get("condition", ""))
+    return bool(re.search(name_pattern, condition))
+
+
+register_function("condition_has_filter", _condition_has_filter)
+register_function("condition_references_selector", _condition_references_selector)
