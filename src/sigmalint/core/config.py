@@ -45,6 +45,8 @@ class Config:
     data_dir: str = "~/.cache/sigmalint"
     fail_on: str = "error"
     min_score: float | None = None
+    load_plugins: tuple[str, ...] = ()
+    custom_rules: dict[str, Any] = field(default_factory=dict)
 
 
 def load_config(path: Path | None) -> Config:
@@ -92,4 +94,6 @@ def _from_dict(d: dict[str, Any]) -> Config:
         data_dir=d.get("data_dir", "~/.cache/sigmalint"),
         fail_on=fail_on,
         min_score=d.get("min_score"),
+        load_plugins=tuple(d.get("load_plugins") or ()),
+        custom_rules=dict(d.get("custom_rules") or {}),
     )
