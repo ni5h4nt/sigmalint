@@ -1,9 +1,13 @@
 """Compile custom rule definitions from .sigmalintrc.yml into Rule subclasses."""
 from __future__ import annotations
 
+import importlib
+import importlib.util
 import re
+import sys
 from collections.abc import Iterable
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 from sigmalint.core.check_functions import get_function
@@ -137,3 +141,32 @@ class CustomRuleLoader:
             register(rule_cls)
             compiled.append(rule_cls)
         return compiled
+
+
+def import_plugin(module_spec: str, config_dir: Path) -> None:
+    """Import a plugin module by dotted name or relative file path.
+
+    Relative paths (starting with './' or '../') are resolved from config_dir.
+    """
+    if module_spec.startswith("./") or module_spec.startswith("../"):
+        path = (config_dir / module_spec).resolve()
+        if not path.exists():
+            raise ConfigError(f"plugin path '{module_spec}' not found (resolved: {path})")
+        spec = importlib.util.spec_from_file_location(path.stem, path)
+        if spec is None or spec.loader is None:
+            raise ConfigError(f"plugin path '{module_spec}' could not be loaded")
+        mod = importlib.util.module_from_spec(spec)
+        try:
+            spec.loader.exec_module(mod)  # type: ignore[union-attr]
+        except Exception as e:
+            raise ConfigError(
+                f"plugin path '{module_spec}' failed to load: {e}"
+            ) from e
+        sys.modules[path.stem] = mod
+    else:
+        try:
+            importlib.import_module(module_spec)
+        except ModuleNotFoundError as e:
+            raise ConfigError(f"cannot import plugin '{module_spec}': {e}") from e
+        except Exception as e:
+            raise ConfigError(f"plugin '{module_spec}' failed to load: {e}") from e
