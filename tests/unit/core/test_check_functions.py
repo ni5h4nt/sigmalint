@@ -160,3 +160,31 @@ def test_condition_references_selector_supports_regex():
     fn = get_function("condition_references_selector")
     parsed = _make_parsed({"condition": "selection and not filter_known_admin"})
     assert fn(None, {"name": "filter_.*"}, parsed, None) is True
+
+
+def test_field_required_passes_when_field_present():
+    fn = get_function("field_required")
+    parsed = ParsedRule(
+        path="test.yml", raw_text="", data={"level": "high", "references": ["https://example.com"]}
+    )
+    assert fn("high", {"field": "references"}, parsed, None) is True
+
+
+def test_field_required_fails_when_field_absent():
+    fn = get_function("field_required")
+    parsed = ParsedRule(path="test.yml", raw_text="", data={"level": "high"})
+    assert fn("high", {"field": "references"}, parsed, None) is False
+
+
+def test_field_required_fails_when_field_is_none():
+    fn = get_function("field_required")
+    parsed = ParsedRule(path="test.yml", raw_text="", data={"level": "high", "references": None})
+    assert fn("high", {"field": "references"}, parsed, None) is False
+
+
+def test_field_required_resolves_nested_path():
+    fn = get_function("field_required")
+    parsed = ParsedRule(
+        path="test.yml", raw_text="", data={"logsource": {"category": "process_creation"}}
+    )
+    assert fn(None, {"field": "logsource.category"}, parsed, None) is True

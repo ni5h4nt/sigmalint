@@ -94,3 +94,19 @@ def _condition_references_selector(
 
 register_function("condition_has_filter", _condition_has_filter)
 register_function("condition_references_selector", _condition_references_selector)
+
+
+# ── Cross-field checks ───────────────────────────────────────────────────────
+
+def _field_required(value: Any, options: dict[str, Any], parsed: Any, ctx: Any) -> bool:
+    """Check a field at options['field'] (doc-root path), independent of `given`."""
+    field_path = options["field"]
+    current: Any = parsed.data
+    for part in field_path.split("."):
+        if not isinstance(current, dict) or part not in current:
+            return False
+        current = current[part]
+    return current is not None
+
+
+register_function("field_required", _field_required)
