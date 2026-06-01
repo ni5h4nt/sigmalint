@@ -11,11 +11,11 @@ import typer
 
 from sigmalint import __version__
 from sigmalint.core.config import Config, load_config
+from sigmalint.core.custom_rule import CustomRuleLoader, import_plugin
 from sigmalint.core.errors import DataLoadError, SigmalintError
 from sigmalint.core.filters import discover_filters
 from sigmalint.core.profiles import PROFILES, resolve_severity
 from sigmalint.core.registry import all_rules, enabled_rules
-from sigmalint.core.custom_rule import CustomRuleLoader, import_plugin
 from sigmalint.core.runner import RunContext
 from sigmalint.core.runner import lint as run_lint
 from sigmalint.core.scoring import score_file
