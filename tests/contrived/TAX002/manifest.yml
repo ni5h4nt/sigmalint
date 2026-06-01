@@ -1,0 +1,44 @@
+# TAX002 contrived shape distribution.
+#
+# Rule: every Sigma field-name modifier (the segment(s) after `|`)
+# must be a known Sigma 2.1.0 modifier. The walker yields field names
+# from detection selectors; for each, modifier segments are extracted
+# by splitting on `|`. v0.1.x had the same walker gap as TAX001 -
+# list-of-dict selectors silently passed.
+rule_id: TAX002
+
+positives:
+  - file: pos_dict_typo_modifier.yml
+    expect: 1
+    summary: dict selector, single misspelled modifier
+  - file: pos_list_of_dict_typo_modifier.yml
+    expect: 1
+    summary: list-of-dict selector, misspelled modifier (walker gap)
+  - file: pos_chained_one_bad_one_good.yml
+    expect: 1
+    summary: chained modifiers, one known one unknown - only the unknown fires
+  - file: pos_multiple_bad_modifiers.yml
+    expect: 2
+    summary: two separate fields each with a misspelled modifier
+  - file: pos_unknown_field_bad_modifier.yml
+    expect: 1
+    summary: TAX002 is independent of TAX001 - bad modifier on unknown field still fires
+
+negatives:
+  - file: neg_no_modifier.yml
+    summary: "plain `Field: value` with no modifier"
+  - file: neg_dict_known_modifier.yml
+    summary: dict selector, single known modifier
+  - file: neg_list_of_dict_known_modifier.yml
+    summary: list-of-dict selector, known modifier (walker gap manifest)
+  - file: neg_chained_known_modifiers.yml
+    summary: chained known modifiers (e.g. contains plus all)
+  - file: neg_unknown_field_known_modifier.yml
+    summary: unknown base field but known modifier - TAX002 does not fire (TAX001 may)
+
+edges:
+  - file: edge_empty_detection.yml
+    summary: detection block is the empty dict
+  - file: edge_double_pipe.yml
+    expect: 1
+    summary: "`Field||contains` produces an empty modifier segment which is not a known modifier"

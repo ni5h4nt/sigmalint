@@ -1,0 +1,9 @@
+title: TAX003 negative - unknown logsource.category short-circuits
+# Alias maps are keyed by category. An unknown category yields no
+# alias mappings, so TAX003 cannot fire.
+logsource:
+    category: thingamajig
+detection:
+    selection:
+        ImagePath: cmd.exe
+    condition: selection

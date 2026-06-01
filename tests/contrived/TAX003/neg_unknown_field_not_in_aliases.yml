@@ -1,0 +1,10 @@
+title: TAX003 negative - unknown field but not an alias
+# `BogusField` is unknown to the taxonomy AND not in the alias map.
+# TAX001 may fire here; TAX003 only fires on names registered as
+# aliases.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        BogusField: foo
+    condition: selection

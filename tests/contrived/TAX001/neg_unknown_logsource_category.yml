@@ -1,0 +1,11 @@
+title: TAX001 negative - unknown logsource.category short-circuits
+# SigmaTaxonomy.is_known returns True for any field when the
+# logsource.category is not in the bundled taxonomy. This prevents
+# false positives on novel categories where the field list isn't yet
+# curated.
+logsource:
+    category: thingamajig
+detection:
+    selection:
+        AnyFieldNameWorks: foo
+    condition: selection

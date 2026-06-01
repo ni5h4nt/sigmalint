@@ -1,0 +1,12 @@
+title: TAX002 positive - two separate fields, each with a bad modifier
+# The current rule emits one finding per bad modifier per field key.
+# Note: pos_chained_one_bad_one_good.yml documents that the rule
+# walks every modifier within a chain; this fixture documents that it
+# also walks every field.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|enswith: ".exe"
+        CommandLine|contianz: "powershell"
+    condition: selection

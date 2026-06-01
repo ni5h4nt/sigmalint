@@ -1,0 +1,43 @@
+# TAX003 contrived shape distribution.
+#
+# Rule: prefer the canonical field name over a known alias. Aliases
+# are defined in vendored fields.yml under `canonical_aliases`. For
+# process_creation, ImagePath -> Image, ProcessName -> Image,
+# ProcessCommandLine -> CommandLine. Severity is INFO (not warning).
+# Same walker-gap class as TAX001/TAX002.
+rule_id: TAX003
+
+positives:
+  - file: pos_dict_imagepath_alias.yml
+    expect: 1
+    summary: dict selector using ImagePath alias instead of canonical Image
+  - file: pos_list_of_dict_processname_alias.yml
+    expect: 1
+    summary: list-of-dict selector using ProcessName alias (walker gap)
+  - file: pos_dict_alias_with_modifier.yml
+    expect: 1
+    summary: aliased field carrying a known modifier
+  - file: pos_multiple_aliases.yml
+    expect: 2
+    summary: two distinct aliases for the same canonical field both used
+  - file: pos_mixed_canonical_and_alias.yml
+    expect: 1
+    summary: selector contains both the canonical name and one alias - alias fires
+
+negatives:
+  - file: neg_dict_canonical_field.yml
+    summary: dict selector using Image (canonical) directly
+  - file: neg_list_of_dict_canonical.yml
+    summary: list-of-dict selector with canonical names (walker gap manifest)
+  - file: neg_canonical_with_modifier.yml
+    summary: canonical name with modifier - rule strips modifier before lookup
+  - file: neg_unknown_logsource_category.yml
+    summary: rule short-circuits when logsource.category is unknown
+  - file: neg_no_logsource_block.yml
+    summary: rule returns early when category is absent
+  - file: neg_unknown_field_not_in_aliases.yml
+    summary: TAX001 may fire on a totally-unknown field, but TAX003 only fires on aliases
+
+edges:
+  - file: edge_empty_detection.yml
+    summary: detection block is the empty dict

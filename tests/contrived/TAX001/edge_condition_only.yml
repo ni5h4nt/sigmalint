@@ -1,0 +1,5 @@
+title: TAX001 edge - detection has only the condition key
+logsource:
+    category: process_creation
+detection:
+    condition: "1 of selection_*"

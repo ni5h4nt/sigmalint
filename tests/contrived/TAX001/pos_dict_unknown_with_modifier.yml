@@ -1,0 +1,10 @@
+title: TAX001 positive - dict selector, unknown base field with modifier
+# Modifier suffix is stripped before taxonomy lookup; the base name is
+# what TAX001 checks. `Frobnicate|contains` -> base `Frobnicate`,
+# unknown for process_creation, so TAX001 fires.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Frobnicate|contains: "powershell"
+    condition: selection

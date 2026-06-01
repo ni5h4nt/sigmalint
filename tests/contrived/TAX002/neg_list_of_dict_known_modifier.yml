@@ -1,0 +1,11 @@
+title: TAX002 negative - list-of-dict selector, known modifier
+# Pre-fix: silent pass because the walker skipped this shape. Post-fix:
+# still no findings, but for the right reason - `endswith` is a known
+# Sigma 2.1.0 modifier.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        - Image|endswith: "\\powershell.exe"
+        - CommandLine|contains: "-enc"
+    condition: selection

@@ -1,0 +1,9 @@
+title: TAX002 negative - unknown base field but known modifier
+# TAX001 might fire on `BogusField`, but TAX002 looks only at modifier
+# segments. `contains` is known, so TAX002 does not fire.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        BogusField|contains: foo
+    condition: selection

@@ -1,0 +1,9 @@
+title: TAX003 positive - aliased field carrying a known modifier
+# `ProcessCommandLine|contains` - base name is the alias
+# `ProcessCommandLine` whose canonical form is `CommandLine`.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        ProcessCommandLine|contains: "-EncodedCommand"
+    condition: selection

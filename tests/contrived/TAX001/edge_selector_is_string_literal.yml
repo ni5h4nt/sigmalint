@@ -1,0 +1,12 @@
+title: TAX001 edge - selector value is a plain string, not dict or list
+# Documents the walker's robustness to non-dict / non-list selector
+# shapes. Valid Sigma rules use dict or list-of-dict selectors; this
+# fixture sits between "valid Sigma" and "outright malformed YAML" -
+# the YAML parses, but the selector violates Sigma 2.1.0 selector
+# semantics. Walker should yield nothing (no field names to iterate)
+# and TAX001 should not fire.
+logsource:
+    category: process_creation
+detection:
+    selection: "literal-string-not-a-selector"
+    condition: selection

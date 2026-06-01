@@ -1,0 +1,12 @@
+title: TAX002 positive - unknown base field, bad modifier - TAX002 still fires
+# TAX002 is field-agnostic: it does not check whether the base name is
+# in the taxonomy, only whether the modifier segment is in the Sigma
+# 2.1.0 modifier appendix. If both TAX001 and TAX002 are enabled, this
+# rule shape would produce one finding each; this fixture asserts
+# TAX002 alone fires once regardless of TAX001's verdict.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        BogusField|contianz: foo
+    condition: selection

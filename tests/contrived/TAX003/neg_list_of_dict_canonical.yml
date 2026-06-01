@@ -1,0 +1,11 @@
+title: TAX003 negative - list-of-dict, canonical names only (walker gap manifest)
+# Pre-fix: silent pass because walker skipped. Post-fix: still passes,
+# but for the right reason - Image and CommandLine are canonical, no
+# alias mapping triggers.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        - Image: cmd.exe
+        - CommandLine: "-enc"
+    condition: selection

@@ -1,0 +1,10 @@
+title: TAX002 negative - chained known modifiers
+# `contains|all` - both are listed in sigma-modifiers.yml.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        CommandLine|contains|all:
+            - "powershell"
+            - "-encodedcommand"
+    condition: selection

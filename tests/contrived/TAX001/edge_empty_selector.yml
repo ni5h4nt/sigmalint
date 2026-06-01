@@ -1,0 +1,6 @@
+title: TAX001 edge - selector is the empty dict
+logsource:
+    category: process_creation
+detection:
+    selection: {}
+    condition: selection
