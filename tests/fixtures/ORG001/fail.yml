@@ -1,0 +1,17 @@
+title: Test Fail Rule
+id: 00000000-0000-4000-a000-000000000002
+status: test
+description: A test rule that fails the org.ref tag check
+author: test
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '\powershell.exe'
+  filter:
+    ParentImage|endswith: '\explorer.exe'
+  condition: selection and not filter
+tags:
+  - attack.defense_evasion
+level: medium
