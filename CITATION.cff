@@ -11,15 +11,12 @@ authors:
 repository-code: "https://github.com/ni5h4nt/sigmalint"
 doi: 10.5281/zenodo.20371168
 license: MIT
-version: 0.1.1
-date-released: "2026-05-24"
+version: 0.1.3
+date-released: "2026-06-01"
 identifiers:
   - type: doi
     value: 10.5281/zenodo.20371168
-    description: Concept DOI — always resolves to the latest archived version
-  - type: doi
-    value: 10.5281/zenodo.20371169
-    description: Versioned DOI for v0.1.1
+    description: Concept DOI — always resolves to the latest archived version. Per-version DOIs are listed on the Zenodo deposit page.
 keywords:
   - sigma
   - detection-engineering

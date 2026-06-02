@@ -8,6 +8,8 @@ See `docs/versioning.md` for the full backward-compatibility policy.
 
 ## [Unreleased]
 
+## [0.1.3] — 2026-06-01
+
 ### Added
 
 - **Contrived shape coverage for the false-positive-risk dimension**
