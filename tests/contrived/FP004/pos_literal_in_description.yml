@@ -1,0 +1,11 @@
+title: FP004 positive - IPv4 appears only in `description:`, not in detection
+# Documents that the rule scans `parsed.raw_text`, not just detection
+# values. Hardcoded literals anywhere in the rule file (description,
+# references, falsepositives, even YAML comments) are flagged.
+description: "Detects connections to 203.0.113.42 (RFC 5737 documentation range)"
+logsource:
+    category: network_connection
+detection:
+    selection:
+        DestinationPort: 4444
+    condition: selection

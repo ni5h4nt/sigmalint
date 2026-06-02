@@ -1,0 +1,11 @@
+title: FP004 negative - first octet has 4 digits, exceeds digit-count boundary
+# The IPv4 regex allows 1-3 digits per octet; a 4-digit leading group
+# breaks the word-boundary anchor and the pattern does not match.
+# The regex does NOT range-check 0-255, so digit count is the only
+# constraint that saves this fixture.
+logsource:
+    category: network_connection
+detection:
+    selection:
+        DestinationIp: "1000.1.1.1"
+    condition: selection

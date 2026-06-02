@@ -1,0 +1,8 @@
+# See the analysis at 198.51.100.42 for context.
+title: FP004 edge - hardcoded literal appears in a YAML comment
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

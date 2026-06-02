@@ -1,0 +1,7 @@
+title: FP004 positive - IPv4 literal in detection value
+logsource:
+    category: network_connection
+detection:
+    selection:
+        DestinationIp: 192.168.1.1
+    condition: selection

@@ -43,6 +43,7 @@ from sigmalint.rules.fp_risk import (
     Fp001SingleBroadSelection,
     Fp002PreferModifiers,
     Fp003NoFilterOnNoisy,
+    Fp004HardcodedLiterals,
 )
 from sigmalint.rules.taxonomy import (
     Tax001KnownFields,
@@ -61,6 +62,7 @@ _RULE_MAP: dict[str, type] = {
     "FP001": Fp001SingleBroadSelection,
     "FP002": Fp002PreferModifiers,
     "FP003": Fp003NoFilterOnNoisy,
+    "FP004": Fp004HardcodedLiterals,
 }
 
 

@@ -1,0 +1,7 @@
+title: FP004 positive - MAC address literal
+logsource:
+    category: network_connection
+detection:
+    selection:
+        SourceMac: "00:1B:44:11:3A:B7"
+    condition: selection
