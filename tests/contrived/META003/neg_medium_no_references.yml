@@ -1,0 +1,8 @@
+title: META003 negative - medium level, no references
+level: medium
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

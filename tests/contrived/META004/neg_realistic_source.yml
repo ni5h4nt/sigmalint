@@ -1,0 +1,9 @@
+title: META004 negative - falsepositives with a realistic source
+falsepositives:
+    - "Legitimate scheduled task with similar command line"
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

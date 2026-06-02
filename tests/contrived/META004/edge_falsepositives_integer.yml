@@ -1,0 +1,11 @@
+title: META004 edge - falsepositives is an integer (non-string non-list)
+# Rule's type-handling normalises non-string, non-list values to an
+# empty list `[]`, so the rule fires for the "no meaningful entries"
+# reason. Documents the type-robust path.
+falsepositives: 42
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

@@ -1,0 +1,10 @@
+title: META002 positive - only date is missing
+author: test@example.com
+description: A test rule
+level: medium
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

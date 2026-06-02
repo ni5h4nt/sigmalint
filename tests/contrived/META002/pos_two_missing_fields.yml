@@ -1,0 +1,9 @@
+title: META002 positive - author and level both missing (2 findings)
+date: 2026-06-01
+description: A test rule
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

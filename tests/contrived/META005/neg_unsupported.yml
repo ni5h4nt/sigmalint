@@ -1,0 +1,8 @@
+title: META005 fixture - neg_unsupported
+status: unsupported
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

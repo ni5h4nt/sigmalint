@@ -1,0 +1,11 @@
+title: META002 positive - level null is treated as missing
+author: test@example.com
+date: 2026-06-01
+description: A test rule
+level: null
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

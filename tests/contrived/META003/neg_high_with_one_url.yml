@@ -1,0 +1,10 @@
+title: META003 negative - high level + one valid reference URL
+level: high
+references:
+    - "https://example.com/threat-research-report"
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

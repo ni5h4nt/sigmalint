@@ -1,0 +1,12 @@
+title: META004 negative - falsepositives "None known"
+# "None known" is a real explanation acknowledging the author
+# considered the question and concluded no realistic FPs exist.
+# Treated as meaningful content, not as the magic "unknown".
+falsepositives:
+    - "None known"
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

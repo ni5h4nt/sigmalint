@@ -1,0 +1,12 @@
+title: META004 negative - falsepositives mixes Unknown with a real entry
+# A single meaningful entry is enough; the rule looks for `any`
+# meaningful entry, not "all entries must be meaningful."
+falsepositives:
+    - "Unknown"
+    - "Some real false-positive source"
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

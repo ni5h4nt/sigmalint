@@ -1,0 +1,48 @@
+# META002 contrived shape distribution.
+#
+# Rule: fires once per missing-or-empty field across `author`, `date`,
+# `description`, `level`. The check is:
+#   v = parsed.data.get(key)
+#   if v is None or (isinstance(v, str) and not v.strip()):
+#       fire
+# So a rule with N missing/empty REQUIRED fields produces N findings.
+# Integer or other non-string non-None values do NOT fire (rule is
+# permissive about type as long as it's truthy-and-not-None).
+rule_id: META002
+
+positives:
+  - file: pos_missing_author.yml
+    expect: 1
+    summary: only `author` is missing - 1 finding
+  - file: pos_missing_date.yml
+    expect: 1
+    summary: only `date` is missing - 1 finding
+  - file: pos_missing_description.yml
+    expect: 1
+    summary: only `description` is missing - 1 finding
+  - file: pos_missing_level.yml
+    expect: 1
+    summary: only `level` is missing - 1 finding
+  - file: pos_two_missing_fields.yml
+    expect: 2
+    summary: author and level both missing - 2 findings
+  - file: pos_all_four_missing.yml
+    expect: 4
+    summary: all four required fields missing - 4 findings
+  - file: pos_whitespace_only_author.yml
+    expect: 1
+    summary: '`author: "   "` - whitespace-only string triggers the empty-string arm'
+  - file: pos_level_null.yml
+    expect: 1
+    summary: '`level: null` - None is treated as missing'
+
+negatives:
+  - file: neg_all_populated.yml
+    summary: all four required fields populated with non-empty strings
+
+edges:
+  - file: edge_level_integer.yml
+    summary: '`level: 1` - non-string non-None value does NOT fire (rule is type-permissive)'
+  - file: edge_empty_yaml.yml
+    expect: 4
+    summary: rule body has only title - all 4 required fields are absent
