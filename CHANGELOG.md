@@ -10,13 +10,17 @@ See `docs/versioning.md` for the full backward-compatibility policy.
 
 ### Added
 
-- **Contrived shape coverage for FP001 + FP002** under
-  `tests/contrived/`. 28 fixtures total: 14 for FP001 (5 positives,
-  7 negatives, 2 edges) and 14 for FP002 (7 positives, 5 negatives,
-  2 edges). Documents both rules' behaviour across dict, list-of-dict,
-  single-branch, multi-branch, modifier-bearing, and edge shapes. Part
-  of the v0.1.x contrived-rollout (TAX shipped in v0.1.2; FP003/FP004
-  next).
+- **Contrived shape coverage for the false-positive-risk dimension**
+  (FP001 + FP002 + FP003 + FP004) under `tests/contrived/`. 49
+  fixtures total: 14 each for FP001 and FP002, 11 for FP003, 10 for
+  FP004. Documents all four rules' behaviour across dict, list-of-dict,
+  condition-AST, raw-text-regex, single-branch, multi-branch,
+  modifier-bearing, and edge shapes. The contrived test loader gained
+  a `filters:` manifest field that materialises `SigmaFilter` dataclass
+  instances in-process so FP003's external-Sigma-Filter path can be
+  exercised without writing real filter YAML files. Part of the v0.1.x
+  contrived-rollout (TAX shipped in v0.1.2; META001a/b + META002-005
+  next in v0.1.3 patch series).
 
 ### Fixed
 
