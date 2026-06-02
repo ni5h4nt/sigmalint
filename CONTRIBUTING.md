@@ -18,6 +18,32 @@ rules** and **rule improvements**.
    comments must be marked resolved. Merge is squash or rebase only
    (linear history — no merge commits).
 
+### Common gotcha: "Permission denied" on push
+
+If you cloned this repository directly (rather than forking first)
+and then tried to push a branch, you'll see:
+
+```
+ERROR: Permission to ni5h4nt/sigmalint.git denied to <your-user>.
+fatal: Could not read from remote repository.
+```
+
+This is expected. GitHub only allows non-collaborators to push to
+**their own forks**, not to the upstream repo. The fix without
+re-cloning:
+
+```bash
+# Fork ni5h4nt/sigmalint on github.com via the web UI first.
+# Then in your local clone:
+git remote rename origin upstream
+git remote add origin https://github.com/<your-user>/sigmalint.git
+git push -u origin <your-branch>
+```
+
+Open the PR from `<your-user>:<your-branch>` → `ni5h4nt:main`. The
+`upstream` remote lets you pull future updates from this repo with
+`git pull upstream main`.
+
 ## How to add a new rule
 
 A new rule is four files. That's the whole contract.
