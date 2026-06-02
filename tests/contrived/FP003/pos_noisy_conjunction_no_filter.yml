@@ -1,0 +1,9 @@
+title: FP003 positive - conjunction of two positive selectors, no negation
+logsource:
+    category: registry_event
+detection:
+    selection:
+        TargetObject: HKLM\foo
+    other:
+        EventType: SetValue
+    condition: selection and other

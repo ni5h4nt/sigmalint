@@ -1,0 +1,9 @@
+title: FP003 positive - `1 of selection_*` pattern, no negation
+logsource:
+    category: file_event
+detection:
+    selection_a:
+        TargetFilename|endswith: ".exe"
+    selection_b:
+        TargetFilename|endswith: ".dll"
+    condition: 1 of selection_*

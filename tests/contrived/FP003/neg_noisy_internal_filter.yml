@@ -1,0 +1,11 @@
+title: FP003 negative - underscore-prefix `_*` selector name
+# `_is_filter_selector("_filter")` is True via the `startswith("_")`
+# branch. Documents the third filter-naming convention.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    _filter:
+        ParentImage|endswith: "\\services.exe"
+    condition: selection and not _filter

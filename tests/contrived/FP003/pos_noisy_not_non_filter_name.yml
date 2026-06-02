@@ -1,0 +1,13 @@
+title: FP003 positive - negation, but target name is NOT a filter-class name
+# `_is_filter_selector("other_selection")` is False (not exactly
+# `filter`, not `filter_*`, not `_*`). So even though there is a
+# `not` in the condition, the negated target doesn't count as a
+# filter and FP003 still fires.
+logsource:
+    category: network_connection
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    other_selection:
+        DestinationPort: 4444
+    condition: selection and not other_selection

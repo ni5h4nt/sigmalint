@@ -1,0 +1,9 @@
+title: FP003 negative - `filter_*` prefix selector name
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    filter_user:
+        User: SYSTEM
+    condition: selection and not filter_user

@@ -1,0 +1,10 @@
+title: FP003 negative - non-noisy logsource.category short-circuits
+# Categories outside the NOISY_CATEGORIES set bypass the rule
+# entirely; FP003 is intentionally scoped to high-volume telemetry
+# sources where missing-filter is a real noise vector.
+logsource:
+    category: webserver
+detection:
+    selection:
+        StatusCode: 200
+    condition: selection

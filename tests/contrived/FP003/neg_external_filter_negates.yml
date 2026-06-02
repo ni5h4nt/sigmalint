@@ -1,0 +1,13 @@
+title: FP003 negative - external Sigma Filter provides the negation
+# This fixture is paired with a `filters:` entry in the manifest that
+# constructs a SigmaFilter targeting this rule's id. The Filter's own
+# condition is `not filter_external`, which contains a negated
+# filter-class name; FP003 walks ctx.filters, finds the applicable
+# filter, parses its condition, sees the negation, and does NOT fire.
+id: 6ba9c5b1-8f7e-4d2a-b5e1-1234567890ab
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

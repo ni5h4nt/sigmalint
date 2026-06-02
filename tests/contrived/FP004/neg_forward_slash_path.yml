@@ -1,0 +1,10 @@
+title: FP004 negative - forward-slash path
+# The Windows-path regex requires backslashes (`C:\\Users\\...`).
+# A forward-slash variant is syntactically a different path shape
+# and not flagged.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image: "C:/Users/admin/foo.exe"
+    condition: selection

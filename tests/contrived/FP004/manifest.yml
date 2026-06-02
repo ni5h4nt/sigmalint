@@ -1,0 +1,41 @@
+# FP004 contrived shape distribution.
+#
+# Rule: regex search over `parsed.raw_text` for any of three patterns
+# (Windows user-path, IPv4 literal, MAC address). Fires once per
+# matching pattern (so a rule with all three patterns matched yields
+# 3 findings). The rule walks raw text, NOT parsed data structures,
+# so a literal appearing in a comment, description, or detection
+# value all fire equally.
+rule_id: FP004
+
+positives:
+  - file: pos_windows_user_path.yml
+    expect: 1
+    summary: 'Windows user-path like `C:\Users\admin\foo` - first pattern matches'
+  - file: pos_ipv4_literal.yml
+    expect: 1
+    summary: "IPv4 literal like `192.168.1.1` - second pattern matches"
+  - file: pos_mac_address.yml
+    expect: 1
+    summary: "MAC address with colons like `00:1B:44:11:3A:B7` - third pattern matches"
+  - file: pos_all_three_patterns.yml
+    expect: 3
+    summary: all three literal types in one rule - one finding per pattern
+  - file: pos_literal_in_description.yml
+    expect: 1
+    summary: "literal appears in `description:` (not detection value) - raw_text scan still fires"
+
+negatives:
+  - file: neg_no_hardcoded_literals.yml
+    summary: clean rule, none of the three patterns appear in raw text
+  - file: neg_forward_slash_path.yml
+    summary: "`C:/Users/foo` with forward slashes - pattern requires backslashes"
+  - file: neg_too_many_digits_ipv4.yml
+    summary: '`1000.1.1.1` - first octet is 4 digits, exceeds `\d{1,3}` boundary'
+  - file: neg_mac_too_few_segments.yml
+    summary: "`00:1B:44:11:3A` - only 5 hex pairs, regex requires 6"
+
+edges:
+  - file: edge_pattern_in_yaml_comment.yml
+    expect: 1
+    summary: pattern appears in a YAML comment - rule scans raw_text including comments

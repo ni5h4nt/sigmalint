@@ -1,0 +1,9 @@
+title: FP004 negative - MAC-shaped string with only 5 hex pairs
+# The MAC regex requires `(?:[0-9A-Fa-f]{2}[:\-]){5}` followed by
+# `[0-9A-Fa-f]{2}` - 6 hex pairs total. A 5-pair shape doesn't match.
+logsource:
+    category: network_connection
+detection:
+    selection:
+        SourceMac: "00:1B:44:11:3A"
+    condition: selection
