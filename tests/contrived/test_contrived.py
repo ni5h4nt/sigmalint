@@ -48,6 +48,10 @@ from sigmalint.rules.fp_risk import (
 from sigmalint.rules.metadata import (
     Meta001aIdPresent,
     Meta001bIdValidUuid4,
+    Meta002CorePopulated,
+    Meta003ReferencesForHigh,
+    Meta004FalsepositivesPopulated,
+    Meta005StatusVocabulary,
 )
 from sigmalint.rules.taxonomy import (
     Tax001KnownFields,
@@ -69,6 +73,10 @@ _RULE_MAP: dict[str, type] = {
     "FP004": Fp004HardcodedLiterals,
     "META001a": Meta001aIdPresent,
     "META001b": Meta001bIdValidUuid4,
+    "META002": Meta002CorePopulated,
+    "META003": Meta003ReferencesForHigh,
+    "META004": Meta004FalsepositivesPopulated,
+    "META005": Meta005StatusVocabulary,
 }
 
 

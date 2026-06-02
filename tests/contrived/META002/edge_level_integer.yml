@@ -1,0 +1,15 @@
+title: META002 edge - level is an integer (non-string, non-None)
+# The rule fires only when value is None OR (string AND empty). An
+# integer value is non-None and not a string, so the rule does NOT
+# fire. This documents the rule's type-permissiveness: any non-None,
+# non-empty-string value passes. META005 would flag this separately.
+author: test@example.com
+date: 2026-06-01
+description: A test rule
+level: 1
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

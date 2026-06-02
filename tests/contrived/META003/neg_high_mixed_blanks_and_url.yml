@@ -1,0 +1,14 @@
+title: META003 negative - mixed blanks and valid URL
+# Rule's `any(isinstance(r, str) and r.strip() ...)` short-circuits
+# on the first meaningful entry; blanks alongside a real URL is fine.
+level: high
+references:
+    - ""
+    - "   "
+    - "https://example.com/cve-2026-0001"
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

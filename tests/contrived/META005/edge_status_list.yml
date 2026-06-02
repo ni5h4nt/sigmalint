@@ -1,0 +1,9 @@
+title: META005 fixture - edge_status_list
+status:
+    - stable
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

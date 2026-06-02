@@ -1,0 +1,10 @@
+title: META002 positive - only description is missing
+author: test@example.com
+date: 2026-06-01
+level: medium
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

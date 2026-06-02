@@ -1,0 +1,8 @@
+title: META004 positive - falsepositives empty list
+falsepositives: []
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

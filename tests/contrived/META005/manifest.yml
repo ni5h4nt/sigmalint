@@ -1,0 +1,51 @@
+# META005 contrived shape distribution.
+#
+# Rule: fires when `status` is present AND not in the Sigma 2.1.0
+# vocabulary {stable, test, experimental, deprecated, unsupported}.
+# The rule is CASE-SENSITIVE - "Stable" is not the same as "stable".
+# Returns silently when `status` is absent or None.
+rule_id: META005
+
+positives:
+  - file: pos_typo_stabel.yml
+    expect: 1
+    summary: '`status: stabel` (typo of stable)'
+  - file: pos_typo_experimnental.yml
+    expect: 1
+    summary: '`status: experimnental` (typo of experimental)'
+  - file: pos_capitalized_stable.yml
+    expect: 1
+    summary: '`status: Stable` (capitalized first letter) - rule is case-sensitive'
+  - file: pos_all_caps_stable.yml
+    expect: 1
+    summary: '`status: STABLE` (all uppercase)'
+  - file: pos_plausible_draft.yml
+    expect: 1
+    summary: '`status: draft` (plausible-but-invalid status)'
+  - file: pos_empty_string.yml
+    expect: 1
+    summary: '`status: ""` - empty string is not in valid set'
+
+negatives:
+  - file: neg_stable.yml
+    summary: '`status: stable`'
+  - file: neg_test.yml
+    summary: '`status: test`'
+  - file: neg_experimental.yml
+    summary: '`status: experimental`'
+  - file: neg_deprecated.yml
+    summary: '`status: deprecated`'
+  - file: neg_unsupported.yml
+    summary: '`status: unsupported`'
+  - file: neg_no_status_key.yml
+    summary: no `status:` key - rule returns early on `is None`
+  - file: neg_status_null.yml
+    summary: '`status: null` - rule returns early on `is None`'
+
+edges:
+  - file: edge_status_integer.yml
+    expect: 1
+    summary: '`status: 1` (integer) - `1 not in VALID_STATUS` fires'
+  - file: edge_status_list.yml
+    expect: 1
+    summary: '`status: [stable]` (list, not scalar) - list not in set, fires'

@@ -1,0 +1,12 @@
+title: META004 positive - falsepositives list of mixed-case unknowns
+# All entries normalize to "unknown"; none are meaningful.
+falsepositives:
+    - "unknown"
+    - "UNKNOWN"
+    - "Unknown"
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

@@ -1,0 +1,8 @@
+title: META005 fixture - pos_typo_stabel
+status: stabel
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

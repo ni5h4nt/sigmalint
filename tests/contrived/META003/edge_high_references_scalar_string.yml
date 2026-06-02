@@ -1,0 +1,13 @@
+title: META003 edge - references is a scalar string, not a list
+# Rule's `isinstance(refs, list)` check is False here, so the
+# `or not any(...)` arm evaluates to True (`not any(...)` would
+# also fire since the iteration is over a string of characters,
+# not URL strings). Either way: rule fires.
+level: high
+references: "https://example.com/just-one-string-not-wrapped"
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

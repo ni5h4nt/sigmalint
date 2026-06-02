@@ -194,7 +194,12 @@ class Meta005StatusVocabulary(Rule):
         status = parsed.data.get("status")
         if status is None:
             return
-        if status not in VALID_STATUS:
+        # Non-string values are semantically invalid as Sigma vocabulary
+        # entries; checking `status not in VALID_STATUS` directly would
+        # crash with TypeError on unhashable values (lists, dicts), which
+        # the runner would convert to an opaque INTERNAL001 finding. Fire
+        # a clean META005 finding instead.
+        if not isinstance(status, str) or status not in VALID_STATUS:
             yield _finding(
                 self,
                 f"status={status!r} not in {sorted(VALID_STATUS)}",

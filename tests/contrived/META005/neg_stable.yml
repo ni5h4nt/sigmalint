@@ -1,0 +1,8 @@
+title: META005 fixture - neg_stable
+status: stable
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

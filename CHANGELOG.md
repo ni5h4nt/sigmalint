@@ -29,9 +29,26 @@ See `docs/versioning.md` for the full backward-compatibility policy.
   severity matches the declared value, used to lock in META001b's
   ERROR-vs-WARNING split that depends on whether the id parses as
   a UUID at all.
+- **Contrived shape coverage for the metadata content rules**
+  (META002 + META003 + META004 + META005). 51 fixtures: 11 for
+  META002, 13 for META003, 12 for META004, 15 for META005.
+  Documents per-field missing-vs-empty behaviour for META002,
+  level-gated reference requirements for META003, the
+  false-positives `Unknown` magic-string casing for META004, and
+  the Sigma 2.1.0 status vocabulary for META005. Closes the v0.1.x
+  contrived rollout for the FP and META dimensions; v0.1.4 will add
+  ATK, RED, and STY; v0.1.5 SCHEMA.
 
 ### Fixed
 
+- **META005 no longer crashes on non-string status values.** A list-
+  or dict-valued `status:` would trip `status not in VALID_STATUS`
+  with a `TypeError: unhashable type` which the runner converted to
+  an opaque `INTERNAL001` finding rather than a clean META005. Added
+  an `isinstance(status, str)` guard so non-string status now fires
+  a regular META005 warning. No SigmaHQ corpus rule was triggering
+  the crash; this is a defensive fix surfaced by the contrived
+  shape coverage in `tests/contrived/META005/edge_status_list.yml`.
 - **FP001 and FP002 walker traverses list-of-dict selectors.** Both
   rules used `_selectors()` which filtered out list-of-dict selectors,
   the same walker-class gap that TAX001/2/3 had in v0.1.2 (paper §6.6).

@@ -1,0 +1,9 @@
+title: META003 edge - level is empty string
+# Rule lowercases to "", which is not in {high, critical}; short-circuits.
+level: ""
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

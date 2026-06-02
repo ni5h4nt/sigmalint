@@ -1,0 +1,46 @@
+# META004 contrived shape distribution.
+#
+# Rule: fires when `falsepositives` is missing, null, empty, scalar
+# "Unknown" (case-insensitive), or a list containing only blank/Unknown
+# entries. Meaningful means: at least one stripped non-empty string
+# that is not "unknown" (lowercase).
+rule_id: META004
+
+positives:
+  - file: pos_no_falsepositives_key.yml
+    expect: 1
+    summary: no `falsepositives:` key at all
+  - file: pos_falsepositives_null.yml
+    expect: 1
+    summary: '`falsepositives: null`'
+  - file: pos_falsepositives_empty_list.yml
+    expect: 1
+    summary: '`falsepositives: []` - empty list'
+  - file: pos_scalar_unknown_exact_case.yml
+    expect: 1
+    summary: '`falsepositives: "Unknown"` - scalar, exact case'
+  - file: pos_scalar_unknown_lowercase.yml
+    expect: 1
+    summary: '`falsepositives: "unknown"` - scalar, lowercase'
+  - file: pos_list_unknown_only.yml
+    expect: 1
+    summary: '`falsepositives: ["Unknown"]` - list with only the magic string'
+  - file: pos_list_multiple_unknown_casings.yml
+    expect: 1
+    summary: '`falsepositives: ["unknown", "UNKNOWN"]` - all entries normalize to "unknown"'
+  - file: pos_list_only_blanks.yml
+    expect: 1
+    summary: '`falsepositives: ["", " "]` - only blank strings'
+
+negatives:
+  - file: neg_realistic_source.yml
+    summary: '`falsepositives: ["Some realistic source"]` - one meaningful entry'
+  - file: neg_mixed_unknown_and_real.yml
+    summary: '`falsepositives: ["Unknown", "Some real FP"]` - mixed; the real entry suffices'
+  - file: neg_none_known.yml
+    summary: '`falsepositives: "None known"` - a real explanation, not the magic "unknown"'
+
+edges:
+  - file: edge_falsepositives_integer.yml
+    expect: 1
+    summary: '`falsepositives: 42` - non-string non-list; rule normalises to [] and fires'

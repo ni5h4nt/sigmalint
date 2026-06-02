@@ -1,0 +1,46 @@
+# META003 contrived shape distribution.
+#
+# Rule: fires when `level` (lowercased) is in {high, critical} AND
+# `references` is missing/None/not-a-list/empty-list/all-blank-strings.
+# The rule's intent: high-severity alerts must cite at least one
+# meaningful reference URL.
+rule_id: META003
+
+positives:
+  - file: pos_high_no_references.yml
+    expect: 1
+    summary: '`level: high` + no references key'
+  - file: pos_critical_no_references.yml
+    expect: 1
+    summary: '`level: critical` + no references key'
+  - file: pos_high_empty_list.yml
+    expect: 1
+    summary: '`level: high` + references is empty list'
+  - file: pos_high_only_blanks.yml
+    expect: 1
+    summary: '`level: high` + references = ["", "  "] - only blank strings'
+  - file: pos_critical_references_null.yml
+    expect: 1
+    summary: '`level: critical` + references is null'
+  - file: pos_uppercase_high.yml
+    expect: 1
+    summary: '`level: HIGH` - rule lowercases before comparing'
+
+negatives:
+  - file: neg_medium_no_references.yml
+    summary: '`level: medium` + no references - rule short-circuits below high'
+  - file: neg_low_no_references.yml
+    summary: '`level: low` + no references - rule short-circuits'
+  - file: neg_no_level_field.yml
+    summary: no `level:` key at all - rule short-circuits
+  - file: neg_high_with_one_url.yml
+    summary: '`level: high` + one valid URL reference'
+  - file: neg_high_mixed_blanks_and_url.yml
+    summary: '`level: high` + references contains one blank and one valid URL'
+
+edges:
+  - file: edge_high_references_scalar_string.yml
+    expect: 1
+    summary: '`level: high` + references is a scalar string (not a list) - rule fires because isinstance(refs, list) is False'
+  - file: edge_level_empty_string.yml
+    summary: '`level: ""` - lowercases to "", not in {high, critical}, does NOT fire'

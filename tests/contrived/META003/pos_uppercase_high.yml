@@ -1,0 +1,10 @@
+title: META003 positive - uppercase HIGH level
+# Rule does `level_raw.lower()`, so case variations are normalised
+# before the {high, critical} membership check.
+level: HIGH
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

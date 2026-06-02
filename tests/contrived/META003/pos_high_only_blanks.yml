@@ -1,0 +1,11 @@
+title: META003 positive - high level, references contains only blank strings
+level: high
+references:
+    - ""
+    - "   "
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

@@ -1,0 +1,9 @@
+title: META004 positive - falsepositives scalar "Unknown" (exact case)
+# Rule wraps scalar string into a single-element list before checking.
+falsepositives: "Unknown"
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

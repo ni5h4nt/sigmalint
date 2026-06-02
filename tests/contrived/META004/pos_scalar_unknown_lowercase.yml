@@ -1,0 +1,9 @@
+title: META004 positive - falsepositives scalar "unknown" lowercase
+# Rule normalises with .lower() before the "unknown" comparison.
+falsepositives: "unknown"
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

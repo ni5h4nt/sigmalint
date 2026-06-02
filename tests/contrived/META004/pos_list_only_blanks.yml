@@ -1,0 +1,11 @@
+title: META004 positive - falsepositives list of blank strings only
+falsepositives:
+    - ""
+    - " "
+    - "  "
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

@@ -1,0 +1,9 @@
+title: META003 positive - critical level, references is null
+level: critical
+references: null
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection
