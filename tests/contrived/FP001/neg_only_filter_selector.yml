@@ -1,0 +1,10 @@
+title: FP001 negative - the only selector is a filter selector
+# `_is_filter_selector("filter")` is True, so even though there is
+# exactly one selector with a single short-scalar field, the rule
+# treats filter-named selectors as exempt from "broad single selection."
+logsource:
+    category: process_creation
+detection:
+    filter:
+        Image: cmd
+    condition: filter

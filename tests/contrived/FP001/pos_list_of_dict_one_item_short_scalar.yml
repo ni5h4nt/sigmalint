@@ -1,0 +1,12 @@
+title: FP001 positive - list-of-dict, one item, short scalar (walker gap pre-fix)
+# This shape is a degenerate OR with exactly one branch. Pre-fix walker
+# filters out list-of-dict entirely so the rule does not fire (returns
+# len(sels) == 0). Post-fix walker yields one (name, body) tuple, the
+# rule sees distinct_names = {selection} and len(sels) = 1, and the
+# body has a single short-scalar field, so the rule fires.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        - Image: cmd
+    condition: selection

@@ -1,0 +1,11 @@
+title: FP001 negative - field value is a list, not a scalar
+# Rule's `isinstance(value, list)` early-return; list values are
+# treated as enumerated matches, distinct from a single broad scalar.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image:
+            - cmd
+            - foo
+    condition: selection

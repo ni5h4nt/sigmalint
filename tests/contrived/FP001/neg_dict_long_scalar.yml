@@ -1,0 +1,9 @@
+title: FP001 negative - dict selector, scalar value length >= 6
+# Companion to pos_dict_boundary_len5: 6 chars must NOT fire, 5 chars
+# must fire. Documents the `< 6` boundary in both directions.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image: longer
+    condition: selection

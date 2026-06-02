@@ -1,0 +1,9 @@
+title: FP001 positive - dict selector, value is the empty string
+# len("") == 0 < 6, so the rule fires; documents that the rule treats
+# empty-string-as-broad consistently with any short string.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image: ""
+    condition: selection

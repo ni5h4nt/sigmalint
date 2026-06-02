@@ -1,0 +1,12 @@
+title: FP001 negative - list-of-dict, single wrapped item with two fields
+# Post-fix: _selectors_iter() yields one tuple whose body has 2 fields.
+# `len(body) != 1` short-circuits the rule. Documents that the rule
+# applies its per-body checks per OR-branch, not over the union of
+# all branches.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        - Image: cmd
+          CommandLine: foo
+    condition: selection
