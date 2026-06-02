@@ -1,0 +1,49 @@
+# FP001 contrived shape distribution.
+#
+# Rule: detection has exactly one non-filter selector containing exactly one
+# field whose value is a string of length < 6 (a "single broad selection").
+# v0.1.x walks _selectors() which filters out list-of-dict shapes; phase 3
+# of v0.1.3 switches to _selectors_iter() returning (name, body) tuples to
+# preserve OR-branch semantics. List-of-dict with one item is degenerate
+# (single branch -> still "single broad"); list-of-dict with 2+ items is
+# a multi-branch OR (not "single broad", does NOT fire).
+rule_id: FP001
+
+positives:
+  - file: pos_dict_named_selection_short.yml
+    expect: 1
+    summary: dict selector named `selection`, one field, len-3 scalar
+  - file: pos_dict_alt_name_short.yml
+    expect: 1
+    summary: dict selector with non-canonical name (`event`), len-3 scalar - rule is name-agnostic for non-filter names
+  - file: pos_dict_empty_string_value.yml
+    expect: 1
+    summary: dict selector, one field whose value is the empty string (len 0)
+  - file: pos_list_of_dict_one_item_short_scalar.yml
+    expect: 1
+    summary: list-of-dict selector with exactly one wrapped dict (walker gap pre-fix)
+  - file: pos_dict_boundary_len5.yml
+    expect: 1
+    summary: boundary case - scalar at exactly len=5 (rule uses `< 6`)
+
+negatives:
+  - file: neg_dict_long_scalar.yml
+    summary: dict selector, scalar value length >= 6
+  - file: neg_two_distinct_selectors.yml
+    summary: two distinct selectors - rule requires exactly one
+  - file: neg_only_filter_selector.yml
+    summary: the only selector is a filter selector (`filter:`) - rule skips
+  - file: neg_one_selector_two_fields.yml
+    summary: one selector with two fields - rule requires exactly one field
+  - file: neg_list_value_not_scalar.yml
+    summary: one selector, one field, but value is a list - rule skips list values
+  - file: neg_list_of_dict_two_items.yml
+    summary: list-of-dict selector with 2 items - multi-branch OR, not single-broad (post-fix only; pre-fix walker drops the selector entirely)
+  - file: neg_list_of_dict_one_item_two_fields.yml
+    summary: list-of-dict, single wrapped item but with two fields - body has two fields, rule skips
+
+edges:
+  - file: edge_empty_detection.yml
+    summary: detection block is the empty dict - no selectors to count
+  - file: edge_condition_only.yml
+    summary: detection has only the condition key - no selectors

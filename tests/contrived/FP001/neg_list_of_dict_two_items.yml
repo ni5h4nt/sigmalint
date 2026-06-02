@@ -1,0 +1,14 @@
+title: FP001 negative - list-of-dict with 2+ items (multi-branch OR)
+# Pre-fix: walker drops the entire list-of-dict so `len(sels) == 0`,
+# rule returns without firing - passes for the WRONG reason.
+# Post-fix: _selectors_iter() yields 2 tuples with the same selector
+# name. distinct_names = {selection} (len 1), but len(sels) == 2,
+# so the rule correctly recognises this as multi-branch and does
+# NOT fire - passes for the RIGHT reason.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        - Image: cmd
+        - CommandLine: foo
+    condition: selection

@@ -1,0 +1,10 @@
+title: FP001 negative - one selector with two fields
+# Rule requires `len(body) == 1`. A two-field selector is multi-condition
+# even if each value is short.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image: cmd
+        CommandLine: foo
+    condition: selection

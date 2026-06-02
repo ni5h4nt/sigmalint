@@ -1,0 +1,9 @@
+title: FP001 positive - boundary case, scalar at exactly len=5
+# Rule uses `len(value) < 6`. A 5-char value sits exactly at the boundary
+# and must fire. A 6-char value (see neg_dict_long_scalar) must not.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image: short
+    condition: selection

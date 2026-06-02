@@ -27,8 +27,31 @@ def _is_filter_selector(name: str) -> bool:
     return name == "filter" or name.startswith("filter_") or name.startswith("_")
 
 
-def _selectors(detection: dict) -> dict[str, dict]:
-    return {k: v for k, v in detection.items() if k != "condition" and isinstance(v, dict)}
+def _selectors_iter(detection: dict) -> Iterable[tuple[str, dict]]:
+    """Yield (selector_name, body) for every dict-shaped detection branch.
+
+    Sigma 2.1.0 allows two selector shapes:
+      - dict:         selection: { Image: foo, CommandLine: bar }
+      - list-of-dict: selection: [ { Image: foo }, { CommandLine: bar } ]
+
+    A dict selector yields one (name, body). A list-of-dict selector
+    yields one (name, body) per dict member - same selector name, multiple
+    bodies (an OR semantic). Rules that need to distinguish "one selector"
+    from "one branch" must inspect both the distinct-name set and the
+    tuple count.
+
+    v0.1.x used `_selectors()` which filtered out list-of-dict selectors
+    entirely, masking FP001/FP002 defects in rules that used that shape.
+    """
+    for k, v in detection.items():
+        if k == "condition":
+            continue
+        if isinstance(v, dict):
+            yield k, v
+        elif isinstance(v, list):
+            for item in v:
+                if isinstance(item, dict):
+                    yield k, item
 
 
 @register
@@ -40,10 +63,17 @@ class Fp001SingleBroadSelection(Rule):
 
     def check(self, parsed: ParsedRule, ctx: object) -> Iterable[Finding]:
         detection = parsed.data.get("detection") or {}
-        sels = _selectors(detection)
-        if len(sels) != 1:
+        sels = list(_selectors_iter(detection))
+        # A list-of-dict selector contributes N tuples sharing one name.
+        # "Single broad selection" requires exactly one distinct selector
+        # AND exactly one branch within it.
+        distinct_names = {n for n, _ in sels}
+        if len(distinct_names) != 1:
             return
-        (name, body) = next(iter(sels.items()))
+        if len(sels) != 1:
+            # Multi-branch OR: same name but >1 tuple, not "single broad".
+            return
+        (name, body) = sels[0]
         if _is_filter_selector(name):
             return
         if len(body) != 1:
@@ -70,7 +100,11 @@ class Fp002PreferModifiers(Rule):
     summary = "Prefer modifiers over leading/trailing wildcards."
 
     def check(self, parsed: ParsedRule, ctx: object) -> Iterable[Finding]:
-        for selname, body in _selectors(parsed.data.get("detection") or {}).items():
+        # _selectors_iter yields one (name, body) per dict branch; for
+        # list-of-dict selectors each branch contributes its own findings,
+        # so duplicate wildcards across OR-branches each warrant their own
+        # modifier suggestion (correct semantics).
+        for selname, body in _selectors_iter(parsed.data.get("detection") or {}):
             for field, value in body.items():
                 if "|" in field:
                     continue  # already using a modifier

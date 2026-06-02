@@ -1,0 +1,13 @@
+title: FP002 positive - list-of-dict, 2 items same field, both wildcards (2 findings)
+# THE LOAD-BEARING REGRESSION TEST: a naive `merged.update(item)`
+# walker fix would collapse the two `Image` keys into one (keeping
+# only the second value) and FP002 would fire once. The correct
+# iter-of-tuples fix yields two tuples each with their own wildcard
+# value, producing 2 findings.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        - Image: "*powershell*"
+        - Image: "*wscript*"
+    condition: selection

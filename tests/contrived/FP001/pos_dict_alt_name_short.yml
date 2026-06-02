@@ -1,0 +1,9 @@
+title: FP001 positive - dict selector with non-canonical name
+# Rule treats any non-filter selector name the same; this fixture
+# documents that "selection" is not the magic name.
+logsource:
+    category: process_creation
+detection:
+    event:
+        CommandLine: foo
+    condition: event

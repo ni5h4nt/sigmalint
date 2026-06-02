@@ -1,0 +1,8 @@
+title: FP002 positive - two distinct fields, both with wildcards (2 findings)
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image: "*powershell*"
+        CommandLine: "*encoded*"
+    condition: selection

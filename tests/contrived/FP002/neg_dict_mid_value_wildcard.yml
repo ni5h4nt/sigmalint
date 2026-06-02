@@ -1,0 +1,11 @@
+title: FP002 negative - wildcard in the middle, not at edges
+# Rule fires only on `*foo*`, `foo*`, or `*foo` patterns. A wildcard
+# strictly between non-wildcard characters (e.g., `f*o`) is a
+# semantically different match expressing "starts with f, ends with o";
+# Sigma's modifier vocabulary does not have a clean rename for this.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image: "power*shell"
+    condition: selection

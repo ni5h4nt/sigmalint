@@ -8,6 +8,54 @@ See `docs/versioning.md` for the full backward-compatibility policy.
 
 ## [Unreleased]
 
+### Added
+
+- **Contrived shape coverage for FP001 + FP002** under
+  `tests/contrived/`. 28 fixtures total: 14 for FP001 (5 positives,
+  7 negatives, 2 edges) and 14 for FP002 (7 positives, 5 negatives,
+  2 edges). Documents both rules' behaviour across dict, list-of-dict,
+  single-branch, multi-branch, modifier-bearing, and edge shapes. Part
+  of the v0.1.x contrived-rollout (TAX shipped in v0.1.2; FP003/FP004
+  next).
+
+### Fixed
+
+- **FP001 and FP002 walker traverses list-of-dict selectors.** Both
+  rules used `_selectors()` which filtered out list-of-dict selectors,
+  the same walker-class gap that TAX001/2/3 had in v0.1.2 (paper §6.6).
+  Switched to `_selectors_iter()` returning `Iterable[tuple[str, dict]]`
+  so list-of-dict yields one (name, body) tuple per dict member,
+  preserving OR-branch semantics:
+
+  - FP001 now uses both `distinct_names` and tuple count to recognise
+    "single broad selection": list-of-dict with exactly one item is
+    a single OR branch and fires; list-of-dict with N>1 items is
+    multi-branch and does not fire.
+  - FP002 iterates per-tuple so duplicate wildcards across OR-branches
+    each warrant their own modifier suggestion.
+
+### Score impact
+
+SigmaHQ corpus (commit `994da16`, 3,132 rules, sigmahq profile,
+ATT&CK v19.1 / Sigma 2.1.0 / taxonomy sigma@v0.1):
+
+| Metric | v0.1.2 | post-fix | Δ |
+|---|---|---|---|
+| Mean total score | 99.1800 | 99.1900 | **+0.0100** |
+| Total findings | 2,888 | 2,864 | -24 |
+| FP001 findings | 38 | 13 | **-25** (false positives removed) |
+| FP002 findings | 30 | 31 | **+1** (true positive surfaced) |
+
+The -25 FP001 delta is the noteworthy direction-change: pre-fix the
+walker silently dropped list-of-dict filter selectors, causing FP001
+to wrongly conclude rules with a dict `selection` plus a list-of-dict
+`filter` were "single broad selection" (because the filter wasn't
+counted). Post-fix the walker sees both, recognises >1 distinct
+selector, and correctly does not fire. 25 SigmaHQ rules' false-positive
+FP001 findings dissolve as a result; mean score moves +0.0100 instead
+of dropping. Within the 2.0-point patch-release stability promise per
+`docs/versioning.md`.
+
 ## [0.1.2] — 2026-06-01
 
 ### Added

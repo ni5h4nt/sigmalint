@@ -1,0 +1,6 @@
+title: FP002 edge - selector body is the empty dict
+logsource:
+    category: process_creation
+detection:
+    selection: {}
+    condition: selection

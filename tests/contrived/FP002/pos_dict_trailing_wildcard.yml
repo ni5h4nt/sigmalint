@@ -1,0 +1,7 @@
+title: FP002 positive - dict selector, value `foo*` (trailing wildcard)
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image: "powershell*"
+    condition: selection

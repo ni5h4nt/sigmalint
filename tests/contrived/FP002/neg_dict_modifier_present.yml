@@ -1,0 +1,10 @@
+title: FP002 negative - field already has a modifier (`|contains`)
+# Rule's `if "|" in field: continue` skips any field name that already
+# has a modifier suffix. The wildcard literal in the value is irrelevant
+# because the rule's whole purpose is to suggest a modifier upgrade.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        CommandLine|contains: "*encoded*"
+    condition: selection
