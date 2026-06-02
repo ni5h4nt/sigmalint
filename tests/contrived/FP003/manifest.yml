@@ -1,0 +1,50 @@
+# FP003 contrived shape distribution.
+#
+# Rule: fires when logsource.category is in NOISY_CATEGORIES
+# {process_creation, registry_event, file_event, network_connection},
+# the condition AST has no negated filter-class selector, AND no
+# external Sigma Filter file applies a negation.
+#
+# A "filter-class selector" is any selector whose name matches
+# _is_filter_selector(): exactly `filter`, or `filter_*`, or `_*`.
+#
+# Shape surface is the condition AST: parses to an AST, walker scans
+# for negated nodes whose target name passes _is_filter_selector. Plus
+# the external-filter path via ctx.filters.
+rule_id: FP003
+
+positives:
+  - file: pos_noisy_no_negation.yml
+    expect: 1
+    summary: noisy category, condition is just `selection` (no negation at all)
+  - file: pos_noisy_conjunction_no_filter.yml
+    expect: 1
+    summary: noisy category, condition `selection and other` (both positive, no filter)
+  - file: pos_noisy_one_of_pattern.yml
+    expect: 1
+    summary: noisy category, condition `1 of selection_*` (multi-selector, no filter)
+  - file: pos_noisy_not_non_filter_name.yml
+    expect: 1
+    summary: noisy category, condition `selection and not other_selection` (negation, but name does not match _is_filter_selector)
+
+negatives:
+  - file: neg_noisy_classic_filter.yml
+    summary: noisy category, condition `selection and not filter` (exact `filter` name)
+  - file: neg_noisy_underscore_filter.yml
+    summary: noisy category, condition `selection and not filter_user` (`filter_*` prefix)
+  - file: neg_noisy_internal_filter.yml
+    summary: noisy category, condition `selection and not _filter` (`_*` prefix)
+  - file: neg_non_noisy_category.yml
+    summary: non-noisy category (`webserver`) - rule short-circuits regardless of negation
+  - file: neg_external_filter_negates.yml
+    summary: noisy category, no internal negation, but external Sigma Filter provides one (`not filter_external`)
+    filters:
+      - targets_ids: ["6ba9c5b1-8f7e-4d2a-b5e1-1234567890ab"]
+        targets_names: []
+        condition: "not filter_external"
+
+edges:
+  - file: edge_no_condition_key.yml
+    summary: detection block has no `condition:` key - rule returns early (condition is None)
+  - file: edge_unparseable_condition.yml
+    summary: noisy category, condition string fails to parse - rule swallows the parse error and does not fire

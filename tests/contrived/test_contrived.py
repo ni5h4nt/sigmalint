@@ -36,9 +36,14 @@ import pytest
 import yaml
 
 from sigmalint.core.config import Config
+from sigmalint.core.filters import SigmaFilter
 from sigmalint.core.runner import RunContext, lint
 from sigmalint.data.taxonomy import SigmaModifiers, SigmaTaxonomy
-from sigmalint.rules.fp_risk import Fp001SingleBroadSelection, Fp002PreferModifiers
+from sigmalint.rules.fp_risk import (
+    Fp001SingleBroadSelection,
+    Fp002PreferModifiers,
+    Fp003NoFilterOnNoisy,
+)
 from sigmalint.rules.taxonomy import (
     Tax001KnownFields,
     Tax002ValidModifiers,
@@ -55,6 +60,7 @@ _RULE_MAP: dict[str, type] = {
     "TAX003": Tax003CanonicalField,
     "FP001": Fp001SingleBroadSelection,
     "FP002": Fp002PreferModifiers,
+    "FP003": Fp003NoFilterOnNoisy,
 }
 
 
@@ -83,11 +89,33 @@ def _case_id(val: Any) -> str:
     return str(val)
 
 
-def _ctx(tmp_path: Path) -> RunContext:
+def _build_filters(specs: list[dict] | None) -> list[SigmaFilter]:
+    """Materialise SigmaFilter objects from manifest `filters:` specs.
+
+    Each spec maps directly to the SigmaFilter dataclass:
+      - targets_ids:   list of rule IDs the filter applies to (UUIDs)
+      - targets_names: list of rule names the filter applies to
+      - condition:     the filter's appended condition string
+    The `path` field is set to a sentinel since contrived fixtures
+    don't load filters from real .yml files.
+    """
+    return [
+        SigmaFilter(
+            path="<contrived>",
+            targets_ids=tuple(spec.get("targets_ids") or ()),
+            targets_names=tuple(spec.get("targets_names") or ()),
+            condition=spec["condition"],
+        )
+        for spec in (specs or [])
+    ]
+
+
+def _ctx(tmp_path: Path, filter_specs: list[dict] | None = None) -> RunContext:
     return RunContext(
         taxonomy=SigmaTaxonomy(tmp_path),
         modifiers=SigmaModifiers(tmp_path),
         config=Config(),
+        filters=_build_filters(filter_specs),
     )
 
 
@@ -109,7 +137,7 @@ def test_contrived_rule_shape(
     if not fixture_path.exists():
         pytest.fail(f"manifest references missing fixture: {fixture_path}")
     rule = rule_cls()
-    results = lint([fixture_path], [rule], _ctx(tmp_path))
+    results = lint([fixture_path], [rule], _ctx(tmp_path, case.get("filters")))
     findings = [f for f in results[0].findings if f.rule_id == rule_id]
     default_expect = 1 if category == "positives" else 0
     expected = case.get("expect", default_expect)

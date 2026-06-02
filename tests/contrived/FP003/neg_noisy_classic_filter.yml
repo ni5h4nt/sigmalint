@@ -1,0 +1,9 @@
+title: FP003 negative - classic `selection and not filter`
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    filter:
+        ParentImage|endswith: "\\explorer.exe"
+    condition: selection and not filter
