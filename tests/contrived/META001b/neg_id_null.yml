@@ -1,0 +1,8 @@
+title: META001b negative - id is null (rule returns early on rid is None)
+id: null
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

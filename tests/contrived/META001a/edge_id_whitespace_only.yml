@@ -1,0 +1,13 @@
+title: META001a edge - id is a whitespace-only string
+# bool(" ") is True in Python, so META001a does NOT fire. This
+# documents a specific failure mode the rule does not catch:
+# a whitespace-only id is "present and truthy" but not useful
+# as an identifier. META001b also does not catch this (UUID("  ")
+# would raise ValueError, but only if the string parses cleanly).
+id: " "
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

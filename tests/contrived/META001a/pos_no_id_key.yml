@@ -1,0 +1,7 @@
+title: META001a positive - no id key
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

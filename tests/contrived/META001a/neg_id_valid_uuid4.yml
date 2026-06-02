@@ -1,0 +1,8 @@
+title: META001a negative - valid UUIDv4 id
+id: "6ba9c5b1-8f7e-4d2a-b5e1-1234567890ab"
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

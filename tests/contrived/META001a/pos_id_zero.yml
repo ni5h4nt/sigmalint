@@ -1,0 +1,12 @@
+title: META001a positive - id is the integer 0 (falsy non-string)
+# The rule checks `not parsed.data.get("id")`. 0 is falsy in Python,
+# so META001a fires even though the key is present and the value is
+# of a non-string type. Documents that the rule is intentionally
+# permissive about *what* the id is - it just needs to be truthy.
+id: 0
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection
