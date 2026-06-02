@@ -1,0 +1,7 @@
+title: FP002 positive - dict selector, value `*foo*` (both wildcards)
+logsource:
+    category: process_creation
+detection:
+    selection:
+        CommandLine: "*foo*"
+    condition: selection

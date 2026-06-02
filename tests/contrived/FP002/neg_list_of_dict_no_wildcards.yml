@@ -1,0 +1,12 @@
+title: FP002 negative - list-of-dict, multiple items, none with wildcards
+# Pre-fix: walker drops the shape entirely; doesn't fire (right outcome
+# for the wrong reason).
+# Post-fix: _selectors_iter yields 2 tuples; each body's CommandLine
+# value has no wildcards; doesn't fire (right outcome, right reason).
+logsource:
+    category: process_creation
+detection:
+    selection:
+        - CommandLine: "powershell"
+        - CommandLine: "wscript"
+    condition: selection

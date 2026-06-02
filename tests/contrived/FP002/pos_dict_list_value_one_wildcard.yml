@@ -1,0 +1,11 @@
+title: FP002 positive - list-valued field with one wildcard entry
+# Rule iterates list values and fires once per matching entry.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        CommandLine:
+            - "no_wildcard_here"
+            - "*encoded*"
+            - "another_plain_string"
+    condition: selection

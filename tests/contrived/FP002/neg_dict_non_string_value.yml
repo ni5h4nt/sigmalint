@@ -1,0 +1,9 @@
+title: FP002 negative - field with non-string value
+# Rule's `if not isinstance(v, str): continue` skips non-string
+# values; only strings are eligible for wildcard checks.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        DestinationPort: 4444
+    condition: selection

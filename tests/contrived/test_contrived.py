@@ -38,7 +38,7 @@ import yaml
 from sigmalint.core.config import Config
 from sigmalint.core.runner import RunContext, lint
 from sigmalint.data.taxonomy import SigmaModifiers, SigmaTaxonomy
-from sigmalint.rules.fp_risk import Fp001SingleBroadSelection
+from sigmalint.rules.fp_risk import Fp001SingleBroadSelection, Fp002PreferModifiers
 from sigmalint.rules.taxonomy import (
     Tax001KnownFields,
     Tax002ValidModifiers,
@@ -54,6 +54,7 @@ _RULE_MAP: dict[str, type] = {
     "TAX002": Tax002ValidModifiers,
     "TAX003": Tax003CanonicalField,
     "FP001": Fp001SingleBroadSelection,
+    "FP002": Fp002PreferModifiers,
 }
 
 

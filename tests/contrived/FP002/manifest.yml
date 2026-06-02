@@ -1,0 +1,55 @@
+# FP002 contrived shape distribution.
+#
+# Rule: per (selector_branch, field) pair, fire when the field has no
+# modifier suffix AND its scalar value starts and/or ends with `*`. The
+# rule yields one finding per matching value (so a list-valued field with
+# 3 wildcard entries yields 3 findings).
+#
+# v0.1.x walks _selectors() which filters out list-of-dict shapes; phase 3
+# of v0.1.3 switches to _selectors_iter() returning (name, body) tuples.
+# Because FP002 iterates per-tuple, list-of-dict with 2 items containing
+# the same field's wildcard values produces 2 findings - this is the
+# scenario where a naive `merged.update(item)` fix would have silently
+# overwritten one wildcard.
+rule_id: FP002
+
+positives:
+  - file: pos_dict_both_wildcards.yml
+    expect: 1
+    summary: dict selector, `*foo*` (both wildcards) - `|contains` suggestion
+  - file: pos_dict_trailing_wildcard.yml
+    expect: 1
+    summary: dict selector, `foo*` (trailing only) - `|startswith` suggestion
+  - file: pos_dict_leading_wildcard.yml
+    expect: 1
+    summary: dict selector, `*foo` (leading only) - `|endswith` suggestion
+  - file: pos_dict_list_value_one_wildcard.yml
+    expect: 1
+    summary: dict selector, list-valued field with exactly one wildcard entry
+  - file: pos_list_of_dict_one_item_wildcard.yml
+    expect: 1
+    summary: list-of-dict, one item, wildcard value (walker gap pre-fix)
+  - file: pos_two_fields_both_wildcards.yml
+    expect: 2
+    summary: dict selector with two distinct fields, both with wildcards - 2 findings
+  - file: pos_list_of_dict_two_items_same_field_both_wildcards.yml
+    expect: 2
+    summary: list-of-dict, 2 items, same field name, both wildcards - 2 findings (regression test against the wrong merge-fix design)
+
+negatives:
+  - file: neg_dict_modifier_present.yml
+    summary: dict selector with `|contains` modifier already present - rule skips field names containing `|`
+  - file: neg_dict_no_wildcards.yml
+    summary: dict selector, scalar value with no wildcards
+  - file: neg_dict_non_string_value.yml
+    summary: dict selector, field with integer value - not a string, no wildcard check applies
+  - file: neg_dict_mid_value_wildcard.yml
+    summary: dict selector, `f*o` (wildcard in the middle, not at edges) - rule only fires on leading/trailing wildcards
+  - file: neg_list_of_dict_no_wildcards.yml
+    summary: list-of-dict, multiple items, none with wildcards
+
+edges:
+  - file: edge_empty_detection.yml
+    summary: detection block is the empty dict
+  - file: edge_empty_selector.yml
+    summary: selector body is the empty dict - no fields to iterate
