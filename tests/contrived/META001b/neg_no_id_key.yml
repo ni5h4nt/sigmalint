@@ -1,0 +1,9 @@
+title: META001b negative - no id key (rule returns early)
+# META001a will fire here (presence check); META001b stays silent
+# because there is no id value to validate.
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

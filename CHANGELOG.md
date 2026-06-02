@@ -19,8 +19,16 @@ See `docs/versioning.md` for the full backward-compatibility policy.
   a `filters:` manifest field that materialises `SigmaFilter` dataclass
   instances in-process so FP003's external-Sigma-Filter path can be
   exercised without writing real filter YAML files. Part of the v0.1.x
-  contrived-rollout (TAX shipped in v0.1.2; META001a/b + META002-005
-  next in v0.1.3 patch series).
+  contrived-rollout (TAX shipped in v0.1.2; META002-005 next in v0.1.3
+  patch series).
+- **Contrived shape coverage for the metadata id rules** (META001a +
+  META001b). 18 fixtures: 8 for META001a (4 positives, 3 negatives,
+  1 edge) and 10 for META001b (7 positives at mixed severities,
+  3 negatives). The contrived test loader gained an optional
+  `expect_severity:` manifest field that asserts each finding's
+  severity matches the declared value, used to lock in META001b's
+  ERROR-vs-WARNING split that depends on whether the id parses as
+  a UUID at all.
 
 ### Fixed
 

@@ -1,0 +1,11 @@
+title: META001b positive - id is an integer (non-string)
+# The rule does `UUID(str(rid))`, so an integer id becomes "42" which
+# fails the UUID parse and fires at ERROR. Documents that non-string
+# id types are caught.
+id: 42
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

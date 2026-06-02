@@ -1,0 +1,50 @@
+# META001b contrived shape distribution.
+#
+# Rule: validates the format of `id` when present. Fires at:
+#   - ERROR severity when the value is not a parseable UUID
+#   - WARNING severity when the value is a parseable UUID but not v4
+# Returns silently (no finding) when `id` is absent or None.
+#
+# This is the first contrived dimension to use the `expect_severity:`
+# manifest field, which asserts each finding's severity matches the
+# declared value. The harness in test_contrived.py applies this check
+# only when the field is set.
+rule_id: META001b
+
+positives:
+  - file: pos_random_string.yml
+    expect: 1
+    expect_severity: error
+    summary: '`id: "not-a-uuid"` - unparseable, fires at ERROR'
+  - file: pos_short_alphanum.yml
+    expect: 1
+    expect_severity: error
+    summary: '`id: "abc123"` - too short to be a UUID, fires at ERROR'
+  - file: pos_integer_id.yml
+    expect: 1
+    expect_severity: error
+    summary: "`id: 42` - integer, str(42)='42' fails UUID parse, fires at ERROR"
+  - file: pos_uuid_with_trailing_whitespace.yml
+    expect: 1
+    expect_severity: error
+    summary: 'UUIDv4 string with trailing whitespace - UUID() does not strip, fires at ERROR'
+  - file: pos_uuid_v1.yml
+    expect: 1
+    expect_severity: warning
+    summary: valid UUIDv1 - parses but wrong version, fires at WARNING
+  - file: pos_uuid_v3.yml
+    expect: 1
+    expect_severity: warning
+    summary: valid UUIDv3 - parses but wrong version, fires at WARNING
+  - file: pos_uuid_v5.yml
+    expect: 1
+    expect_severity: warning
+    summary: valid UUIDv5 - parses but wrong version, fires at WARNING
+
+negatives:
+  - file: neg_valid_uuid4.yml
+    summary: valid UUIDv4 - the canonical happy path
+  - file: neg_no_id_key.yml
+    summary: no `id:` key - rule returns early on None (META001a may fire, META001b stays silent)
+  - file: neg_id_null.yml
+    summary: '`id: null` - rule returns early on `rid is None`'

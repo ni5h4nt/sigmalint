@@ -1,0 +1,8 @@
+title: META001b positive - id is a short alphanumeric string
+id: "abc123"
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

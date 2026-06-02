@@ -1,0 +1,9 @@
+title: META001b positive - valid UUIDv3 (parses but wrong version)
+# UUIDv3 is namespace-based (MD5). Standard example from RFC 4122.
+id: "6fa459ea-ee8a-3ca4-894e-db77e160355e"
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

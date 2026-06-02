@@ -1,0 +1,10 @@
+title: META001a negative - valid UUIDv1 id
+# META001a does not validate UUID version. Any truthy id passes.
+# META001b would fire here at warning severity.
+id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

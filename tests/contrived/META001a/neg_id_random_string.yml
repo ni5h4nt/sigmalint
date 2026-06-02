@@ -1,0 +1,11 @@
+title: META001a negative - id is a non-UUID string but truthy
+# META001a only checks presence/truthiness. The string "not-a-uuid"
+# is truthy, so META001a does not fire. META001b (which validates
+# UUID format) would fire here with severity=error.
+id: "not-a-uuid"
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

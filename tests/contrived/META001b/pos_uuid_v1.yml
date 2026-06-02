@@ -1,0 +1,11 @@
+title: META001b positive - valid UUIDv1 (parses but wrong version)
+# UUIDv1 is time-based; Sigma recommends v4 specifically. The rule
+# parses successfully (so no ERROR) but the version mismatch fires
+# at WARNING. SigmaHQ's corpus has 37 such legacy ids.
+id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: "\\powershell.exe"
+    condition: selection

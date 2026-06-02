@@ -45,6 +45,10 @@ from sigmalint.rules.fp_risk import (
     Fp003NoFilterOnNoisy,
     Fp004HardcodedLiterals,
 )
+from sigmalint.rules.metadata import (
+    Meta001aIdPresent,
+    Meta001bIdValidUuid4,
+)
 from sigmalint.rules.taxonomy import (
     Tax001KnownFields,
     Tax002ValidModifiers,
@@ -63,6 +67,8 @@ _RULE_MAP: dict[str, type] = {
     "FP002": Fp002PreferModifiers,
     "FP003": Fp003NoFilterOnNoisy,
     "FP004": Fp004HardcodedLiterals,
+    "META001a": Meta001aIdPresent,
+    "META001b": Meta001bIdValidUuid4,
 }
 
 
@@ -149,3 +155,13 @@ def test_contrived_rule_shape(
         f"expected {expected} {rule_id} findings, got {len(findings)} - "
         f"{[f.message for f in findings]}"
     )
+    # Optional per-fixture severity assertion. Used by rules like META001b
+    # that emit at multiple severities depending on input shape.
+    expected_severity = case.get("expect_severity")
+    if expected_severity is not None:
+        for f in findings:
+            assert f.severity.value == expected_severity, (
+                f"{rule_id} {category[:-1]} '{summary}' ({case['file']}): "
+                f"expected severity={expected_severity!r}, got {f.severity.value!r} "
+                f"on finding: {f.message}"
+            )

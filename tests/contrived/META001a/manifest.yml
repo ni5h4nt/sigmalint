@@ -1,0 +1,34 @@
+# META001a contrived shape distribution.
+#
+# Rule: fires when the `id` key is absent OR when its value is falsy
+# (None, "", 0, False, etc.). META001a is a presence check; UUID
+# validity is META001b's concern. The two rules are paired - a rule
+# with `id: "not-a-uuid"` does NOT fire META001a (truthy value) but
+# DOES fire META001b (unparseable UUID).
+rule_id: META001a
+
+positives:
+  - file: pos_no_id_key.yml
+    expect: 1
+    summary: rule has no `id:` key at all
+  - file: pos_id_null.yml
+    expect: 1
+    summary: "`id: null` - present but None"
+  - file: pos_id_empty_string.yml
+    expect: 1
+    summary: '`id: ""` - present but empty string'
+  - file: pos_id_zero.yml
+    expect: 1
+    summary: "`id: 0` - falsy integer triggers the `not ... .get()` arm"
+
+negatives:
+  - file: neg_id_random_string.yml
+    summary: '`id: "not-a-uuid"` - truthy, META001a does not fire (META001b would)'
+  - file: neg_id_valid_uuid4.yml
+    summary: valid UUIDv4 - truthy
+  - file: neg_id_uuid1.yml
+    summary: valid UUIDv1 - truthy (META001a does not check version, only presence)
+
+edges:
+  - file: edge_id_whitespace_only.yml
+    summary: '`id: " "` - whitespace string is truthy in Python, so META001a does NOT fire'
