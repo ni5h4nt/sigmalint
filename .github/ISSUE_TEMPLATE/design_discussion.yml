@@ -1,0 +1,89 @@
+name: Design discussion (RFC)
+description: Propose a substantial new feature or architectural change before writing code
+title: "[RFC] <short title>"
+labels: ["design-discussion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for any change that introduces a new public API surface,
+        plugin/extension point, security-relevant behavior, or anything spanning
+        more than ~300 lines of implementation. Small bug fixes, new built-in
+        rules, and docs changes do **not** need an RFC — open a PR directly.
+
+        The goal of an RFC is to align on the design **before** code is written,
+        so contributor effort lands somewhere the maintainers can accept it.
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: What problem does this solve? Who has the problem? What do they do today instead?
+      placeholder: |
+        - Concrete use cases (ideally with examples from real Sigma rule repos)
+        - Who is asking for this (org-specific, community-wide, research-driven?)
+        - What workaround exists today, and why isn't it good enough?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed design
+      description: How would it work from the user's perspective? Show config snippets, CLI usage, or rule examples.
+      placeholder: |
+        - User-facing surface (config keys, CLI flags, file formats)
+        - Worked examples — what a user would type or write
+        - Default behavior vs. opt-in
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other approaches did you consider? Why did you reject them?
+      placeholder: |
+        - Alternative A — pros/cons, why not chosen
+        - Alternative B — pros/cons, why not chosen
+    validations:
+      required: true
+
+  - type: textarea
+    id: stability
+    attributes:
+      label: Stability and compatibility
+      description: What public API surface does this create? What's the long-term commitment?
+      placeholder: |
+        - New config keys, function names, or types that become part of the public API
+        - Migration path if existing behavior changes
+        - Versioning impact (per docs/versioning.md)
+
+  - type: textarea
+    id: security
+    attributes:
+      label: Security model
+      description: Especially relevant for plugins, code execution, external data, file I/O, or anything CI-facing.
+      placeholder: |
+        - Threat model — who can do what, who shouldn't be able to
+        - Default-deny vs. default-allow posture
+        - Opt-in flags, signatures, allowlists, or sandboxing
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and milestone
+      description: How large is the implementation, and which release line is it targeting?
+      placeholder: |
+        - Rough line/file count estimate
+        - Whether it can be split into smaller PRs (and how)
+        - Target milestone (e.g. v1.0, v2.0)
+
+  - type: textarea
+    id: open_questions
+    attributes:
+      label: Open questions
+      description: What's still unresolved? What do you want maintainer input on?
+      placeholder: |
+        - Specific decisions you'd like the maintainers to weigh in on
+        - Areas where you don't have a strong opinion
