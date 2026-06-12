@@ -166,6 +166,20 @@ See `docs/configuration.md` for the full schema.
 sigmalint is the only tool that scores Sigma rules across multiple
 quality dimensions with stable, citeable rule IDs.
 
+## Validation
+
+sigmalint has been empirically evaluated against the full SigmaHQ public
+corpus: 3,132 production detection rules from
+[SigmaHQ/sigma](https://github.com/SigmaHQ/sigma) at Sigma v2.1.0, with a
+mean target-rule recall of 0.993. External-corpus smoke tests also run
+weekly in CI. The framework and empirical results are documented in
+[Static Quality Assessment of Sigma Detection Rules: Framework and Empirical Evaluation](https://doi.org/10.5281/zenodo.20371761).
+
+The project is citable as software via DOI
+[10.5281/zenodo.20371168](https://doi.org/10.5281/zenodo.20371168) (see
+`CITATION.cff`), and PyPI releases ship with Sigstore build-provenance
+attestations via Trusted Publishing.
+
 ## Roadmap
 
 - **v0.2** — additional rule formats (Splunk SPL detections, Elastic
