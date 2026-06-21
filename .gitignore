@@ -69,3 +69,7 @@ coverage.xml
 .casef/
 uv.lock
 AGENTS.md
+
+# Implementation plans are kept local, not committed (the CHANGELOG, git
+# history, and the methodology paper cover the what/why for contributors).
+docs/plans/
