@@ -8,6 +8,8 @@ See `docs/versioning.md` for the full backward-compatibility policy.
 
 ## [Unreleased]
 
+## [0.1.4] — 2026-06-21
+
 ### Added
 
 - **Contrived shape coverage for the ATT&CK, redundancy, and style
