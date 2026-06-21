@@ -38,7 +38,19 @@ import yaml
 from sigmalint.core.config import Config
 from sigmalint.core.filters import SigmaFilter
 from sigmalint.core.runner import RunContext, lint
-from sigmalint.data.taxonomy import SigmaModifiers, SigmaTaxonomy
+from sigmalint.data.attack import AttackTaxonomy
+from sigmalint.data.corpus import CorpusEntry
+from sigmalint.data.taxonomy import (
+    AttackLogsourceMap,
+    SigmaModifiers,
+    SigmaTaxonomy,
+)
+from sigmalint.rules.attack import (
+    Atk001ValidTechnique,
+    Atk002NotRevoked,
+    Atk003LogsourcePlausible,
+    Atk004SubtechniqueSpecificity,
+)
 from sigmalint.rules.fp_risk import (
     Fp001SingleBroadSelection,
     Fp002PreferModifiers,
@@ -52,6 +64,15 @@ from sigmalint.rules.metadata import (
     Meta003ReferencesForHigh,
     Meta004FalsepositivesPopulated,
     Meta005StatusVocabulary,
+)
+from sigmalint.rules.redundancy import (
+    Red001NearDuplicateFingerprint,
+    Red002TitleOrIdCollision,
+)
+from sigmalint.rules.style import (
+    Sty001LowercaseTopLevelKeys,
+    Sty002LfAndYml,
+    Sty003FourSpaceIndent,
 )
 from sigmalint.rules.taxonomy import (
     Tax001KnownFields,
@@ -77,7 +98,23 @@ _RULE_MAP: dict[str, type] = {
     "META003": Meta003ReferencesForHigh,
     "META004": Meta004FalsepositivesPopulated,
     "META005": Meta005StatusVocabulary,
+    "ATK001": Atk001ValidTechnique,
+    "ATK002": Atk002NotRevoked,
+    "ATK003": Atk003LogsourcePlausible,
+    "ATK004": Atk004SubtechniqueSpecificity,
+    "RED001": Red001NearDuplicateFingerprint,
+    "RED002": Red002TitleOrIdCollision,
+    "STY001": Sty001LowercaseTopLevelKeys,
+    "STY002": Sty002LfAndYml,
+    "STY003": Sty003FourSpaceIndent,
 }
+
+# The ATT&CK + logsource providers fall back to the pinned vendored bundle
+# (ATTACK v19.1) when the data_dir holds no override, so they are
+# deterministic. Build once at import to avoid re-parsing the STIX bundle
+# for every parametrized case.
+_ATTACK = AttackTaxonomy(Path("<contrived-no-override>"))
+_ATTACK_LOGSOURCE = AttackLogsourceMap(Path("<contrived-no-override>"))
 
 
 def _load_manifest(rule_dir: Path) -> dict[str, Any]:
@@ -126,12 +163,64 @@ def _build_filters(specs: list[dict] | None) -> list[SigmaFilter]:
     ]
 
 
-def _ctx(tmp_path: Path, filter_specs: list[dict] | None = None) -> RunContext:
+class _FakeCorpus:
+    """Duck-typed stand-in for RuleCorpus, driven by a manifest `corpus:` block.
+
+    RED001 reads `available` + `near_duplicates(fp, threshold)`; RED002 reads
+    `available` + `entries()`. The fake returns the manifest-declared matches
+    verbatim, decoupling RED001's shape coverage from the Jaccard metric (which
+    is unit-tested separately). Without a `corpus:` block `ctx.corpus` is None,
+    preserving the early-return behaviour every non-RED dimension relies on.
+    """
+
+    def __init__(self, near: list[CorpusEntry], entries: list[CorpusEntry]):
+        self.available = True
+        self._near = near
+        self._entries = entries
+
+    def near_duplicates(self, fingerprint, threshold: float = 0.85) -> list[CorpusEntry]:
+        return self._near
+
+    def entries(self) -> list[CorpusEntry]:
+        return self._entries
+
+
+def _corpus_entry(spec: dict, self_path: str | None) -> CorpusEntry:
+    # `<self>` resolves to the fixture's own path so RED001's self-skip
+    # (m.path == parsed.path) can be exercised.
+    path = spec.get("path") or "<contrived-corpus>"
+    if path == "<self>" and self_path is not None:
+        path = self_path
+    return CorpusEntry(
+        path=path,
+        title=str(spec.get("title", "")),
+        id=spec.get("id"),
+        fingerprint=frozenset(),
+    )
+
+
+def _build_corpus(spec: dict | None, self_path: str | None) -> _FakeCorpus | None:
+    if not spec:
+        return None
+    near = [_corpus_entry(d, self_path) for d in (spec.get("near_duplicates") or [])]
+    entries = [_corpus_entry(d, self_path) for d in (spec.get("entries") or [])]
+    return _FakeCorpus(near, entries)
+
+
+def _ctx(
+    tmp_path: Path,
+    filter_specs: list[dict] | None = None,
+    corpus_spec: dict | None = None,
+    self_path: str | None = None,
+) -> RunContext:
     return RunContext(
         taxonomy=SigmaTaxonomy(tmp_path),
         modifiers=SigmaModifiers(tmp_path),
         config=Config(),
         filters=_build_filters(filter_specs),
+        attack=_ATTACK,
+        attack_logsource=_ATTACK_LOGSOURCE,
+        corpus=_build_corpus(corpus_spec, self_path),
     )
 
 
@@ -153,7 +242,8 @@ def test_contrived_rule_shape(
     if not fixture_path.exists():
         pytest.fail(f"manifest references missing fixture: {fixture_path}")
     rule = rule_cls()
-    results = lint([fixture_path], [rule], _ctx(tmp_path, case.get("filters")))
+    ctx = _ctx(tmp_path, case.get("filters"), case.get("corpus"), str(fixture_path))
+    results = lint([fixture_path], [rule], ctx)
     findings = [f for f in results[0].findings if f.rule_id == rule_id]
     default_expect = 1 if category == "positives" else 0
     expected = case.get("expect", default_expect)

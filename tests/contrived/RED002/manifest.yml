@@ -1,0 +1,53 @@
+# RED002 contrived shape distribution.
+# Rule (INFO): iterate corpus entries; first entry whose id matches yields
+# an id-collision (then return); else first whose title matches yields a
+# title-collision. Id check precedes title check within each entry.
+rule_id: RED002
+
+positives:
+  - file: pos_id_collision.yml
+    expect: 1
+    summary: 'rule id matches a corpus entry id'
+    corpus:
+      entries:
+        - {id: 'aaaaaaaa-1111-4111-8111-111111111111', title: 'other title', path: 'rules/x.yml'}
+  - file: pos_title_collision.yml
+    expect: 1
+    summary: 'title matches; id unique'
+    corpus:
+      entries:
+        - {id: '99999999-1111-4111-8111-111111111111', title: 'colliding title', path: 'rules/y.yml'}
+  - file: pos_both_collision.yml
+    expect: 1
+    summary: 'both id and title collide -> id wins (return first)'
+    corpus:
+      entries:
+        - {id: 'aaaaaaaa-1111-4111-8111-111111111111', title: 'colliding title', path: 'rules/z.yml'}
+
+negatives:
+  - file: neg_corpus_unavailable.yml
+    summary: 'no corpus block -> early return'
+  - file: neg_unique.yml
+    summary: 'unique id and title vs corpus'
+    corpus:
+      entries:
+        - {id: '99999999-1111-4111-8111-111111111111', title: 'some other title', path: 'rules/q.yml'}
+  - file: neg_no_id_no_title.yml
+    summary: 'rule has no id and no title keys'
+    corpus:
+      entries:
+        - {id: 'aaaaaaaa-1111-4111-8111-111111111111', title: 'colliding title', path: 'rules/q.yml'}
+
+edges:
+  - file: edge_entry_id_none.yml
+    summary: 'entry id null + different title -> no collision'
+    corpus:
+      entries:
+        - {id: null, title: 'other title', path: 'rules/n.yml'}
+  - file: edge_multiple_title_first.yml
+    expect: 1
+    summary: 'two entries collide on title -> first yields, return'
+    corpus:
+      entries:
+        - {id: '11111111-1111-4111-8111-111111111111', title: 'dup title', path: 'rules/a.yml'}
+        - {id: '22222222-1111-4111-8111-111111111111', title: 'dup title', path: 'rules/b.yml'}

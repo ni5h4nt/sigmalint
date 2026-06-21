@@ -1,0 +1,9 @@
+title: rule
+tags:
+    - attack.t1059
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image: '\\cmd.exe'
+    condition: selection

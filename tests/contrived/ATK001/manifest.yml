@@ -1,0 +1,31 @@
+# ATK001 contrived shape distribution.
+# Rule (ERROR): one finding per attack.t#### tag whose normalized id is not
+# a known technique. Uses vendored ATT&CK v19.1: T1059 valid, T9999 invalid.
+rule_id: ATK001
+
+positives:
+  - file: pos_unknown_technique.yml
+    expect: 1
+    summary: 'attack.t9999 (unknown technique)'
+  - file: pos_two_unknown.yml
+    expect: 2
+    summary: 'two unknown techniques'
+  - file: pos_mixed_valid_invalid.yml
+    expect: 1
+    summary: 'valid t1059 + invalid t9999'
+
+negatives:
+  - file: neg_valid_technique.yml
+    summary: 'attack.t1059 (valid)'
+  - file: neg_tactic_tag.yml
+    summary: 'attack.execution (tactic, not a technique tag)'
+  - file: neg_no_tags.yml
+    summary: 'no tags key'
+  - file: neg_tags_scalar.yml
+    summary: 'tags is a scalar string, not a list'
+
+edges:
+  - file: edge_nonstring_entry.yml
+    summary: 'non-string entry (42) skipped; t1059 valid -> 0'
+  - file: edge_subtechnique_valid.yml
+    summary: 'attack.t1059.001 valid sub-technique'

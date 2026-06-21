@@ -1,0 +1,7 @@
+title: x
+logsource:
+    category: process_creation
+detection:
+    Selection:
+        Image: x
+    condition: Selection

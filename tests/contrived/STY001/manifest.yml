@@ -1,0 +1,27 @@
+# STY001 contrived shape distribution.
+# Rule: one finding per top-level key that is a str and != its lowercase
+# form. No early return - N non-lowercase keys yield N findings.
+rule_id: STY001
+
+positives:
+  - file: pos_capitalized_title.yml
+    expect: 1
+    summary: '`Title:` capitalized top-level key'
+  - file: pos_mixed_logsource_key.yml
+    expect: 1
+    summary: '`LogSource:` mixed-case top-level key'
+  - file: pos_two_noncanonical_keys.yml
+    expect: 2
+    summary: 'two non-lowercase keys (Title + Author)'
+
+negatives:
+  - file: neg_all_lowercase.yml
+    summary: 'all top-level keys already lowercase'
+  - file: neg_nested_capitalized.yml
+    summary: 'nested key capitalized; top level all lowercase'
+
+edges:
+  - file: edge_nonstring_key.yml
+    summary: 'non-string (int) top-level key skipped by isinstance guard'
+  - file: edge_underscore_key.yml
+    summary: '`related_rules:` digits/underscores already lowercase'

@@ -8,6 +8,35 @@ See `docs/versioning.md` for the full backward-compatibility policy.
 
 ## [Unreleased]
 
+### Added
+
+- **Contrived shape coverage for the ATT&CK, redundancy, and style
+  dimensions** (ATK001-004, RED001-002, STY001-003) under
+  `tests/contrived/`. 67 fixtures total: 9 ATK001, 6 ATK002, 7 ATK003,
+  8 ATK004, 8 RED001, 8 RED002, 7 STY001, 6 STY002, 8 STY003. Closes the
+  v0.1.x contrived rollout for ATK + RED + STY (TAX shipped in v0.1.2;
+  FP + META in v0.1.3); v0.1.5 adds SCHEMA. The contrived harness gained
+  two test-side context extensions, both reusing the v0.1.3 `filters:`
+  pattern: the `attack`/`attack_logsource` providers are now populated
+  from the pinned vendored ATT&CK bundle (v19.1) so ATK001-003 can be
+  exercised deterministically, and an optional per-case `corpus:` field
+  materialises a duck-typed fake `RuleCorpus` (declaring `near_duplicates`
+  and `entries`) so RED001/002 can be exercised without cloning SigmaHQ.
+
+### Fixed
+
+- **STY002 now detects CRLF line endings.** The runner read rule files
+  with `Path.read_text()`, which opens in universal-newline mode and
+  translates `\r\n` to `\n` before the text reaches `parsed.raw_text`.
+  STY002's `"\r\n" in raw_text` check was therefore dead code that could
+  never fire on a real file. Switched `_parse_file` to
+  `path.read_bytes().decode("utf-8", errors="replace")` so line endings
+  reach raw-text rules intact; YAML parsing tolerates CRLF unchanged. A
+  reader-class gap analogous to the TAX/FP list-of-dict walker gaps of
+  prior releases, surfaced by the new STY002 contrived shape coverage.
+  Score impact on the SigmaHQ corpus (3,370 rules): +1 INFO finding
+  (the single CRLF rule now triggers STY002), mean-score Δ 0.00.
+
 ## [0.1.3] — 2026-06-01
 
 ### Added

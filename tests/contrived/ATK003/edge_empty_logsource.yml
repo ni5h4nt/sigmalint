@@ -1,0 +1,8 @@
+title: rule
+tags:
+    - attack.t1059
+logsource: {}
+detection:
+    selection:
+        Image: x
+    condition: selection

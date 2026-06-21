@@ -1,0 +1,7 @@
+title: yaml ext
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '\\evil.exe'
+    condition: selection

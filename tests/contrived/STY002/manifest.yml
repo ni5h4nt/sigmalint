@@ -1,0 +1,26 @@
+# STY002 contrived shape distribution.
+# Rule: fires once for CRLF (\r\n in raw_text) and once for a .yaml
+# suffix. Up to 2 findings. The .yaml branch can only fire from a fixture
+# literally named *.yaml.
+rule_id: STY002
+
+positives:
+  - file: pos_crlf_yml.yml
+    expect: 1
+    summary: '.yml file with CRLF line endings'
+  - file: pos_yaml_extension.yaml
+    expect: 1
+    summary: '.yaml suffix (LF endings)'
+  - file: pos_yaml_and_crlf.yaml
+    expect: 2
+    summary: '.yaml suffix AND CRLF - both branches'
+
+negatives:
+  - file: neg_clean_yml.yml
+    summary: 'clean .yml file, LF endings'
+  - file: neg_lone_cr.yml
+    summary: 'lone CR (\\r) at EOF, no \\r\\n substring'
+
+edges:
+  - file: edge_empty.yml
+    summary: 'empty .yml file'

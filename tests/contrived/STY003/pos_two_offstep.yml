@@ -1,0 +1,11 @@
+title: x
+tags:
+   - attack.t1059
+references:
+     - https://example.com
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '\\evil.exe'
+    condition: selection

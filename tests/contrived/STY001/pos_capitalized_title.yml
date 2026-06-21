@@ -1,0 +1,7 @@
+Title: capitalized top-level key
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '\\evil.exe'
+    condition: selection

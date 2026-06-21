@@ -1,0 +1,8 @@
+title: colliding title
+id: aaaaaaaa-1111-4111-8111-111111111111
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '\\evil.exe'
+    condition: selection

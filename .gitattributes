@@ -1,0 +1,6 @@
+# Contrived STY002 fixtures encode exact line endings (CRLF / lone CR) as
+# test input. Disable git's newline normalization so the bytes survive
+# checkout on every platform; otherwise the CRLF-detection coverage breaks.
+tests/contrived/STY002/pos_crlf_yml.yml -text
+tests/contrived/STY002/pos_yaml_and_crlf.yaml -text
+tests/contrived/STY002/neg_lone_cr.yml -text
