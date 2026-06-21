@@ -24,7 +24,12 @@ or the GitHub UI.
 5. Push tag → CI builds wheel + sdist and uploads to PyPI via OIDC.
 6. Create a GitHub Release from the tag, copy the CHANGELOG section
    into the body.
-7. Run `sigmalint update-data` against the latest ATT&CK and SigmaHQ
+7. Re-point the floating major tag so the README CI example
+   (`uses: ni5h4nt/sigmalint@v0`) tracks the new release:
+   `git tag -f v0 vX.Y.Z && git push -f origin v0`. While the project is
+   on 0.x this floats across minors too, so only move it to releases you
+   consider safe for example consumers.
+8. Run `sigmalint update-data` against the latest ATT&CK and SigmaHQ
    commits; if the vendored snapshot moves, that is a separate PR.
 
 ## Type-strictness roadmap
