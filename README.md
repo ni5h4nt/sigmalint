@@ -40,7 +40,7 @@ sigmalint lint rules/
 Example output:
 
 ```
-                                sigmalint 0.1.0
+                                sigmalint 0.1.4
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ file                    ┃ status ┃ score ┃ findings ┃ top findings           ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━┩
@@ -109,7 +109,7 @@ per-rule documentation.
 ## In CI
 
 ```yaml
-- uses: ni5h4nt/sigmalint@v0.1.0
+- uses: ni5h4nt/sigmalint@v0.1.4
   with:
     path: rules/
     format: github
