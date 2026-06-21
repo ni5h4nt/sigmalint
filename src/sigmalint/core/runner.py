@@ -81,7 +81,11 @@ def _plain(x: Any) -> Any:
 
 
 def _parse_file(path: Path) -> ParsedRule:
-    text = path.read_text(encoding="utf-8", errors="replace")
+    # Decode bytes directly rather than Path.read_text(): the latter opens in
+    # universal-newline mode, translating CRLF -> LF, which made STY002's
+    # `"\r\n" in raw_text` check dead code. Preserving raw bytes keeps line
+    # endings intact for raw-text rules while YAML parsing tolerates CRLF.
+    text = path.read_bytes().decode("utf-8", errors="replace")
     try:
         node = _yaml.load(text) or {}
         if not hasattr(node, "items"):
