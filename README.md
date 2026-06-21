@@ -109,7 +109,7 @@ per-rule documentation.
 ## In CI
 
 ```yaml
-- uses: ni5h4nt/sigmalint@v0.1.4
+- uses: ni5h4nt/sigmalint@v0   # floating major tag; tracks the latest 0.x release
   with:
     path: rules/
     format: github
