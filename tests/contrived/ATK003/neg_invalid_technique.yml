@@ -1,0 +1,9 @@
+title: rule
+tags:
+    - attack.t9999
+logsource:
+    category: registry_event
+detection:
+    selection:
+        Image: x
+    condition: selection

@@ -1,0 +1,10 @@
+title: rule
+tags:
+    - attack.t1002
+    - attack.t1004
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image: x
+    condition: selection

@@ -1,0 +1,59 @@
+# RED001 contrived shape distribution.
+# Rule (INFO): with an available corpus and non-empty fingerprint, one
+# finding per near-duplicate match (capped at first 3), skipping any match
+# whose path equals the rule's own path. Fake corpus returns the
+# manifest-declared matches verbatim.
+rule_id: RED001
+
+positives:
+  - file: pos_one_match.yml
+    expect: 1
+    summary: 'corpus returns 1 near-duplicate'
+    corpus:
+      near_duplicates:
+        - {path: 'rules/a.yml', title: 'Existing A'}
+  - file: pos_three_matches.yml
+    expect: 3
+    summary: 'corpus returns 3 near-duplicates'
+    corpus:
+      near_duplicates:
+        - {path: 'rules/a.yml', title: 'A'}
+        - {path: 'rules/b.yml', title: 'B'}
+        - {path: 'rules/c.yml', title: 'C'}
+  - file: pos_five_matches_capped.yml
+    expect: 3
+    summary: 'corpus returns 5 -> capped at 3'
+    corpus:
+      near_duplicates:
+        - {path: 'rules/a.yml', title: 'A'}
+        - {path: 'rules/b.yml', title: 'B'}
+        - {path: 'rules/c.yml', title: 'C'}
+        - {path: 'rules/d.yml', title: 'D'}
+        - {path: 'rules/e.yml', title: 'E'}
+  - file: pos_two_with_self.yml
+    expect: 1
+    summary: '2 matches, one is self -> self skipped'
+    corpus:
+      near_duplicates:
+        - {path: '<self>', title: 'Self'}
+        - {path: 'rules/b.yml', title: 'B'}
+
+negatives:
+  - file: neg_corpus_unavailable.yml
+    summary: 'no corpus block -> ctx.corpus None -> early return'
+  - file: neg_no_matches.yml
+    summary: 'corpus available, zero matches'
+    corpus:
+      near_duplicates: []
+  - file: neg_empty_fingerprint.yml
+    summary: 'empty detection -> empty fingerprint -> early return'
+    corpus:
+      near_duplicates:
+        - {path: 'rules/a.yml', title: 'A'}
+
+edges:
+  - file: edge_only_self_match.yml
+    summary: 'only the self match -> all skipped -> 0'
+    corpus:
+      near_duplicates:
+        - {path: '<self>', title: 'Self'}

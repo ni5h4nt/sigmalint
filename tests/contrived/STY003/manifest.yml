@@ -1,0 +1,31 @@
+# STY003 contrived shape distribution.
+# Rule: fires when a line's leading-space indent is non-zero and
+# indent % 4 not in (0, 2). Returns after the FIRST offending line, so
+# multi-violation files still yield exactly 1 finding.
+rule_id: STY003
+
+positives:
+  - file: pos_indent_3.yml
+    expect: 1
+    summary: 'list item indented 3 spaces (3 % 4 == 3)'
+  - file: pos_indent_5.yml
+    expect: 1
+    summary: 'list item indented 5 spaces'
+  - file: pos_indent_9.yml
+    expect: 1
+    summary: 'list item indented 9 spaces'
+  - file: pos_two_offstep.yml
+    expect: 1
+    summary: 'two off-step lines (3 and 5) - early return yields 1'
+
+negatives:
+  - file: neg_canonical.yml
+    summary: 'canonical 4-space-step mapping (0/4/8)'
+  - file: neg_4n2_continuation.yml
+    summary: '4n+2 list-item continuation (related: id at 4, type at 6)'
+
+edges:
+  - file: edge_empty.yml
+    summary: 'empty file'
+  - file: edge_only_toplevel.yml
+    summary: 'only zero-indent top-level keys'

@@ -1,0 +1,9 @@
+title: rule
+tags:
+    - attack.t1059
+logsource:
+    service: foo
+detection:
+    selection:
+        Image: x
+    condition: selection

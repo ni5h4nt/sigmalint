@@ -1,0 +1,25 @@
+# ATK002 contrived shape distribution.
+# Rule (WARNING): fires when a technique is valid AND revoked/deprecated.
+# Vendored ATT&CK v19.1: T1002/T1004 revoked parents; T1070.001 revoked sub.
+rule_id: ATK002
+
+positives:
+  - file: pos_revoked_technique.yml
+    expect: 1
+    summary: 'attack.t1002 (valid + revoked)'
+  - file: pos_two_revoked.yml
+    expect: 2
+    summary: 'two revoked techniques'
+
+negatives:
+  - file: neg_valid_not_revoked.yml
+    summary: 'attack.t1059 (valid, not revoked)'
+  - file: neg_invalid_technique.yml
+    summary: 'attack.t9999 (invalid; is_valid gate fails first)'
+  - file: neg_no_technique_tags.yml
+    summary: 'no technique tags'
+
+edges:
+  - file: edge_revoked_subtechnique.yml
+    expect: 1
+    summary: 'attack.t1070.001 (revoked sub-technique)'

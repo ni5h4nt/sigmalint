@@ -1,0 +1,31 @@
+# ATK004 contrived shape distribution.
+# Rule (INFO): for each parent technique tagged with a _PARENT_HINTS entry,
+# if a needle appears in lowercased raw_text and the sub is not already
+# tagged, emit one finding then break. Only T1059 has hints.
+rule_id: ATK004
+
+positives:
+  - file: pos_powershell.yml
+    expect: 1
+    summary: "t1059 + 'powershell' in body -> suggest .001"
+  - file: pos_cmd.yml
+    expect: 1
+    summary: "t1059 + 'cmd.exe' in body -> suggest .003"
+  - file: pos_two_hints_break.yml
+    expect: 1
+    summary: 'powershell + bash both present -> break, 1 finding'
+
+negatives:
+  - file: neg_already_subtagged.yml
+    summary: 't1059 + t1059.001 already tagged -> sub in tags'
+  - file: neg_only_subtechnique.yml
+    summary: 'only t1059.001 (dotted) tagged -> parent loop skips'
+  - file: neg_no_hints_parent.yml
+    summary: 't1003 has no _PARENT_HINTS entry'
+  - file: neg_no_needle.yml
+    summary: 't1059 but no powershell/cmd/bash/python needle'
+
+edges:
+  - file: edge_uppercase_needle.yml
+    expect: 1
+    summary: "'PowerShell' uppercase -> raw_text lowercased -> fires"

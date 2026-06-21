@@ -1,0 +1,10 @@
+title: powershell and bash
+tags:
+    - attack.t1059
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image: '\\powershell.exe'
+        Other: bash
+    condition: selection

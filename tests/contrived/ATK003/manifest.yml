@@ -1,0 +1,26 @@
+# ATK003 contrived shape distribution.
+# Rule (INFO): fires when logsource has category/product, technique valid,
+# and attack_logsource.plausible() is False. T1059 -> process_creation /
+# {windows,linux,macos}. Unknown-in-map technique -> plausible (no signal).
+rule_id: ATK003
+
+positives:
+  - file: pos_implausible_category.yml
+    expect: 1
+    summary: 't1059 + registry_event (implausible category)'
+
+negatives:
+  - file: neg_plausible_category.yml
+    summary: 't1059 + process_creation (plausible)'
+  - file: neg_short_circuit_no_cat_product.yml
+    summary: 'no category and no product -> short circuit'
+  - file: neg_invalid_technique.yml
+    summary: 'invalid technique skipped by is_valid gate'
+  - file: neg_unknown_in_map.yml
+    summary: 't1486 not in logsource map -> plausible (no signal)'
+  - file: edge_product_only_plausible.yml
+    summary: 'product=windows only -> plausible'
+
+edges:
+  - file: edge_empty_logsource.yml
+    summary: 'empty logsource dict -> short circuit'
