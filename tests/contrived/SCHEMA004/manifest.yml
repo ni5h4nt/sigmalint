@@ -20,6 +20,9 @@ positives:
   - file: pos_list_condition_unknown.yml
     expect: 1
     summary: 'list-valued condition member references an unknown selector'
+  - file: pos_condition_scalar_int.yml
+    expect: 1
+    summary: 'non-string/non-list condition (int) now raises ConditionParseError'
 
 negatives:
   - file: neg_valid.yml
