@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sigmalint-cli"
-version = "0.1.4"
+version = "0.1.5"
 description = "ESLint-style linter for Sigma detection rules"
 readme = "README.md"
 license = "MIT"

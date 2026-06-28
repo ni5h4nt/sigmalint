@@ -1,3 +1,3 @@
 """sigmalint — ESLint-style linter for Sigma detection rules."""
 
-__version__ = "0.1.4"
+__version__ = "0.1.5"
