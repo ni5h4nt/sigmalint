@@ -1,0 +1,11 @@
+title: Valid with optionals
+id: 0e2b6c3d-9c4a-4e3b-8b1a-2f6d7c8e9a01
+status: stable
+level: high
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '\evil.exe'
+    condition: selection
