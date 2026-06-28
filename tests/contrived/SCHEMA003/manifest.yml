@@ -1,0 +1,34 @@
+# SCHEMA003 contrived shape distribution.
+# Rule: one finding per missing required top-level key (title/logsource/
+# detection) plus one if detection is a dict lacking `condition`. A missing
+# `detection` also trips the condition check (det falls back to {}), so it
+# yields 2 findings.
+rule_id: SCHEMA003
+
+positives:
+  - file: pos_missing_title.yml
+    expect: 1
+    summary: 'missing title'
+  - file: pos_missing_logsource.yml
+    expect: 1
+    summary: 'missing logsource'
+  - file: pos_missing_detection.yml
+    expect: 2
+    summary: 'missing detection (also trips condition check)'
+  - file: pos_detection_no_condition.yml
+    expect: 1
+    summary: 'detection present without condition'
+  - file: pos_all_missing.yml
+    expect: 4
+    summary: 'title + logsource + detection + condition all absent'
+
+negatives:
+  - file: neg_all_present.yml
+    summary: 'all required keys present incl. condition'
+
+edges:
+  - file: edge_detection_scalar.yml
+    summary: 'detection is a non-dict string (condition check skipped)'
+  - file: edge_detection_null.yml
+    expect: 1
+    summary: 'detection: null -> det falls back to {}, condition missing'

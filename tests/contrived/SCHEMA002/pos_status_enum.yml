@@ -1,0 +1,8 @@
+title: Bad status
+status: banana
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '\evil.exe'
+    condition: selection

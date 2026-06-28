@@ -8,6 +8,22 @@ See `docs/versioning.md` for the full backward-compatibility policy.
 
 ## [Unreleased]
 
+### Added
+
+- **Contrived shape coverage for the SCHEMA dimension**
+  (SCHEMA001-004) under `tests/contrived/`, completing the v0.1.x
+  contrived rollout (TAX shipped in v0.1.2; FP + META in v0.1.3;
+  ATK + RED + STY in v0.1.4). 34 fixtures total: 8 SCHEMA001, 7 SCHEMA002,
+  8 SCHEMA003, 11 SCHEMA004. The contrived harness gained two test-side
+  extensions: it builds the bundled Sigma 2.1.0 schema via the
+  vendored-fallback `SigmaSchema` (mirroring the pinned-ATT&CK pattern) and
+  passes it through `RunContext` so SCHEMA002 validates deterministically
+  without a cloned data dir, and it special-cases the runner-emitted
+  SCHEMA001 (which has no `Rule` class) by linting with an empty rules list
+  so the malformed-YAML fixtures exercise the parse-error path. The
+  SCHEMA001 fixtures also document that the runner rejects a non-mapping
+  YAML root ("root must be a mapping").
+
 ## [0.1.4] — 2026-06-21
 
 ### Added

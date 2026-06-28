@@ -22,9 +22,10 @@ To add a new dimension's coverage, drop a manifest + fixtures into
 `tests/contrived/<RULE_ID>/` and extend `_RULE_MAP` below.
 
 Rollout cadence (patches, not minors): v0.1.2 ships TAX; v0.1.3 adds
-FP + META; v0.1.4 adds ATK + RED + STY; v0.1.5 adds SCHEMA. The
-README Roadmap remains canonical for v0.2 (formats + AI) and v0.3
-(multi-version Sigma) scope.
+FP + META; v0.1.4 adds ATK + RED + STY; v0.1.5 adds SCHEMA (this
+release, completing the v0.1.x contrived rollout). The README Roadmap
+remains canonical for v0.2 (formats + AI) and v0.3 (multi-version
+Sigma) scope.
 """
 
 from __future__ import annotations
@@ -40,6 +41,7 @@ from sigmalint.core.filters import SigmaFilter
 from sigmalint.core.runner import RunContext, lint
 from sigmalint.data.attack import AttackTaxonomy
 from sigmalint.data.corpus import CorpusEntry
+from sigmalint.data.sigma_schema import SigmaSchema
 from sigmalint.data.taxonomy import (
     AttackLogsourceMap,
     SigmaModifiers,
@@ -69,6 +71,11 @@ from sigmalint.rules.redundancy import (
     Red001NearDuplicateFingerprint,
     Red002TitleOrIdCollision,
 )
+from sigmalint.rules.schema import (
+    Schema002SigmaSchema,
+    Schema003RequiredKeys,
+    Schema004ConditionParseable,
+)
 from sigmalint.rules.style import (
     Sty001LowercaseTopLevelKeys,
     Sty002LfAndYml,
@@ -82,8 +89,8 @@ from sigmalint.rules.taxonomy import (
 
 CONTRIVED_DIR = Path(__file__).parent
 
-# Extend per-dimension as contrived coverage is added (v0.2: TAX only;
-# v0.3: + FP + META; v0.4: + ATK + RED + STY; v0.5: + SCHEMA).
+# Extend per-dimension as contrived coverage is added (v0.1.2: TAX only;
+# v0.1.3: + FP + META; v0.1.4: + ATK + RED + STY; v0.1.5: + SCHEMA).
 _RULE_MAP: dict[str, type] = {
     "TAX001": Tax001KnownFields,
     "TAX002": Tax002ValidModifiers,
@@ -107,6 +114,11 @@ _RULE_MAP: dict[str, type] = {
     "STY001": Sty001LowercaseTopLevelKeys,
     "STY002": Sty002LfAndYml,
     "STY003": Sty003FourSpaceIndent,
+    "SCHEMA002": Schema002SigmaSchema,
+    "SCHEMA003": Schema003RequiredKeys,
+    "SCHEMA004": Schema004ConditionParseable,
+    # SCHEMA001 is runner-emitted (no Rule class); see the branch in
+    # test_contrived_rule_shape.
 }
 
 # The ATT&CK + logsource providers fall back to the pinned vendored bundle
@@ -115,6 +127,11 @@ _RULE_MAP: dict[str, type] = {
 # for every parametrized case.
 _ATTACK = AttackTaxonomy(Path("<contrived-no-override>"))
 _ATTACK_LOGSOURCE = AttackLogsourceMap(Path("<contrived-no-override>"))
+
+# SigmaSchema falls back to the pinned vendored 2.1.0 bundle when the
+# data_dir holds no override, so it is deterministic. Build once at import,
+# mirroring _ATTACK above, so SCHEMA002 can validate without a cloned data_dir.
+_SCHEMA = SigmaSchema(Path("<contrived-no-override>"))
 
 
 def _load_manifest(rule_dir: Path) -> dict[str, Any]:
@@ -220,6 +237,7 @@ def _ctx(
         filters=_build_filters(filter_specs),
         attack=_ATTACK,
         attack_logsource=_ATTACK_LOGSOURCE,
+        sigma_schema=_SCHEMA,
         corpus=_build_corpus(corpus_spec, self_path),
     )
 
@@ -232,18 +250,25 @@ def _ctx(
 def test_contrived_rule_shape(
     rule_id: str, category: str, rule_dir: Path, case: dict, tmp_path: Path
 ) -> None:
-    rule_cls = _RULE_MAP.get(rule_id)
-    if rule_cls is None:
-        pytest.fail(
-            f"manifest references {rule_id} but no rule class is registered "
-            f"in _RULE_MAP. Add it to tests/contrived/test_contrived.py."
-        )
+    # SCHEMA001 is emitted by lint() directly on YAML parse failure and has no
+    # Rule class, so it is intentionally absent from _RULE_MAP. Run with an
+    # empty rules list; the runner emits SCHEMA001 from the malformed fixture.
+    # This branch MUST precede the _RULE_MAP lookup below.
+    if rule_id == "SCHEMA001":
+        rules: list = []
+    else:
+        rule_cls = _RULE_MAP.get(rule_id)
+        if rule_cls is None:
+            pytest.fail(
+                f"manifest references {rule_id} but no rule class is registered "
+                f"in _RULE_MAP. Add it to tests/contrived/test_contrived.py."
+            )
+        rules = [rule_cls()]
     fixture_path = rule_dir / case["file"]
     if not fixture_path.exists():
         pytest.fail(f"manifest references missing fixture: {fixture_path}")
-    rule = rule_cls()
     ctx = _ctx(tmp_path, case.get("filters"), case.get("corpus"), str(fixture_path))
-    results = lint([fixture_path], [rule], ctx)
+    results = lint([fixture_path], rules, ctx)
     findings = [f for f in results[0].findings if f.rule_id == rule_id]
     default_expect = 1 if category == "positives" else 0
     expected = case.get("expect", default_expect)

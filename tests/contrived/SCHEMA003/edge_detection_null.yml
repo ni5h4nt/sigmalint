@@ -1,0 +1,4 @@
+title: Null detection
+logsource:
+    category: process_creation
+detection:

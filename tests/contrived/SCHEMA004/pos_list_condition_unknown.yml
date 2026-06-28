@@ -1,0 +1,9 @@
+title: List condition unknown member
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '\evil.exe'
+    condition:
+        - selection
+        - missing

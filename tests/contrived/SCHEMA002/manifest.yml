@@ -1,0 +1,29 @@
+# SCHEMA002 contrived shape distribution.
+# Rule: one finding per Sigma 2.1.0 JSON-schema validation error. Counts below
+# are the exact emitted counts, observed by running SigmaSchema.validate().
+rule_id: SCHEMA002
+
+positives:
+  - file: pos_title_nonstring.yml
+    expect: 1
+    summary: 'title is an integer, not a string'
+  - file: pos_status_enum.yml
+    expect: 1
+    summary: 'status not in the allowed enum'
+  - file: pos_level_enum.yml
+    expect: 1
+    summary: 'level not in the allowed enum'
+  - file: pos_logsource_wrongtype.yml
+    expect: 1
+    summary: 'logsource is a string, not a mapping'
+  - file: pos_multiple_errors.yml
+    expect: 2
+    summary: 'two violations (non-string title + bad status) -> one finding each'
+
+negatives:
+  - file: neg_valid.yml
+    summary: 'schema-valid rule'
+
+edges:
+  - file: edge_valid_optional_fields.yml
+    summary: 'schema-valid rule with id/status/level/product populated'
