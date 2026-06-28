@@ -8,6 +8,19 @@ See `docs/versioning.md` for the full backward-compatibility policy.
 
 ## [Unreleased]
 
+### Fixed
+
+- **`detection.condition` parser no longer crashes on a non-string,
+  non-list value.** A scalar condition such as an integer (`condition: 5`)
+  was passed straight to the grammar, raising `AttributeError` that escaped
+  every caller's `except ConditionParseError` and surfaced as `INTERNAL001`
+  instead of a clean finding. `core.condition.parse()` now raises
+  `ConditionParseError` for non-`str`/`list` input, so SCHEMA004 emits a
+  proper "does not parse" finding and the FP rules (`fp_risk.py`) that also
+  parse conditions are guarded by the same fix. Adds a SCHEMA004 contrived
+  fixture for the int-condition shape (the one deferred from the v0.1.5
+  rollout). Closes #52.
+
 ## [0.1.5] — 2026-06-27
 
 ### Added

@@ -41,6 +41,14 @@ def test_bad_condition_raises():
         parse("selection and and")
 
 
+def test_non_string_condition_raises_condition_parse_error():
+    # A scalar non-str/list condition (e.g. an int from YAML) must raise
+    # ConditionParseError, not an AttributeError that escapes callers'
+    # `except ConditionParseError` and surfaces as INTERNAL001.
+    with pytest.raises(ConditionParseError):
+        parse(5)
+
+
 def test_referenced_selectors_basic():
     ast = parse("selection and not filter_admin")
     assert referenced_selectors(ast) == {"selection", "filter_admin"}

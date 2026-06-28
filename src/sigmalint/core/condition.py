@@ -105,6 +105,10 @@ def parse(condition: str | list[str]) -> object:
     """Parse a Sigma condition string (or list of strings, OR-joined) to AST."""
     if isinstance(condition, list):
         condition = " or ".join(f"({c})" for c in condition)
+    elif not isinstance(condition, str):
+        raise ConditionParseError(
+            f"condition must be a string or list, got {type(condition).__name__}"
+        )
     try:
         result = _GRAMMAR.parse_string(condition, parse_all=True)
     except pp.ParseException as e:
