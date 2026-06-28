@@ -1,0 +1,32 @@
+# SCHEMA001 contrived shape distribution.
+# Rule: emitted by lint() (runner.py) when the YAML fails to parse;
+# short-circuits before any Rule runs, so at most 1 finding. Valid YAML of any
+# root shape yields 0.
+rule_id: SCHEMA001
+
+positives:
+  - file: pos_unterminated_quote.yml
+    expect: 1
+    summary: 'unterminated quoted string'
+  - file: pos_unclosed_flow_seq.yml
+    expect: 1
+    summary: 'unclosed flow sequence [a, b'
+  - file: pos_mapping_values.yml
+    expect: 1
+    summary: 'mapping values not allowed (a: b: c)'
+  - file: pos_tab_indent.yml
+    expect: 1
+    summary: 'tab character used for indentation'
+  - file: pos_scalar_root.yml
+    expect: 1
+    summary: 'non-mapping root: parses as YAML but runner requires a mapping'
+
+negatives:
+  - file: neg_valid_minimal.yml
+    summary: 'valid minimal rule parses cleanly'
+
+edges:
+  - file: edge_empty.yml
+    summary: 'empty file parses to None (no mapping-root error)'
+  - file: edge_comment_only.yml
+    summary: 'comment-only file parses to None (no mapping-root error)'
