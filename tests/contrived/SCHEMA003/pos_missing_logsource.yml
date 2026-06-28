@@ -1,0 +1,5 @@
+title: No logsource
+detection:
+    selection:
+        Image|endswith: '\evil.exe'
+    condition: selection
