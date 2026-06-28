@@ -1,0 +1,9 @@
+title: Wildcard match
+logsource:
+    category: process_creation
+detection:
+    selection1:
+        Image|endswith: '\a.exe'
+    selection2:
+        Image|endswith: '\b.exe'
+    condition: all of selection*

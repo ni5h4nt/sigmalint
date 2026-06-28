@@ -1,0 +1,7 @@
+title: Them keyword
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '\evil.exe'
+    condition: all of them

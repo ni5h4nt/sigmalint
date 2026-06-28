@@ -1,0 +1,38 @@
+# SCHEMA004 contrived shape distribution.
+# Rule: parse failure -> 1 finding (early return); else one finding per unknown
+# referenced selector. parse() accepts str | list[str] (lists OR-joined).
+# Counts observed by running the rule via lint().
+rule_id: SCHEMA004
+
+positives:
+  - file: pos_unparseable.yml
+    expect: 1
+    summary: 'condition does not parse (early return)'
+  - file: pos_unknown_selector.yml
+    expect: 1
+    summary: 'condition references one undefined selector'
+  - file: pos_two_unknown.yml
+    expect: 2
+    summary: 'condition references two undefined selectors'
+  - file: pos_wildcard_no_match.yml
+    expect: 1
+    summary: 'wildcard pattern matches no selector'
+  - file: pos_list_condition_unknown.yml
+    expect: 1
+    summary: 'list-valued condition member references an unknown selector'
+
+negatives:
+  - file: neg_valid.yml
+    summary: 'condition references an existing selector'
+  - file: neg_list_condition_known.yml
+    summary: 'list-valued condition, all members reference existing selectors'
+  - file: neg_wildcard_match.yml
+    summary: 'wildcard matches existing selectors (all of selection*)'
+  - file: neg_them_keyword.yml
+    summary: 'them keyword is not treated as a selector'
+
+edges:
+  - file: edge_detection_scalar.yml
+    summary: 'detection not a dict (early return, 0)'
+  - file: edge_condition_null.yml
+    summary: 'condition is null (early return, 0)'

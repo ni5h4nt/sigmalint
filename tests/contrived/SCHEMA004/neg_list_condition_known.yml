@@ -1,0 +1,11 @@
+title: List condition known
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '\evil.exe'
+    filter:
+        User: SYSTEM
+    condition:
+        - selection
+        - filter

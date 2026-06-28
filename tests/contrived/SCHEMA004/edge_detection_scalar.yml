@@ -1,0 +1,4 @@
+title: Detection scalar
+logsource:
+    category: process_creation
+detection: not-a-mapping
