@@ -197,6 +197,7 @@ attestations via Trusted Publishing.
 - `docs/scoring.md` — validity gate + weighted quality scoring
 - `docs/profiles.md` — per-profile rule severities
 - `docs/configuration.md` — config schema
+- `docs/custom-rules.md` — YAML rule DSL and Python plugin system
 - `docs/versioning.md` — semver policy and rule-ID stability
 - `docs/maintainers.md` — release process and spec-update playbook
 - `docs/rules/<ID>.md` — per-rule pages (also surfaced by `sigmalint explain`)

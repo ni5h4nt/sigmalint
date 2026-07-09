@@ -11,6 +11,7 @@ import typer
 
 from sigmalint import __version__
 from sigmalint.core.config import Config, load_config
+from sigmalint.core.custom_rule import CustomRuleLoader, import_plugin
 from sigmalint.core.errors import DataLoadError, SigmalintError
 from sigmalint.core.filters import discover_filters
 from sigmalint.core.profiles import PROFILES, resolve_severity
@@ -112,6 +113,15 @@ def lint(
             cfg = dataclasses.replace(cfg, fail_on=fail_on)
         if min_score is not None:
             cfg = dataclasses.replace(cfg, min_score=min_score)
+
+        # Load plugins first so their registered functions are available to custom_rules.
+        config_dir = (config or Path(".sigmalintrc.yml")).parent.resolve()
+        for plugin_spec in cfg.load_plugins:
+            import_plugin(plugin_spec, config_dir=config_dir)
+
+        # Compile custom rules and register them before enabled_rules() is called.
+        if cfg.custom_rules:
+            CustomRuleLoader.compile(cfg.custom_rules)
 
         data_dir = Path(cfg.data_dir).expanduser()
         v = cfg.target_sigma_version

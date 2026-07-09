@@ -63,3 +63,34 @@ def test_target_sigma_version_unsupported_raises(tmp_path: Path) -> None:
     p.write_text("target_sigma_version: 2.2.0\n")
     with pytest.raises(ConfigError):
         load_config(p)
+
+
+def test_load_plugins_defaults_to_empty(tmp_path: Path) -> None:
+    c = load_config(tmp_path / "missing.yml")
+    assert c.load_plugins == ()
+
+
+def test_custom_rules_defaults_to_empty(tmp_path: Path) -> None:
+    c = load_config(tmp_path / "missing.yml")
+    assert c.custom_rules == {}
+
+
+def test_load_plugins_parses_list(tmp_path: Path) -> None:
+    p = tmp_path / ".sigmalintrc.yml"
+    p.write_text("load_plugins:\n  - my_org.rules\n  - ./local.py\n")
+    c = load_config(p)
+    assert c.load_plugins == ("my_org.rules", "./local.py")
+
+
+def test_custom_rules_parses_dict(tmp_path: Path) -> None:
+    p = tmp_path / ".sigmalintrc.yml"
+    p.write_text(
+        "custom_rules:\n"
+        "  ORG001:\n"
+        "    message: Test\n"
+        "    then:\n"
+        "      function: required\n"
+    )
+    c = load_config(p)
+    assert "ORG001" in c.custom_rules
+    assert c.custom_rules["ORG001"]["message"] == "Test"

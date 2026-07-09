@@ -49,3 +49,4 @@ removed/renamed keys are major.
 
 - Example: [`.sigmalintrc.example.yml`](../.sigmalintrc.example.yml)
 - Loader: `src/sigmalint/core/config.py`
+- Custom rules and plugins: [`docs/custom-rules.md`](./custom-rules.md)
