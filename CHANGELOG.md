@@ -8,6 +8,8 @@ See `docs/versioning.md` for the full backward-compatibility policy.
 
 ## [Unreleased]
 
+## [0.1.6] — 2026-07-19
+
 ### Fixed
 
 - **`detection.condition` parser no longer crashes on a non-string,
@@ -291,5 +293,6 @@ corpus (3,132 rules) lints cleanly at **mean score 99.61** with 0 errors,
 reference-data refreshes will be compared against in the "Score impact"
 subsection of each release.
 
-[Unreleased]: https://github.com/ni5h4nt/sigmalint/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/ni5h4nt/sigmalint/compare/v0.1.6...HEAD
+[0.1.6]: https://github.com/ni5h4nt/sigmalint/compare/v0.1.5...v0.1.6
 [0.1.0]: https://github.com/ni5h4nt/sigmalint/releases/tag/v0.1.0

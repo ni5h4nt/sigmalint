@@ -70,6 +70,10 @@ coverage.xml
 uv.lock
 AGENTS.md
 
-# Implementation plans are kept local, not committed (the CHANGELOG, git
-# history, and the methodology paper cover the what/why for contributors).
+# Implementation plans and specs are kept local, not committed (the CHANGELOG,
+# git history, and the methodology paper cover the what/why for contributors).
 docs/plans/
+docs/specs/
+
+# Serena tool state
+.serena/
