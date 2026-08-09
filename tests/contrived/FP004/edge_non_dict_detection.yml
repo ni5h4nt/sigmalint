@@ -1,0 +1,5 @@
+title: FP004 edge - detection is null, literal appears in prose
+description: "Playbook-style entry referencing 192.168.1.1 with no detection block."
+logsource:
+    category: network_connection
+detection:

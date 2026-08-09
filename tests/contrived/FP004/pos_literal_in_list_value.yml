@@ -1,0 +1,9 @@
+title: FP004 positive - literal in a list-valued detection field
+logsource:
+    category: network_connection
+detection:
+    selection:
+        DestinationIp:
+            - 8.8.8.8
+            - 192.168.1.1
+    condition: selection

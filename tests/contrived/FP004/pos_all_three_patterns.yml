@@ -1,8 +1,10 @@
 title: FP004 positive - all three patterns in one rule (3 findings)
-description: "Detects activity at 10.0.0.1 from C:\\Users\\admin or MAC 00:1B:44:11:3A:B7"
+description: "All three literals live in detection values, one per pattern."
 logsource:
     category: process_creation
 detection:
     selection:
         Image: C:\Users\admin\foo.exe
+        DestinationIp: 10.0.0.1
+        SourceMac: "00:1B:44:11:3A:B7"
     condition: selection

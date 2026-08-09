@@ -29,7 +29,7 @@ def _is_filter_selector(name: str) -> bool:
     return name == "filter" or name.startswith("filter_") or name.startswith("_")
 
 
-def _selectors_iter(detection: dict) -> Iterable[tuple[str, dict]]:
+def _selectors_iter(detection: object) -> Iterable[tuple[str, dict]]:
     """Yield (selector_name, body) for every dict-shaped detection branch.
 
     Sigma 2.1.0 allows two selector shapes:
@@ -45,6 +45,12 @@ def _selectors_iter(detection: dict) -> Iterable[tuple[str, dict]]:
     v0.1.x used `_selectors()` which filtered out list-of-dict selectors
     entirely, masking FP001/FP002 defects in rules that used that shape.
     """
+    if not isinstance(detection, dict):
+        # A non-dict `detection:` is a SCHEMA003 defect, not an FP defect.
+        # Yield nothing rather than raising AttributeError out of a rule
+        # whose callers only catch ConditionParseError (cf. the 0.1.6
+        # non-string-condition fix).
+        return
     for k, v in detection.items():
         if k == "condition":
             continue
@@ -220,6 +226,31 @@ class Fp003NoFilterOnNoisy(Rule):
         )
 
 
+def _detection_value_text(detection: object) -> str:
+    """Newline-joined string values of every detection field.
+
+    Reads values only - not field names, not `condition`, and not the
+    prose keys or YAML comments a raw-text scan would sweep up. List
+    values are flattened; non-string values are skipped, since a
+    hardcoded literal is by definition textual.
+
+    The walk is deliberately flat: dict-valued and list-of-dict-valued
+    detection fields are skipped rather than recursed into. Both shapes
+    occur zero times across the SigmaHQ corpus snapshot - every selector
+    field holds a scalar or a list of scalars - so recursion would be
+    code for a shape that does not exist. If one ever appears FP004
+    under-reports on it, never over-reports, so the finding set stays a
+    subset either way.
+    """
+    values: list[str] = []
+    for _selname, body in _selectors_iter(detection):
+        for value in body.values():
+            for item in value if isinstance(value, list) else [value]:
+                if isinstance(item, str):
+                    values.append(item)
+    return "\n".join(values)
+
+
 _HARDCODED_PATTERNS = [
     re.compile(r"C:\\Users\\[A-Za-z0-9._-]+"),
     re.compile(r"\b\d{1,3}(?:\.\d{1,3}){3}\b"),
@@ -235,8 +266,9 @@ class Fp004HardcodedLiterals(Rule):
     summary = "Hardcoded environment-specific literals."
 
     def check(self, parsed: ParsedRule, ctx: object) -> Iterable[Finding]:
+        text = _detection_value_text(parsed.data.get("detection"))
         for pat in _HARDCODED_PATTERNS:
-            m = pat.search(parsed.raw_text)
+            m = pat.search(text)
             if m:
                 yield Finding(
                     self.id,

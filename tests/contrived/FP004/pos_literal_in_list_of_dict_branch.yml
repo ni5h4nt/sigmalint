@@ -1,0 +1,8 @@
+title: FP004 positive - literal in a list-of-dict selector branch
+logsource:
+    category: network_connection
+detection:
+    selection:
+        - DestinationPort: 4444
+        - DestinationIp: 192.168.1.1
+    condition: selection

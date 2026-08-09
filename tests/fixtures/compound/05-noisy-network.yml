@@ -1,7 +1,7 @@
 title: Noisy network connect
 id: a4b2c3d4-1111-4222-8333-444444444444
 status: stable
-description: Network rule with leading wildcard, trailing wildcard, env-specific literals, single broad selection, and no negated filter.
+description: Network rule with leading wildcard, trailing wildcard, single broad selection, and no negated filter. The IP in `falsepositives` is deliberately NOT an FP004 finding - FP004 reads detection values only, and this rule's sole detection value must stay under six characters for FP001 to fire, so the two rules cannot both be exercised here. FP004 is covered by fixtures 06 and 10.
 author: Compound Tester
 date: '2026-05-23'
 references:
