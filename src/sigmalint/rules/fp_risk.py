@@ -7,7 +7,9 @@ from collections.abc import Iterable
 
 from sigmalint.core.condition import (
     ConditionParseError,
+    expand_patterns,
     has_negated_selector,
+    is_wildcard_pattern,
     parse,
 )
 from sigmalint.core.filters import filters_for_rule
@@ -154,6 +156,11 @@ class Fp003NoFilterOnNoisy(Rule):
         if category not in _NOISY_CATEGORIES:
             return
         detection = parsed.data.get("detection") or {}
+        if not isinstance(detection, dict):
+            # Non-dict `detection:` is a SCHEMA003 defect. Bail rather than
+            # raise AttributeError out of a rule whose callers catch only
+            # ConditionParseError (cf. the 0.1.6 non-string-condition fix).
+            return
         condition = detection.get("condition")
         if condition is None:
             return
@@ -161,8 +168,31 @@ class Fp003NoFilterOnNoisy(Rule):
             ast = parse(condition)
         except ConditionParseError:
             return
-        if has_negated_selector(ast, _is_filter_selector):
+
+        selector_names = {k for k in detection if k != "condition"}
+
+        def _references_filter(name: str) -> bool:
+            """True if `name` is, or a glob resolving to, a filter-class selector.
+
+            `has_negated_selector` hands this both selector names
+            (`Ident.name`) and `N of <pattern>` globs (`Quantifier.pattern`).
+            A glob is resolved against the selectors this rule actually
+            declares, using the same `expand_patterns` the condition layer
+            uses, so `1 of filter*` matches a declared `filter_admin` while
+            `1 of other*` does not. `them` is not a wildcard pattern and
+            falls through to the name check, where it correctly fails: `not
+            1 of them` negates the search itself rather than excluding from
+            it, which is not the shape FP003 asks for.
+            """
+            if is_wildcard_pattern(name):
+                return any(_is_filter_selector(s) for s in expand_patterns([name], selector_names))
+            return _is_filter_selector(name)
+
+        if has_negated_selector(ast, _references_filter):
             return
+        # External filter conditions reference selectors declared in the
+        # filter file, not in this rule, so their globs cannot be resolved
+        # against `selector_names`. Name matching only.
         ext_filters = getattr(ctx, "filters", None) or []
         ext = filters_for_rule(
             ext_filters,

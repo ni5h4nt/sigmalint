@@ -1,0 +1,9 @@
+title: FP003 positive - negated glob whose prefix is not filter-class
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '\reg.exe'
+    other_branch:
+        CommandLine|contains: query
+    condition: selection and not 1 of other*

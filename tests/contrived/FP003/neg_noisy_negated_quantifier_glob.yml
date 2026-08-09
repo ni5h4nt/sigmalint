@@ -1,0 +1,9 @@
+title: FP003 negative - negated quantifier glob `not 1 of filter*`
+logsource:
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '\reg.exe'
+    filter_admin:
+        User|startswith: 'NT AUTHORITY\'
+    condition: selection and not 1 of filter*
