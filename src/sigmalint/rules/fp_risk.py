@@ -120,6 +120,12 @@ class Fp002PreferModifiers(Rule):
                 for v in values:
                     if not isinstance(v, str):
                         continue
+                    if v.strip("*") == "":
+                        # `field: '*'` is the field-existence idiom. No
+                        # modifier expresses "any value", so the only
+                        # suggestion available (`|contains: ''`) would be
+                        # meaningless and would change the rule's semantics.
+                        continue
                     if v.startswith("*") and v.endswith("*"):
                         yield Finding(
                             self.id,

@@ -47,6 +47,8 @@ negatives:
     summary: dict selector, `f*o` (wildcard in the middle, not at edges) - rule only fires on leading/trailing wildcards
   - file: neg_list_of_dict_no_wildcards.yml
     summary: list-of-dict, multiple items, none with wildcards
+  - file: neg_dict_value_only_wildcard.yml
+    summary: "value is exactly `*` (field-existence idiom) - no modifier expresses \"any value\", so suggesting `|contains: ''` would be meaningless"
 
 edges:
   - file: edge_empty_detection.yml
