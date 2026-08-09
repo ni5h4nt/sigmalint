@@ -9,4 +9,4 @@ from sigmalint import __version__
 
 
 def test_version_string():
-    assert __version__ == "0.1.6"
+    assert __version__ == "0.1.7"

@@ -11,8 +11,8 @@ authors:
 repository-code: "https://github.com/ni5h4nt/sigmalint"
 doi: 10.5281/zenodo.20371168
 license: MIT
-version: 0.1.6
-date-released: "2026-07-19"
+version: 0.1.7
+date-released: "2026-08-08"
 identifiers:
   - type: doi
     value: 10.5281/zenodo.20371168
