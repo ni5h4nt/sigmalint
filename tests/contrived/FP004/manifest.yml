@@ -1,11 +1,17 @@
 # FP004 contrived shape distribution.
 #
-# Rule: regex search over `parsed.raw_text` for any of three patterns
-# (Windows user-path, IPv4 literal, MAC address). Fires once per
-# matching pattern (so a rule with all three patterns matched yields
-# 3 findings). The rule walks raw text, NOT parsed data structures,
-# so a literal appearing in a comment, description, or detection
-# value all fire equally.
+# Rule: regex search for any of three patterns (Windows user-path,
+# IPv4 literal, MAC address) over the *detection field values* only -
+# field names, `condition`, prose keys (`description`, `references`)
+# and YAML comments are all out of scope, because FP004 is a claim
+# about detection logic being non-portable, not about prose.
+#
+# The three patterns are applied once each to the newline-joined value
+# text, so the rule still fires once per matching *pattern*, not once
+# per matching value: a rule with all three patterns yields 3 findings.
+#
+# The walk is deliberately flat - nested dict values are skipped rather
+# than recursed into, since zero such shapes exist in the SigmaHQ corpus.
 rule_id: FP004
 
 positives:
@@ -21,11 +27,16 @@ positives:
   - file: pos_all_three_patterns.yml
     expect: 3
     summary: all three literal types in one rule - one finding per pattern
-  - file: pos_literal_in_description.yml
+  - file: pos_literal_in_list_value.yml
     expect: 1
-    summary: "literal appears in `description:` (not detection value) - raw_text scan still fires"
+    summary: "IPv4 literal inside a list-valued detection field - list members are flattened before scanning"
+  - file: pos_literal_in_list_of_dict_branch.yml
+    expect: 1
+    summary: "IPv4 literal inside one branch of a list-of-dict selector - `_selectors_iter` yields each branch"
 
 negatives:
+  - file: pos_literal_in_description.yml
+    summary: "IPv4 appears only in `description:` - prose is not detection logic, so the rule does not fire"
   - file: neg_no_hardcoded_literals.yml
     summary: clean rule, none of the three patterns appear in raw text
   - file: neg_forward_slash_path.yml
@@ -35,7 +46,11 @@ negatives:
   - file: neg_mac_too_few_segments.yml
     summary: "`00:1B:44:11:3A` - only 5 hex pairs, regex requires 6"
 
-edges:
   - file: edge_pattern_in_yaml_comment.yml
-    expect: 1
-    summary: pattern appears in a YAML comment - rule scans raw_text including comments
+    summary: "pattern appears in a YAML comment - comments are not detection values, so the rule does not fire"
+
+edges:
+  - file: edge_non_dict_detection.yml
+    summary: "`detection:` is null (42 such rules in the corpus) - the walker guard yields nothing instead of raising AttributeError, and no raw-text fallback fires on the prose literal"
+  - file: edge_literal_in_nested_dict_value.yml
+    summary: "literal sits inside a nested dict value - the walk is deliberately flat (zero such shapes in the corpus), so the rule under-reports here rather than recursing; pins the decision so a future change to recurse is a visible test change"

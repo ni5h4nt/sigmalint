@@ -1,0 +1,8 @@
+title: FP004 edge - literal inside a nested dict value (not recursed into)
+logsource:
+    category: network_connection
+detection:
+    selection:
+        Nested:
+            DestinationIp: 192.168.1.1
+    condition: selection

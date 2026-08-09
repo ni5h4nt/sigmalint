@@ -138,10 +138,6 @@
       {
         "rule_id": "FP003",
         "severity": "warning"
-      },
-      {
-        "rule_id": "FP004",
-        "severity": "info"
       }
     ],
     "must_not_include": [
@@ -153,7 +149,8 @@
       "ATK001",
       "META001a",
       "META001b",
-      "TAX001"
+      "TAX001",
+      "FP004"
     ],
     "score_floor": 94.0,
     "score_ceiling": 98.0

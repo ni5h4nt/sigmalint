@@ -8,6 +8,18 @@
 # A "filter-class selector" is any selector whose name matches
 # _is_filter_selector(): exactly `filter`, or `filter_*`, or `_*`.
 #
+# has_negated_selector also hands the predicate `N of <pattern>`
+# quantifier globs (Quantifier.pattern). Those are resolved against the
+# selectors the rule actually declares, via the condition layer's
+# expand_patterns, which implements full Sigma glob semantics (`*` and
+# `?` at any position). So `not 1 of filter*` counts as negated when the
+# rule declares a filter-class selector the glob matches, and does not
+# when it declares only non-filter selectors. `them` is not a wildcard
+# pattern and falls through to the name check, where it fails by design.
+# External Sigma Filter conditions stay name-based: a filter file
+# declares its own selectors, which cannot be resolved against the
+# linted rule.
+#
 # Shape surface is the condition AST: parses to an AST, walker scans
 # for negated nodes whose target name passes _is_filter_selector. Plus
 # the external-filter path via ctx.filters.
@@ -26,6 +38,19 @@ positives:
   - file: pos_noisy_not_non_filter_name.yml
     expect: 1
     summary: noisy category, condition `selection and not other_selection` (negation, but name does not match _is_filter_selector)
+  - file: pos_noisy_negated_non_filter_glob.yml
+    expect: 1
+    summary: "noisy category, condition `selection and not 1 of other*` - glob resolves to the declared `other_branch`, which is not filter-class, so the rule still fires"
+  - file: pos_noisy_negated_them.yml
+    expect: 1
+    summary: "noisy category, condition `not 1 of them` - `them` negates the search itself rather than excluding from it, so it is deliberately not filter-class"
+  - file: pos_external_filter_glob_unresolved.yml
+    expect: 1
+    summary: "external Sigma Filter negates a glob (`not 1 of filter*`) - the filter file declares its own selectors, which cannot be resolved against the linted rule, so the external path stays name-based and the rule still fires"
+    filters:
+      - targets_ids: ["7c1d0e2f-3a4b-4c5d-8e9f-0a1b2c3d4e5f"]
+        targets_names: []
+        condition: "not 1 of filter*"
 
 negatives:
   - file: neg_noisy_classic_filter.yml
@@ -34,6 +59,8 @@ negatives:
     summary: noisy category, condition `selection and not filter_user` (`filter_*` prefix)
   - file: neg_noisy_internal_filter.yml
     summary: noisy category, condition `selection and not _filter` (`_*` prefix)
+  - file: neg_noisy_negated_quantifier_glob.yml
+    summary: "noisy category, condition `selection and not 1 of filter*` - the glob resolves against the declared selectors and matches the filter-class `filter_admin`"
   - file: neg_non_noisy_category.yml
     summary: non-noisy category (`webserver`) - rule short-circuits regardless of negation
   - file: neg_external_filter_negates.yml
