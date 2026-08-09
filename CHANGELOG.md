@@ -8,6 +8,69 @@ See `docs/versioning.md` for the full backward-compatibility policy.
 
 ## [Unreleased]
 
+## [0.1.7] — 2026-08-08
+
+### Fixed
+
+- **FP003 no longer fires on rules that exclude via `not 1 of filter*`.**
+  `core.condition.has_negated_selector` passes both selector names and
+  `N of <pattern>` globs to `rules.fp_risk`'s predicate, which understood
+  only names — the glob `filter*` matched none of its branches. The most
+  common SigmaHQ exclusion idiom was therefore invisible to the rule that
+  exists to detect exclusions. A negated glob is now resolved against the
+  selectors the rule declares, reusing `core.condition.expand_patterns`,
+  so it follows the same Sigma glob semantics as the rest of the condition
+  layer (`*` and `?` at any position) rather than a rule-local
+  approximation. `not 1 of them` is deliberately still a finding: it
+  negates the search itself rather than excluding from it. Conditions in
+  external Sigma Filter files continue to match by name, since their
+  selectors are declared elsewhere and cannot be resolved against the
+  linted rule.
+- **FP004 now scans detection values rather than the whole rule file.**
+  `docs/rules/FP004.md` documents the rule as checking detection values;
+  the implementation regex-searched `parsed.raw_text`, sweeping in
+  `description`, `references` and YAML comments. Most visibly, a rule that
+  had generalized a user path and wrote `C:\Users\redacted` in its
+  description to say so was penalized for the sentence describing the fix.
+  The rule now walks detection field values via `_selectors_iter`,
+  flattening list values and skipping non-strings. Finding counts are
+  unchanged in shape: the three patterns still apply once each, so a rule
+  matching all three yields three findings. This is the largest of the
+  three fixes by some margin — **34 of 112 FP004 findings (30.4%) across
+  the corpus were raised against text that is not detection logic.** The
+  walk is deliberately flat: nested dict values are skipped rather than
+  recursed into, a shape that occurs zero times in the corpus, so FP004
+  under-reports there and never over-reports.
+- **FP002 no longer suggests a modifier for bare-wildcard values.** A value
+  of `'*'` satisfied both the leading- and trailing-wildcard branches,
+  producing the meaningless suggestion `field|contains: ''`. `field: '*'`
+  is the field-existence idiom and has no modifier equivalent.
+- **`_selectors_iter` guards against a non-dict `detection:`,** which would
+  otherwise raise `AttributeError` out of FP004's new code path and surface
+  as `INTERNAL001` — the same defect class as the 0.1.6 condition fix. The
+  corpus holds 42 rules with `detection: null`, so the shape is real. The
+  guard covers FP001, FP002 and FP004.
+
+### Score impact
+
+All three fixes are strictly finding-removing. Verified against the SigmaHQ
+corpus snapshot (`data_versions.corpus` = `98781da`, 3370 files) by diffing
+this release against a worktree pinned to the `v0.1.6` tag: **0 findings
+added, 41 removed** — FP004 ×34 across 33 files, FP003 ×5, FP002 ×2. Total
+findings 7199 → 7158. Corpus mean score moves 98.6800 → 98.6900
+(**+0.0100**). Re-running the differential under `--profile strict` gives an
+identical split, confirming the change is profile-invariant.
+
+Two FP004 findings change their message without changing count: the rule now
+names the literal actually present in the detection values rather than the
+first one anywhere in the file (`net_connection_lnx_back_connect_shell_dev.yml`
+`10.0.0.1` → `127.0.0.1`; `win_smbserver_connectivity_unsigned_and_unencrypted_share_connection.yml`
+`10.0.0.0` → `127.0.0.0`).
+
+No rule clean at 0.1.6 acquires a finding, so the `docs/versioning.md`
+score-floor promise is satisfied trivially — it constrains score *drops*, and
+this release has none.
+
 ## [0.1.6] — 2026-07-19
 
 ### Fixed
@@ -293,7 +356,8 @@ corpus (3,132 rules) lints cleanly at **mean score 99.61** with 0 errors,
 reference-data refreshes will be compared against in the "Score impact"
 subsection of each release.
 
-[Unreleased]: https://github.com/ni5h4nt/sigmalint/compare/v0.1.6...HEAD
+[Unreleased]: https://github.com/ni5h4nt/sigmalint/compare/v0.1.7...HEAD
+[0.1.7]: https://github.com/ni5h4nt/sigmalint/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/ni5h4nt/sigmalint/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/ni5h4nt/sigmalint/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/ni5h4nt/sigmalint/compare/v0.1.3...v0.1.4
